@@ -8,7 +8,7 @@
 // It should plan around other candy sources if you add code to harvest them.
 // The current route uses Smith's Tome to get to 60 advs to coil wire on turn 0; any other route would work.
 
-// You'll need to set up CCS and mood named "hccs" for this to work.
+// You'll need to set up CCS and moods named "hccs" (for most leveling combats) and "hccs-early" (for early leveling, before you have much MP).
 /* hccs CCS:
 [ default ]
 while (snarfblat 113 && !monstername "possessed can of tomatoes") || (snarfblat 439 && !monstername "novelty tropical skeleton")
@@ -384,11 +384,22 @@ void shrug(effect ef) {
     }
 }
 
-// We have Polka, Phat Loot, Ur-Kel's on at all times; fourth slot is variable.
+// We have Phat Loot, Ur-Kel's on at all times; third and fourth slots are variable.
 void open_song_slot() {
     shrug($effect[Power Ballad of the Arrowsmith]);
     shrug($effect[The Magical Mojomuscular Melody]);
     shrug($effect[The Moxious Madrigal]);
+}
+
+void ensure_song(effect ef) {
+    if (have_effect(ef) == 0) {
+        open_song_slot();
+        if (!cli_execute(ef.default) || have_effect(ef) == 0) {
+            error('Failed to get effect ' + ef.name + '.');
+        }
+    } else {
+        print('Already have effect ' + ef.name + '.');
+    }
 }
 
 void ensure_ode(int turns) {
@@ -666,8 +677,7 @@ if (!test_done(TEST_HP)) {
     }
     ensure_effect($effect[Triple-Sized]);
     ensure_effect($effect[Song of Bravado]);
-    open_song_slot();
-    ensure_effect($effect[The Magical Mojomuscular Melody]);
+    ensure_song($effect[The Magical Mojomuscular Melody]);
     ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
     equip($item[hollandaise helmet]);
@@ -1025,13 +1035,12 @@ if (!test_done(TEST_HP)) {
 
     synthesis_plan($effect[Synthesis: Strong], tail(tail(subsequent)));
 
-    open_song_slot();
     ensure_potion_effect($effect[Expert Oiliness], $item[oil of expertise]);
     // ensure_effect($effect[Gr8ness]);
     ensure_effect($effect[Tomato Power]);
     ensure_effect($effect[Song of Starch]);
     ensure_effect($effect[Big]);
-    ensure_effect($effect[Power Ballad of the Arrowsmith]);
+    ensure_song($effect[Power Ballad of the Arrowsmith]);
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Quiet Determination]);
     ensure_npc_effect($effect[Go Get 'Em, Tiger!], 5, $item[Ben-Gal&trade; balm]);
@@ -1046,10 +1055,9 @@ if (!test_done(TEST_HP)) {
 }
 
 if (!test_done(TEST_MUS)) {
-    open_song_slot();
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
-    ensure_effect($effect[Power Ballad of the Arrowsmith]);
+    ensure_song($effect[Power Ballad of the Arrowsmith]);
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Quiet Determination]);
     ensure_effect($effect[Tomato Power]);
@@ -1062,10 +1070,9 @@ if (!test_done(TEST_MUS)) {
 }
 
 if (!test_done(TEST_MYS)) {
-    open_song_slot();
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
-    ensure_effect($effect[The Magical Mojomuscular Melody]);
+    ensure_song($effect[The Magical Mojomuscular Melody]);
     ensure_effect($effect[Tomato Power]);
     ensure_effect($effect[Mystically Oiled]);
     ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
@@ -1080,10 +1087,9 @@ if (!test_done(TEST_MOX)) {
     effect[int] subsequent = { $effect[Synthesis: Collection] };
     synthesis_plan($effect[Synthesis: Cool], subsequent);
 
-    open_song_slot();
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
-    ensure_effect($effect[The Moxious Madrigal]);
+    ensure_song($effect[The Moxious Madrigal]);
     ensure_effect($effect[Quiet Desperation]);
     ensure_effect($effect[Tomato Power]);
     ensure_npc_effect($effect[Butt-Rock Hair], 5, $item[hair spray]);
