@@ -2,7 +2,7 @@
 // This is a script to do 1-day Hardcore Community Service runs.
 // The script is fine to run twice; if it breaks somewhere, fix it manually and then the script should start where it left off.
 // THe script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary.
-// Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, garbage tote, and Genie.
+// Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, garbage tote, SongBoom, and Genie.
 // It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish to fight that guy.
 // It also assumes that you have access to Peppermint Garden for candy sorce.
 // It should plan around other candy sources if you add code to harvest them.
@@ -17,6 +17,7 @@ endwhile
 if monstername "novelty tropical skeleton" || monstername "possessed can of tomatoes" || monstername "factory worker" || monstername "ungulith"
     skill use the force
 endif
+skill sing along # only if you have SongBoom
 if monstername "BRICKO oyster" || monstername "sausage goblin" || snarfblat 528 # NEP
     if monstername "BRICKO oyster"
         skill otoscope
@@ -39,6 +40,7 @@ skill lecture on relativity
 if hpbelow 50
 abort
 endif
+skill sing along # only if you have SongBoom
 skill saucegeyser
 */
 
@@ -119,7 +121,7 @@ void ensure_item(int quantity, item it) {
         buy(quantity - item_amount(it), it);
     }
     if (item_amount(it) < quantity) {
-        error('Could not buy item.');
+        error('Could not buy item' + it.name + '.');
     }
 }
 
@@ -187,6 +189,24 @@ void wish_effect(effect ef) {
     }
 }
 
+item item_priority(item it1, item it2) {
+    if (item_amount(it1) > 0) return it1;
+    else return it2;
+}
+
+item item_priority(item it1, item it2, item it3) {
+    if (item_amount(it1) > 0) return it1;
+    else if (item_amount(it2) > 0) return it2;
+    else return it3;
+}
+
+item item_priority(item it1, item it2, item it3, item it4) {
+    if (item_amount(it1) > 0) return it1;
+    else if (item_amount(it2) > 0) return it2;
+    else if (item_amount(it3) > 0) return it3;
+    else return it4;
+}
+
 void pizza_effect(effect ef, item it1, item it2, item it3, item it4) {
     if (have_effect(ef) == 0) {
         if (item_amount($item[diabolic pizza]) > 0) {
@@ -251,6 +271,14 @@ record candy_pair {
 
 boolean[item] npc_candies = $items[jaba&ntilde;ero-flavored chewing gum, lime-and-chile-flavored chewing gum, pickle-flavored chewing gum, tamarind-flavored chewing gum];
 
+boolean[item] candy_forms(item candy) {
+    boolean[item] result = { candy: true };
+    if (candy == $item[peppermint sprout]) {
+        result[$item[peppermint twist]] = true;
+    }
+    return result;
+}
+
 // This is a simple backtracking algorithm to find a way to use our candy to synthesize the things we want.
 candy_pair synthesis_plan(effect ef, int[item] candies, effect[int] subsequent, int[item] used) {
     if (ef == $effect[none]) {
@@ -264,41 +292,46 @@ candy_pair synthesis_plan(effect ef, int[item] candies, effect[int] subsequent, 
         int count1 = candies[it1] - used[it1];
         if (count1 == 0) continue;
 
-        if ($effects[Synthesis: Strong, Synthesis: Smart, Synthesis: Cool, Synthesis: Hardy, Synthesis: Energy] contains ef) {
-            // Complex + Simple
-            foreach it2 in npc_candies {
-                if (sweet_synthesis_result(it1, it2) != ef) continue;
-                int[item] new_used = with(used, it1);
-                candy_pair next_pair = synthesis_plan(subsequent[0], candies, tail(subsequent), new_used);
-                if (next_pair.success) {
-                    print('>> PLAN: For effect ' + ef.name + ', ' + it1.name + ' and ' + it2.name + '.');
-                    candy_pair result;
-                    result.success = true;
-                    result.used = new_used;
-                    result.it1 = it1;
-                    result.it2 = it2;
-                    return result;
+        foreach form1 in candy_forms(it1) {
+            if ($effects[Synthesis: Strong, Synthesis: Smart, Synthesis: Cool, Synthesis: Hardy, Synthesis: Energy] contains ef) {
+                // Complex + Simple
+                foreach it2 in npc_candies {
+                    if (sweet_synthesis_result(form1, it2) != ef) continue;
+                    int[item] new_used = with(used, it1);
+                    candy_pair next_pair = synthesis_plan(subsequent[0], candies, tail(subsequent), new_used);
+                    if (next_pair.success) {
+                        print('>> PLAN: For effect ' + ef.name + ', ' + form1.name + ' and ' + it2.name + '.');
+                        candy_pair result;
+                        result.success = true;
+                        result.used = new_used;
+                        result.it1 = form1;
+                        result.it2 = it2;
+                        return result;
+                    }
                 }
-            }
-        } else {
-            // Complex + Comples
-            foreach it2 in candies {
-                if (it2 == it1 && count1 == 1) continue;
-                int count2 = candies[it2] - used[it2];
-                if (count2 == 0) continue;
-                if (sweet_synthesis_result(it1, it2) != ef) continue;
+            } else {
+                // Complex + Complex
+                foreach it2 in candies {
+                    if (it2 == it1 && count1 == 1) continue;
+                    int count2 = candies[it2] - used[it2];
+                    if (count2 == 0) continue;
 
-                print('> Testing pair ' + it1.name + ' ' + it2.name + '.');
-                int[item] new_used = with(used, it1, it2);
-                candy_pair next_pair = synthesis_plan(subsequent[0], candies, tail(subsequent), new_used);
-                if (next_pair.success) {
-                    print('>> PLAN: For effect ' + ef.name + ', ' + it1.name + ' and ' + it2.name + '.');
-                    candy_pair result;
-                    result.success = true;
-                    result.used = new_used;
-                    result.it1 = it1;
-                    result.it2 = it2;
-                    return result;
+                    foreach form2 in candy_forms(it2) {
+                        if (sweet_synthesis_result(form1, form2) != ef) continue;
+
+                        print('> Testing pair ' + form1.name + ' ' + form2.name + '.');
+                        int[item] new_used = with(used, it1, it2);
+                        candy_pair next_pair = synthesis_plan(subsequent[0], candies, tail(subsequent), new_used);
+                        if (next_pair.success) {
+                            print('>> PLAN: For effect ' + ef.name + ', ' + form1.name + ' and ' + form2.name + '.');
+                            candy_pair result;
+                            result.success = true;
+                            result.used = new_used;
+                            result.it1 = form1;
+                            result.it2 = form2;
+                            return result;
+                        }
+                    }
                 }
             }
         }
@@ -327,8 +360,15 @@ void synthesis_plan(effect ef, effect[int] subsequent) {
         int[item] empty;
         candy_pair pair = synthesis_plan(ef, candies, subsequent, empty);
         if (pair.success) {
-            // Buy NPC candy if necessary.
-            ensure_item(1, pair.it2);
+            // This should turn any peppermint sprouts into peppermint twists.
+            retrieve_item(1, pair.it1);
+            if (npc_candies contains pair.it2) {
+                // Buy NPC candy if necessary.
+                ensure_item(1, pair.it2);
+            } else {
+                // This should turn any peppermint sprouts into peppermint twists.
+                retrieve_item(1, pair.it2);
+            }
             sweet_synthesis(pair.it1, pair.it2);
         } else {
             abort('Failed to synthesisze effect ' + ef.name + '. Please plan it out and re-run me.');
@@ -349,11 +389,10 @@ void open_song_slot() {
     shrug($effect[Power Ballad of the Arrowsmith]);
     shrug($effect[The Magical Mojomuscular Melody]);
     shrug($effect[The Moxious Madrigal]);
-    shrug($effect[Ode to Booze]);
 }
 
-void ensure_ode() {
-    if (have_effect($effect[Ode to Booze]) == 0) {
+void ensure_ode(int turns) {
+    while (have_effect($effect[Ode to Booze]) < turns) {
         while (my_mp() < 50) {
             ensure_item(1, $item[Doc Galaktik's Invigorating Tonic]);
             use(1, $item[Doc Galaktik's Invigorating Tonic]);
@@ -374,7 +413,7 @@ int free_rests() {
 boolean summon_bricko_oyster() {
     if (get_property_int('_brickoFights') >= 3) return false;
     if (item_amount($item[BRICKO oyster]) > 0) return true;
-    while (item_amount($item[BRICKO eye brick]) < 1 || item_amount($item[BRICKO brick]) < 8) {
+    while (get_property_int('libramSummons') < 10 && (item_amount($item[BRICKO eye brick]) < 1 || item_amount($item[BRICKO brick]) < 8)) {
         use_skill(1, $skill[Summon BRICKOs]);
     }
     return use(8, $item[BRICKO brick]);
@@ -408,8 +447,8 @@ boolean adventure_manual(location loc) {
 }
 
 boolean stat_ready() {
-    // Ben-Gal balm, Rage of the Reindeer, Quiet Determination
-    int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + 3.5) * my_basestat($stat[Mysticality]);
+    // Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet
+    int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + 4.7) * my_basestat($stat[Mysticality]);
     boolean muscle_met = buffed_muscle - my_basestat($stat[Muscle]) >= 1770;
     print('Buffed muscle: ' + floor(buffed_muscle) + ' (' + muscle_met + ')');
     // Hair spray, runproof mascara, Quiet Desperation
@@ -471,7 +510,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     // Chateau juice bar
     visit_url('place.php?whichplace=chateau&action=chateau_desk2');
     autosell(1, $item[gremlin juice]);
-    autosell(1, $item[ectoplasm <i>au jus</i>]);
+    // autosell(1, $item[ectoplasm <i>au jus</i>]);
     // autosell(1, $item[clove-flavored lip balm]);
 
     // Sell pork gems + tent
@@ -614,7 +653,7 @@ if (!test_done(TEST_HP)) {
     }
 
     // Cast polka, phat, singer's, stats, hulkein, triple size
-    cli_execute('mood hccs');
+    cli_execute('mood hccs-early');
     if (have_effect($effect[Hulkien]) == 0) {
         cli_execute('pillkeeper stats');
     }
@@ -640,6 +679,9 @@ if (!test_done(TEST_HP)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
+    if (get_property('boomBoxSong') != 'Total Eclipse of Your Meat') {
+        cli_execute('boombox meat');
+    }
     cli_execute('ccs hccs');
 
     // Plan is for this to fall all the way through to item -> hot res -> fam weight.
@@ -688,14 +730,12 @@ if (!test_done(TEST_HP)) {
     // Prep Sweet Synthesis.
     if (my_garden_type() == 'peppermint') {
         cli_execute('garden pick');
-        while (item_amount($item[peppermint sprout]) > 0) {
-            use(1, $item[peppermint sprout]);
-        }
-        if (get_property_int('_candySummons') == 0) {
-            use_skill(1, $skill[Summon Crimbo Candy]);
-        }
     } else {
         print('WARNING: This script is built for peppermint garden. Switch gardens or find other candy.');
+    }
+
+    if (get_property_int('_candySummons') == 0) {
+        use_skill(1, $skill[Summon Crimbo Candy]);
     }
 
     effect[int] subsequent = { $effect[Synthesis: Smart], $effect[Synthesis: Strong], $effect[Synthesis: Cool], $effect[Synthesis: Collection] };
@@ -709,7 +749,7 @@ if (!test_done(TEST_HP)) {
     // Cast Ode and drink bee's knees
     if (have_effect($effect[On the Trolley]) == 0) {
         assert_meat(500);
-        ensure_ode();
+        ensure_ode(2);
         cli_execute('drink 1 Bee\'s Knees');
     }
 
@@ -769,7 +809,25 @@ if (!test_done(TEST_HP)) {
     }
 
     // Breakfast
-    cli_execute('breakfast');
+
+    // Visiting Looking Glass in clan VIP lounge
+    visit_url('clan_viplounge.php?action=lookingglass&whichfloor=2');
+    cli_execute('swim item');
+    while (get_property_int('_genieWishesUsed') < 3) {
+        cli_execute('genie wish for more wishes');
+    }
+
+    // Visiting the Ruined House
+    visit_url('place.php?whichplace=desertbeach&action=db_nukehouse');
+
+    use_skill(1, $skill[Advanced Cocktailcrafting]);
+    use_skill(1, $skill[Advanced Saucecrafting]);
+    use_skill(1, $skill[Pastamastery]);
+    use_skill(1, $skill[Spaghetti Breakfast]);
+    use_skill(1, $skill[Grab a Cold One]);
+    use_skill(1, $skill[Perfect Freeze]);
+    use_skill(1, $skill[Acquire Rhinestones]);
+    use_skill(1, $skill[Prevent Scurvy and Sobriety]);
     autosell(3, $item[coconut shell]);
     autosell(3, $item[magical ice cubes]);
     autosell(3, $item[little paper umbrella]);
@@ -804,8 +862,8 @@ if (!test_done(TEST_HP)) {
     // Autosell stuff
     //autosell(1, $item[strawberry]);
     autosell(1, $item[orange]);
-    //autosell(1, $item[razor-sharp can lid]);
-    autosell(5, $item[red pixel]);
+    autosell(1, $item[razor-sharp can lid]);
+    // autosell(5, $item[red pixel]);
     autosell(5, $item[green pixel]);
     autosell(5, $item[blue pixel]);
     autosell(5, $item[white pixel]);
@@ -836,6 +894,7 @@ if (!test_done(TEST_HP)) {
         cli_execute('shrug Carlweather\'s Cantata of Confrontation');
     }
 
+    cli_execute('mood hccs');
     cli_execute('ccs hccs');
 
     // 17 free NEP fights
@@ -886,11 +945,6 @@ if (!test_done(TEST_HP)) {
 
     open_song_slot();
     if (have_effect($effect[Polka of Plenty]) > 0) cli_execute('uneffect Polka of Plenty');
-    ensure_effect($effect[The Sonata of Sneakiness]);
-    ensure_effect($effect[Smooth Movements]);
-    if (get_property_int('_powerfulGloveBatteryPowerUsed') < 95) {
-        ensure_effect($effect[Invisible Avatar]);
-    }
 
     equip($item[fish hatchet]);
     equip($item[Kramco Sausage-o-Matic&trade;]);
@@ -898,11 +952,17 @@ if (!test_done(TEST_HP)) {
     while ((get_property_int('_banderRunaways') < my_familiar_weight() / 5
              || (have_skill($skill[Snokebomb]) && get_property_int('_snokebombUsed') < 3)
              || (have_skill($skill[Reflex Hammer]) && get_property_int('_reflexHammerUsed') < 3))) {
+        ensure_effect($effect[The Sonata of Sneakiness]);
+        ensure_effect($effect[Smooth Movements]);
+        if (get_property_int('_powerfulGloveBatteryPowerUsed') < 95) {
+            ensure_effect($effect[Invisible Avatar]);
+        }
+
         if (get_property_int('garbageShirtCharge') <= 8) {
             equip($slot[shirt], $item[none]);
         }
         if (get_property_int('_banderRunaways') < my_familiar_weight() / 5) {
-            ensure_ode();
+            ensure_ode(1);
         }
         if (adventure_manual($location[The Haiku Dungeon])) {
             // Skip fairy gravy NC
@@ -933,7 +993,7 @@ if (!test_done(TEST_HP)) {
         if (item_amount($item[perfect dark and stormy]) == 0) {
             create(1, $item[perfect dark and stormy]);
         }
-        ensure_ode();
+        ensure_ode(3);
         drink(1, $item[perfect dark and stormy]);
     }
 
@@ -943,13 +1003,17 @@ if (!test_done(TEST_HP)) {
     try_equip($item[amulet coin]);
     try_equip($item[astral pet sweater]);
 
+    // Get Punching Potion
+    if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
+        cli_execute('boombox damage');
+    }
+
     // Use turns to level to 14.
     int turns_spent = 0;
     // Fight
     set_property('choiceAdventure1324', '5');
     if (!stat_ready()) {
         print('At level ' + my_level() + '. Going to level 14...');
-        cli_execute('mood execute');
         while (!stat_ready() && my_basestat($stat[Mysticality]) < 178 && get_property_int('garbageShirtCharge') > 0) {
             ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
             adv1($location[The Neverending Party], -1, '');
@@ -1048,7 +1112,7 @@ if (!test_done(TEST_ITEM)) {
 
     try_use(1, $item[astral six-pack]);
     while (item_amount($item[astral pilsner]) > 0) {
-        ensure_ode();
+        ensure_ode(1);
         drink(1, $item[astral pilsner]);
     }
 
@@ -1069,6 +1133,7 @@ if (!test_done(TEST_ITEM)) {
 
     ensure_effect($effect[Fat Leon's Phat Loot Lyric]);
     ensure_effect($effect[Singer's Faithful Ocelot]);
+    ensure_effect($effect[The Spirit of Taking]);
 
     effect[int] subsequent;
     synthesis_plan($effect[Synthesis: Collection], subsequent);
@@ -1090,8 +1155,8 @@ if (!test_done(TEST_ITEM)) {
         pizza_effect(
             $effect[Certainty],
             $item[clove-flavored lip balm],
-            $item[electronics kit], // FIXME
-            $item[razor-sharp can lid], // FIXME: Use something else
+            $item[ectoplasm <i>au jus</i>],
+            item_priority($item[ravioli hat], $item[red pixel], $item[ratty knitted cap]),
             $item[blood-faced volleyball] // get extra-strength rubber bands
         );
     }
@@ -1108,18 +1173,16 @@ if (!test_done(TEST_ITEM)) {
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
-        item n = $item[neverending wallet chain];
-        if (item_amount(n) == 0) n = $item[Newbiesport&trade; tent];
         pizza_effect(
             $effect[Infernal Thirst],
             $item[Irish Coffee, English Heart],
-            n,
+            item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
             $item[Flaskfull of Hollow],
             $item[extra-strength rubber bands] // get amulet coin
         );
     }
 
-    maximize('item, 2booze drop, -equip broken champagne bottle', false);
+    maximize('item, 2 booze drop, -equip broken champagne bottle', false);
 
     do_test(TEST_ITEM);
 }
@@ -1132,7 +1195,7 @@ if (!test_done(TEST_HOT_RES)) {
         if (my_inebriety() > 13) {
             error('Too drunk. Something is wrong.');
         }
-        ensure_ode();
+        ensure_ode(2);
         cli_execute('drink 1 Ish Kabibble');
     }
 
@@ -1304,7 +1367,7 @@ if (!test_done(TEST_WEAPON)) {
             error('Something went wrong. We are too drunk.');
         }
         assert_meat(500);
-        ensure_ode();
+        ensure_ode(2);
         cli_execute('drink Sockdollager');
     }
 
@@ -1320,6 +1383,15 @@ if (!test_done(TEST_WEAPON)) {
     // Hatter buff
     ensure_item(1, $item[goofily-plumed helmet]);
     ensure_effect($effect[Weapon of Mass Destruction]);
+
+    if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
+        cli_execute('boombox damage');
+    }
+
+    // Boombox potion - did we get one?
+    if (item_amount($item[Punching Potion]) > 0) {
+        ensure_effect($effect[Feeling Punchy]);
+    }
 
     // Pool buff
     ensure_effect($effect[Billiards Belligerence]);
