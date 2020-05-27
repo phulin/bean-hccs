@@ -1,10 +1,11 @@
 This is a Kingdom of Loathing script by myself, worthawholebean / ikzann to do 1-day Hardcore Community Service runs.
-THe script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary.
-Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, garbage tote, SongBoom, and Genie.
-It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish to fight that guy.
+The script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary; if you are missing more than one or two of the leveling ones in particular, the script will fail to level enough to cap the stat tests. That will very likely mean missing daycount.
+Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, Garbage Tote, SongBoom, and Genie.
+It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish or the fax to fight that guy.
 It also assumes that you have access to Peppermint Garden for candy sorce.
 It should plan around other candy sources if you add code to harvest them.
 The current route uses Smith's Tome to get to 60 advs to coil wire on turn 0; any other resource that uses 6 fullness or fewer would work.
+
 The script is fine to run twice; if it breaks somewhere, fix it manually and then the script should start where it left off.
 
 To install:
