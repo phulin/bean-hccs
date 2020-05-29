@@ -9,7 +9,7 @@ Finally, it assumes that you have access to essentially every CS-relevant perm. 
 The current route uses Smith's Tome to make This Charming Flans to get to 60 advs to coil wire on turn 0; any other resource that uses 6 fullness or fewer would work.
 
 I expect most folks will need to make some changes, unless your set of IotMs is a strict superset of mine. This is supposed to be an outline that can get you to daycount with some work. IotMs that will save you substantial turns on top of what I have include:
-- Bastille will likely obviate the need to spend any turns leveling. Add it right after the +XP% buffs. It could replace Chateau.
+- Bastille will likely obviate the need to spend any turns leveling. Add it right after the +XP% buffs. It could replace Chateau, or it could get you to level 5 on turn 0 instead of turn 60 so that you could drink a perfect drink then to get to 60 adventures
 - Distant Woods is a great XP buff that should also help reduce leveling turns.
 - Beach Comb beachhead buffs would save turns in a variety of places.
 - Any alternative way to get to 60 adventures to coil wire on turn 0 would help; you could use Borrowed Time from the Tome of Clip Art, for example. That would free up 4 stomach from the current route and enable you to fit in two more pizzas.
