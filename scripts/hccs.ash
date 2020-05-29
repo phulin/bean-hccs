@@ -725,7 +725,7 @@ if (!test_done(TEST_HP)) {
         equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
         equip($slot[acc2], $item[Powerful Glove]);
         equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
-        // Switch MCD first, as we won't have access and it will only go to 10.
+        // Actually tune the moon.
         visit_url('inv_use.php?whichitem=10254&doit=96&whichsign=8');
     }
 
@@ -740,6 +740,7 @@ if (!test_done(TEST_HP)) {
         use_skill(1, $skill[Summon Crimbo Candy]);
     }
 
+    // This is the sequence of synthesis effects; synthesis_plan will, if possible, come up with a plan for allocating candy to each of these.
     effect[int] subsequent = { $effect[Synthesis: Smart], $effect[Synthesis: Strong], $effect[Synthesis: Cool], $effect[Synthesis: Collection] };
     synthesis_plan($effect[Synthesis: Learning], subsequent);
     synthesis_plan($effect[Synthesis: Smart], tail(subsequent));
