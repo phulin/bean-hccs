@@ -413,14 +413,6 @@ void ensure_ode(int turns) {
     }
 }
 
-int free_rests() {
-    int result = 5;
-    if (have_skill($skill[Adventurer of Leisure])) result += 2;
-    if (have_skill($skill[Disco Nap])) result += 1;
-    if (have_skill($skill[Executive Narcolepsy])) result += 1;
-    return result;
-}
-
 boolean summon_bricko_oyster() {
     if (get_property_int('_brickoFights') >= 3) return false;
     if (item_amount($item[BRICKO oyster]) > 0) return true;
@@ -659,7 +651,7 @@ if (!test_done(TEST_HP)) {
     try_use(1, $item[a ten-percent bonus]);
 
     // Chateau rest
-    while (get_property_int('timesRested') < free_rests()) {
+    while (get_property_int('timesRested') < total_free_rests()) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
     }
 
