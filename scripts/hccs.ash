@@ -1,50 +1,8 @@
 // Script by worthawholebean. Public domain; feel free to modify or distribute.
-// This is a script to do 1-day Hardcore Community Service runs.
-// The script is fine to run twice; if it breaks somewhere, fix it manually and then the script should start where it left off.
-// THe script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary.
-// Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, garbage tote, SongBoom, and Genie.
-// It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish to fight that guy.
-// It also assumes that you have access to Peppermint Garden for candy sorce.
-// It should plan around other candy sources if you add code to harvest them.
-// The current route uses Smith's Tome to get to 60 advs to coil wire on turn 0; any other route would work.
-
-// You'll need to set up CCS and moods named "hccs" (for most leveling combats) and "hccs-early" (for early leveling, before you have much MP).
-/* hccs CCS:
-[ default ]
-while (snarfblat 113 && !monstername "possessed can of tomatoes") || (snarfblat 439 && !monstername "novelty tropical skeleton")
-    skill cheat code: replace enemy
-endwhile
-if monstername "novelty tropical skeleton" || monstername "possessed can of tomatoes" || monstername "factory worker" || monstername "ungulith"
-    skill use the force
-endif
-skill sing along # only if you have SongBoom
-if monstername "BRICKO oyster" || monstername "sausage goblin" || snarfblat 528 # NEP
-    if monstername "BRICKO oyster"
-        skill otoscope
-    endif
-    skill curse of weaksauce
-    skill saucegeyser
-endif
-abort
-*/
-
-// You also need a ccs "copygoblin" for copying sausage goblins.
-/* copygoblin CCS:
-[default]
-abort
-
-[sausage goblin]
-skill curse of weaksauce
-skill detect weakness
-skill lecture on relativity
-if hpbelow 50
-abort
-endif
-skill sing along # only if you have SongBoom
-skill saucegeyser
-*/
+// This is a script to do 1-day Hardcore Community Service runs. See README.md for details.
 
 import <canadv.ash>
+import <hccs_macros.ash>
 
 int TEST_HP = 1;
 int TEST_MUS = 2;
@@ -433,22 +391,6 @@ int my_familiar_weight() {
     return familiar_weight(my_familiar()) + weight_adjustment();
 }
 
-int[location] snarfblats;
-snarfblats[$location[The Haiku Dungeon]] = 138;
-snarfblats[$location[The Haunted Pantry]] = 113;
-snarfblats[$location[The Neverending Party]] = 528;
-snarfblats[$location[The Skeleton Store]] = 439;
-
-// Returns true if we are in a choice (i.e. noncombat).
-boolean adventure_manual(location loc) {
-    if (my_hp() < .6 * my_maxhp()) {
-        restore_hp(my_maxhp());
-    }
-    if (!(snarfblats contains loc)) error('Bad location.');
-    visit_url('adventure.php?snarfblat=' + snarfblats[loc]);
-    return handling_choice();
-}
-
 boolean stat_ready() {
     // Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet
     int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + 4.7) * my_basestat($stat[Mysticality]);
@@ -764,7 +706,30 @@ if (!test_done(TEST_HP)) {
         ensure_effect($effect[Musk of the Moose]);
         ensure_effect($effect[Carlweather's Cantata of Confrontation]);
 
-        adv1($location[The Haunted Pantry], -1, '');
+        adventure_result adv_result = adventure_manual($location[The Haunted Pantry]);
+        monster[string] banishes;
+        while (adv_result.current_monster != $monster[possessed can of tomatoes]) {
+            if (adv_result.current_monster == $monster[none]) {
+                // Probably hit the superlikely. Try again.
+                adv_result = adventure_manual($location[The Haunted Pantry]);
+            } else if (have_skill($skill[Snokebomb]) && get_property_int('_snokebombUsed') < 3 && !(banishes contains "Snokebomb")) {
+                use_skill(1, $skill[Snokebomb]);
+                adv_result = adventure_manual($location[The Haunted Pantry]);
+            } else if (have_skill($skill[Reflex Hammer]) && get_property_int('_reflexHammerUsed') < 3 && !(banishes contains "Reflex Hammer")) {
+                use_skill(1, $skill[Reflex Hammer]);
+                adv_result = adventure_manual($location[The Haunted Pantry]);
+            } else if (have_skill($skill[CHEAT CODE: Replace Enemy] && get_property_int('_powerfulGloveBatteryPowerUsed') <= 80)) {
+                int original_battery = get_property_int('_powerfulGloveBatteryPowerUsed');
+                use_skill(1, $skill[CHEAT CODE: Replace Enemy]);
+                int new_battery = get_property_int('_powerfulGloveBatteryPowerUsed');
+                if (new_battery == original_battery) {
+                    print('WARNING: Mafia is not updating PG battery charge.')
+                    set_property('_powerfulGloveBatteryPowerUsed', '' + (new_battery + 10));
+                }
+                adv_result = adventure_state();
+            }
+        }
+        use_skill(1, $skill[Use the Force]);
         saber_yr();
     }
 
@@ -777,11 +742,34 @@ if (!test_done(TEST_HP)) {
             run_choice(1);
         }
         if (!can_adv($location[The Skeleton Store], false)) error('Cannot open skeleton store!');
-        adv1($location[The Skeleton Store], -1, '');
+        adventure_manual($location[The Skeleton Store], -1, '');
         if (!$location[The Skeleton Store].noncombat_queue.contains_text('Skeletons In Store')) {
             error('Something went wrong at skeleton store.');
         }
-        adv1($location[The Skeleton Store], -1, '');
+        adventure_result adv_result = adventure_manual($location[The Skeleton Store]);
+        monster[string] banishes;
+        while (adv_result.current_monster != $monster[novelty tropical skeleton]) {
+            if (adv_result.current_monster == $monster[none]) {
+                // Probably hit the superlikely. Try again.
+                adv_result = adventure_manual($location[The Haunted Pantry]);
+            } else if (have_skill($skill[Snokebomb]) && get_property_int('_snokebombUsed') < 3 && !(banishes contains "Snokebomb")) {
+                use_skill(1, $skill[Snokebomb]);
+                adv_result = adventure_manual($location[The Haunted Pantry]);
+            } else if (have_skill($skill[Reflex Hammer]) && get_property_int('_reflexHammerUsed') < 3 && !(banishes contains "Reflex Hammer")) {
+                use_skill(1, $skill[Reflex Hammer]);
+                adv_result = adventure_manual($location[The Haunted Pantry]);
+            } else if (have_skill($skill[CHEAT CODE: Replace Enemy] && get_property_int('_powerfulGloveBatteryPowerUsed') <= 80)) {
+                int original_battery = get_property_int('_powerfulGloveBatteryPowerUsed');
+                use_skill(1, $skill[CHEAT CODE: Replace Enemy]);
+                int new_battery = get_property_int('_powerfulGloveBatteryPowerUsed');
+                if (new_battery == original_battery) {
+                    print('WARNING: Mafia is not updating PG battery charge.')
+                    set_property('_powerfulGloveBatteryPowerUsed', '' + (new_battery + 10));
+                }
+                adv_result = adventure_state();
+            }
+        }
+        use_skill(1, $skill[Use the Force]);
         saber_yr();
     }
 
@@ -798,17 +786,30 @@ if (!test_done(TEST_HP)) {
         try_equip($item[Pocket Professor memory chip]);
 
         equip($item[Kramco Sausage-o-Matic&trade;]);
-        cli_execute('ccs copygoblin');
-        // Just here to party.
-        set_property('choiceAdventure1322', '2');
-        adv1($location[The Neverending Party], -1, '');
 
-        if (my_hp() < .8 * my_maxhp()) {
-            visit_url('clan_viplounge.php?where=hottub');
+        while (get_property_int('_sausageFights') == 0) {
+            if (my_hp() < .8 * my_maxhp()) {
+                visit_url('clan_viplounge.php?where=hottub');
+            }
+
+            adventure_result adv_result = ($location[The Neverending Party], -1, '');
+            if (adv_result.current_choice == 1322) {
+                // Just here to party.
+                run_choice(2);
+            } else if (adv_result.current_choice >= 0) {
+                error('Unrecognized noncombat.');
+            } else if (adv_result.current_monster == $monster[sausage goblin]) {
+                while (!adv_result.finished) {
+                    new_macro()
+                        .m_skill($skill[Sing Along])
+                        .m_skill($skill[Curse of Weaksauce])
+                        .m_skill($skill[Lecture on Relativity])
+                        .m_skill($skill[Saucegeyser])
+                        .m_repeat()
+                        .submit_macro();
+                }
+            }
         }
-
-        // Actually find the goblin.
-        adv1($location[The Neverending Party], -1, '');
     }
 
     // Breakfast
@@ -913,8 +914,8 @@ if (!test_done(TEST_HP)) {
             cli_execute('boombox damage');
         }
 
-        boolean hit_nc = false;
-        if (adventure_manual($location[The Neverending Party])) {
+        adventure_result adv_result = adventure_manual($location[The Neverending Party]));
+        if (adv_result.current_choice == 1324) {
             // In NEP noncombat. Get stat buff if we don't have it. This WILL spend an adventure if we're out.
             if (have_effect($effect[Tomes of Opportunity]) == 0) {
                 run_choice(1);
@@ -923,11 +924,18 @@ if (!test_done(TEST_HP)) {
             } else {
                 // Combat.
                 run_choice(5);
-                hit_nc = true;
             }
+        } else if (adv_result.current_choice >= 0 || adv_result.current_monster == $monster[none]) {
+            error('Something went wrong. Unrecognized noncombat or monster.')
         }
-        if (get_property_int('_neverendingPartyFreeTurns') < 10 || (!hit_nc && last_monster() == $monster[sausage goblin])) {
-            run_combat();
+
+        if (get_property_int('_neverendingPartyFreeTurns') < 10 || adv_result.current_monster.attributes.contains_text('FREE')) {
+            new_macro()
+                .m_skill($skill[Sing Along])
+                .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Saucegeyser])
+                .m_repeat()
+                .submit_macro();
         } else if (have_skill($skill[Chest X-Ray]) && get_property_int('_chestXRayUsed') < 3) {
             use_skill(1, $skill[Chest X-Ray]);
         } else if (have_skill($skill[Shattering Punch]) && get_property_int('_shatteringPunchUsed') < 3) {
@@ -937,13 +945,15 @@ if (!test_done(TEST_HP)) {
         } else {
             error('Something went wrong. We should not be in a party fight.');
         }
-        if (handling_choice()) {
-            if (last_choice() == 1340) {
-                // Lil' Doctor quest. Turn off phone.
-                run_choice(3);
-            } else {
-                error('We are in a choice adventure for some reason.');
-            }
+
+        adv_result = adventure_state();
+        if (adv_result.current_choice < 0 && !adv_result.finished) {
+            error('Did not finish combat for some reason.');
+        } else if (adv_result.current_choice == 1340) {
+            // Lil' Doctor quest. Turn off phone.
+            run_choice(3);
+        } else if (adv_result.current_choice >= 0) {
+            error('We are in a choice adventure for some reason.');
         }
     }
 
@@ -963,21 +973,29 @@ if (!test_done(TEST_HP)) {
              || (have_skill($skill[Reflex Hammer]) && get_property_int('_reflexHammerUsed') < 3))) {
         ensure_effect($effect[The Sonata of Sneakiness]);
         ensure_effect($effect[Smooth Movements]);
-        if (get_property_int('_powerfulGloveBatteryPowerUsed') < 95) {
+        if (get_property_int('_powerfulGloveBatteryPowerUsed') <= 90) {
             ensure_effect($effect[Invisible Avatar]);
         }
-
         if (get_property_int('garbageShirtCharge') <= 8) {
             equip($slot[shirt], $item[none]);
         }
         if (get_property_int('_banderRunaways') < my_familiar_weight() / 5) {
             ensure_ode(1);
         }
-        if (adventure_manual($location[The Haiku Dungeon])) {
+
+        adventure_result adv_result = adventure_manual($location[The Neverending Party]));
+        if (adv_result.last_choice == 297) {
             // Skip fairy gravy NC
             run_choice(3);
-        } else if (last_monster() == $monster[sausage goblin]) {
-            run_combat();
+        } else if (adv_result.last_choice >= 0) {
+            error('Unrecognized noncombat.')
+        } else if (adv_result.last_monster.attributes.contains_text('FREE')) {
+            new_macro()
+                .m_skill($skill[Sing Along])
+                .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Saucegeyser])
+                .m_repeat()
+                .submit_macro();
         } else if (get_property_int('_banderRunaways') < my_familiar_weight() / 5) {
             runaway();
             set_property_int('_banderRunaways', get_property_int('_banderRunaways') + 1);
@@ -986,17 +1004,11 @@ if (!test_done(TEST_HP)) {
         } else if (have_skill($skill[Reflex Hammer]) && get_property_int('_reflexHammerUsed') < 3) {
             use_skill(1, $skill[Reflex Hammer]);
         } else {
-            error('Something went wrong. We should not be in a party fight.');
+            error('Something went wrong.');
         }
     }
 
     if (have_effect($effect[The Sonata of Sneakiness]) > 0) cli_execute('uneffect Sonata of Sneakiness');
-
-    if (my_level() < 11) error('Have to be level 11 before eating.');
-
-    if (my_fullness() == 0) {
-        eat(1, $item[spaghetti breakfast]);
-    }
 
     if (my_inebriety() < 5) {
         if (item_amount($item[perfect dark and stormy]) == 0) {
@@ -1018,9 +1030,23 @@ if (!test_done(TEST_HP)) {
     set_property('choiceAdventure1324', '5');
     if (!stat_ready()) {
         print('At level ' + my_level() + '. Going to level 14...');
+        cli_execute('mood execute');
         while (!stat_ready() && my_basestat($stat[Mysticality]) < 178 && get_property_int('garbageShirtCharge') > 0) {
             ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
-            adv1($location[The Neverending Party], -1, '');
+
+            adventure_result adv_result = adventure_manual($location[The Neverending Party]));
+            if (adv_result.last_choice == 1324) {
+                // Fight
+                run_choice(5);
+            }
+
+            new_macro()
+                .m_skill($skill[Sing Along])
+                .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Saucegeyser])
+                .m_repeat()
+                .submit_macro();
+            
             turns_spent += 1;
             print('Spent ' + turns_spent + ' turns trying to level.');
             cli_execute('mood execute');
