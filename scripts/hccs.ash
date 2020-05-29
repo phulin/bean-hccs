@@ -914,6 +914,12 @@ if (!test_done(TEST_HP)) {
             || (have_skill($skill[Gingerbread Mob Hit]) && !get_property_boolean('_gingerbreadMobHitUsed'))) {
         ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
         ensure_effect($effect[Polka of Plenty]);
+
+        // Get Punching Potion once we run out of free fights
+        if (get_property_int('_neverendingPartyFreeTurns') >= 10 && get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
+            cli_execute('boombox damage');
+        }
+
         boolean hit_nc = false;
         if (adventure_manual($location[The Neverending Party])) {
             // In NEP noncombat. Get stat buff if we don't have it. This WILL spend an adventure if we're out.
@@ -1013,11 +1019,6 @@ if (!test_done(TEST_HP)) {
     try_equip($item[amulet coin]);
     try_equip($item[astral pet sweater]);
 
-    // Get Punching Potion
-    if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
-        cli_execute('boombox damage');
-    }
-
     // Use turns to level to 14.
     int turns_spent = 0;
     // Fight
@@ -1078,9 +1079,22 @@ if (!test_done(TEST_MYS)) {
     ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
     maximize('mysticality', false);
     if (my_buffedstat($stat[mysticality]) - my_basestat($stat[mysticality]) < 1770) {
-        error('Not enough mysticality to cap.');
+        if (my_class() == $class[Sauceror]) {
+            // Try making a saucepanic.
+            ensure_item(1, $item[tenderizing hammer]);
+            ensure_create_item(1, $item[Saucepanic]);
+            // now we have to get a new saucepan.
+            ensure_hermit_item(1, $item[saucepan]);
+            maximize('mysticality', false);
+        }
+        if (my_buffedstat($stat[mysticality]) - my_basestat($stat[mysticality]) < 1770) {
+            error('Not enough mysticality to cap.');
+        }
     }
     do_test(TEST_MYS);
+    if (item_amount($item[Saucepanic]) > 0) {
+        cli_execute('smash 1 Saucepanic');
+    }
 }
 
 if (!test_done(TEST_MOX)) {
@@ -1349,6 +1363,10 @@ if (!test_done(TEST_NONCOMBAT)) {
 
     wish_effect($effect[Disquiet Riot]);
 
+    if (round(numeric_modifier('-combat')) < 40) {
+        error('Not enough -combat to cap.')
+    }
+
     maximize('-combat, 0.01 familiar weight', false);
 
     do_test(TEST_NONCOMBAT);
@@ -1467,3 +1485,4 @@ set_property('autoSatisfyWithNPCs', get_property('_saved_autoSatisfyWithNPCs'));
 
 cli_execute('mood default');
 cli_execute('ccs default');
+cli_execute('boombox food');
