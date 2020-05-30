@@ -139,7 +139,8 @@ adventure_result adventure_state() {
     return _current_state;
 }*/
 
-string MODE_FIND_MONSTER_SABER_YR = "find";
+string MODE_FIND_MONSTER_SABER_YR = "findsaber";
+string MODE_SABER_YR = "saber";
 string MODE_COPY = "copy";
 string MODE_FREE_KILL = "freekill";
 string MODE_KILL = "kill";
@@ -184,7 +185,9 @@ boolean used_banisher_in_zone(monster[string] banished, string banisher, locatio
 void main(int initround, monster foe, string page) {
     string mode = get_hccs_combat_mode();
     location loc = my_location();
-    if (mode == MODE_FIND_MONSTER_SABER_YR) {
+    if (mode == MODE_SABER_YR) {
+        use_skill(1, $skill[Use the Force]);
+    } else if (mode == MODE_FIND_MONSTER_SABER_YR) {
         string monster_name = get_hccs_combat_arg1();
         monster desired = monster_name.to_monster();
         monster[string] banished = banished_monsters();

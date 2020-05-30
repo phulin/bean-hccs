@@ -1031,6 +1031,7 @@ if (!test_done(TEST_HOT_RES)) {
         }
         cli_execute('mood apathetic');
         equip($item[Fourth of May Cosplay Saber]);
+        set_hccs_combat_mode(MODE_SABER_YR);
         use(1, $item[photocopied monster]);
         saber_yr();
     }
