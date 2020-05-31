@@ -139,11 +139,13 @@ adventure_result adventure_state() {
     return _current_state;
 }*/
 
+string MODE_NULL = "";
 string MODE_FIND_MONSTER_SABER_YR = "findsaber";
 string MODE_SABER_YR = "saber";
 string MODE_COPY = "copy";
 string MODE_FREE_KILL = "freekill";
 string MODE_KILL = "kill";
+string MODE_OTOSCOPE = "otoscope";
 string MODE_RUN_UNLESS_FREE = "run";
 
 void set_hccs_combat_mode(string mode) {
@@ -206,7 +208,7 @@ void main(int initround, monster foe, string page) {
                 print("WARNING: Mafia is not updating PG battery charge.");
                 set_property("_powerfulGloveBatteryPowerUsed", "" + (new_battery + 10));
             }
-            run_combat();
+            // Hopefully at this point it comes back to the consult script.
         }
     } else if (mode == MODE_COPY) {
         string monster_name = get_hccs_combat_arg1();
@@ -240,6 +242,13 @@ void main(int initround, monster foe, string page) {
             .m_skill($skill[Curse of Weaksauce])
             .m_skill($skill[Saucegeyser])
             .m_repeat_submit();
+    } else if (mode == MODE_OTOSCOPE) {
+        m_new()
+            .m_skill($skill[Sing Along])
+            .m_skill($skill[Curse of Weaksauce])
+            .m_skill($skill[Otoscope])
+            .m_skill($skill[Saucegeyser])
+            .m_repeat_submit();
     } else if (mode == MODE_RUN_UNLESS_FREE) {
         if (foe.attributes.contains_text('FREE')) {
             m_new()
@@ -257,6 +266,8 @@ void main(int initround, monster foe, string page) {
         } else {
             abort("Something went wrong.");
         }
+    } else {
+        abort("Unrecognized mode.");
     }
 
     multi_fight();
@@ -272,29 +283,33 @@ void saber_yr() {
 void find_monster_saber_yr(location loc, monster foe) {
     set_hccs_combat_mode(MODE_FIND_MONSTER_SABER_YR, foe.name);
     set_property("_hccsCombatFound", "false");
-    adv1(loc, -1, "");
-    if (get_property("_hccsCombatFound") != "true") {
-        abort(`Failed to find monster {foe.name}`);
+    while (get_property("_hccsCombatFound") != "true") {
+        adv1(loc, -1, "");
     }
     saber_yr();
+    set_hccs_combat_mode(MODE_NULL);
 }
 
 void adventure_copy(location loc, monster foe) {
-    set_hccs_combat_mode(MODE_COPY);
+    set_hccs_combat_mode(MODE_COPY, foe.name);
     adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL);
 }
 
 void adventure_kill(location loc) {
     set_hccs_combat_mode(MODE_KILL);
     adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL);
 }
 
 void adventure_free_kill(location loc) {
     set_hccs_combat_mode(MODE_FREE_KILL);
     adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL);
 }
 
 void adventure_run_unless_free(location loc) {
     set_hccs_combat_mode(MODE_RUN_UNLESS_FREE);
     adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL);
 }

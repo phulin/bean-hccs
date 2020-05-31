@@ -354,7 +354,7 @@ void ensure_mp_tonic(int mp) {
 void ensure_mp_sausage(int mp) {
     while (my_mp() < mp) {
         ensure_create_item(1, $item[magical sausage]);
-        use(1, $item[magical sausage]);
+        eat(1, $item[magical sausage]);
     }
 }
 
@@ -582,13 +582,13 @@ if (!test_done(TEST_HP)) {
     // Use ten-percent bonus
     try_use(1, $item[a ten-percent bonus]);
 
-    // Chateau rest
-    while (get_property_int('timesRested') < total_free_rests()) {
-        visit_url('place.php?whichplace=chateau&action=chateau_restbox');
+    if (!get_property_boolean('_lyleFavored')) {
+        ensure_effect($effect[Favored by Lyle]);
     }
+    ensure_effect($effect[Triple-Sized]);
+    ensure_song($effect[The Magical Mojomuscular Melody]);
+    ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
-    // Cast polka, phat, singer's, stats, hulkein, triple size
-    cli_execute('mood hccs-early');
     if (have_effect($effect[Hulkien]) == 0) {
         cli_execute('pillkeeper stats');
     }
@@ -596,14 +596,6 @@ if (!test_done(TEST_HP)) {
     if (have_effect($effect[Fidoxene]) == 0) {
         cli_execute('pillkeeper familiar');
     }
-
-    if (!get_property_boolean('_lyleFavored')) {
-        ensure_effect($effect[Favored by Lyle]);
-    }
-    ensure_effect($effect[Triple-Sized]);
-    ensure_effect($effect[Song of Bravado]);
-    ensure_song($effect[The Magical Mojomuscular Melody]);
-    ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
     equip($item[hollandaise helmet]);
     equip($slot[shirt], $item[none]);
@@ -613,6 +605,15 @@ if (!test_done(TEST_HP)) {
     equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
+
+    // Chateau rest
+    while (get_property_int('timesRested') < total_free_rests()) {
+        visit_url('place.php?whichplace=chateau&action=chateau_restbox');
+    }
+
+    cli_execute('mood hccs-early');
+
+    ensure_effect($effect[Song of Bravado]);
 
     if (get_property('boomBoxSong') != 'Total Eclipse of Your Meat') {
         cli_execute('boombox meat');
@@ -631,8 +632,10 @@ if (!test_done(TEST_HP)) {
             visit_url('clan_viplounge.php?where=hottub');
         }
         restore_mp(32);
+        set_hccs_combat_mode(MODE_OTOSCOPE);
         use(1, $item[BRICKO oyster]);
         autosell(1, $item[BRICKO pearl]);
+        set_hccs_combat_mode(MODE_NULL);
     }
 
     // Get beach access.
@@ -738,7 +741,7 @@ if (!test_done(TEST_HP)) {
 
             // Just here to party.
             set_choice(1322, 2);
-            adv1($location[The Neverending Party], -1, '');
+            adventure_copy($location[The Neverending Party], $monster[sausage goblin]);
         }
     }
 
@@ -1013,7 +1016,7 @@ if (!test_done(TEST_HOT_RES)) {
         if (my_meat() < 500) {
             error('Not enough meat. Please autosell stuff.');
         }
-        if (my_inebriety() > 13) {
+        if (my_inebriety() > 3) {
             error('Too drunk. Something is wrong.');
         }
         ensure_ode(2);
@@ -1034,6 +1037,7 @@ if (!test_done(TEST_HOT_RES)) {
         set_hccs_combat_mode(MODE_SABER_YR);
         use(1, $item[photocopied monster]);
         saber_yr();
+        set_hccs_combat_mode(MODE_NULL);
     }
     autosell(1, $item[very hot lunch]);
 
@@ -1044,11 +1048,15 @@ if (!test_done(TEST_HOT_RES)) {
 
     use_familiar($familiar[Exotic Parrot]);
     try_equip($item[amulet coin]);
+    ensure_effect($effect[Blood Bond]);
+    ensure_effect($effect[Leash of Linguini]);
+    ensure_effect($effect[Empathy]);
 
     if (have_effect($effect[Rainbowolin]) == 0) {
         cli_execute('pillkeeper elemental');
     }
 
+    ensure_item(1, $item[tenderizing hammer]);
     cli_execute('smash * ratty knitted cap');
     cli_execute('smash * red-hot sausage fork');
     autosell(10, $item[hot nuggets]);
@@ -1108,13 +1116,12 @@ if (!test_done(TEST_ITEM)) {
     ensure_mp_sausage(500);
 
     if (item_amount($item[cyclops eyedrops]) == 0 && have_effect($effect[One Very Clear Eye]) == 0) {
+        cli_execute('pillkeeper semirare');
         if (get_property_int('semirareCounter') != 0) {
-            cli_execute('pillkeeper semirare');
-            if (get_property_int('semirareCounter') != 0) {
-                error('Semirare should be now. Something went wrong.');
-            }
+            error('Semirare should be now. Something went wrong.');
         }
         cli_execute('mood apathetic');
+        cli_execute('counters Fortune Cookie nowarn');
         adv1($location[The Limerick Dungeon], -1, '');
     }
 
@@ -1124,7 +1131,7 @@ if (!test_done(TEST_ITEM)) {
         drink(1, $item[astral pilsner]);
     }
 
-    if (my_inebriety() != 11) {
+    if (my_inebriety() != 13) {
         error('Too drunk. Something went wrong.');
     }
 
@@ -1408,6 +1415,7 @@ if (!test_done(TEST_SPELL)) {
 }
 
 set_property('autoSatisfyWithNPCs', get_property('_saved_autoSatisfyWithNPCs'));
+set_property('hpAutoRecovery', '0.8');
 
 cli_execute('mood default');
 cli_execute('ccs default');
