@@ -915,7 +915,8 @@ if (!test_done(TEST_HP)) {
     if (!stat_ready()) {
         print('At level ' + my_level() + '. Going to level 14...');
         cli_execute('mood execute');
-        while (!stat_ready() && my_basestat($stat[Mysticality]) < 178 && get_property_int('garbageShirtCharge') > 0) {
+        // Turncount minimum is to make sure we get a punching potion.
+        while (my_turncount() < 62 || (!stat_ready() && my_basestat($stat[Mysticality]) < 178 && get_property_int('garbageShirtCharge') > 0)) {
             ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
             adventure_kill($location[The Neverending Party]);
@@ -1106,6 +1107,7 @@ if (!test_done(TEST_HOT_RES)) {
         error('Something went wrong building hot res.');
     }
 
+    abort('CHECK hot res');
     do_test(TEST_HOT_RES);
 
     autosell(1, $item[lava-proof pants]);
@@ -1206,8 +1208,9 @@ if (!test_done(TEST_ITEM)) {
         );
     }
 
-    maximize('item, 2 booze drop, -equip broken champagne bottle', false);
+    maximize('item, 2 booze drop, equip Vicar\'s Tutu, -equip broken champagne bottle', false);
 
+    abort('CHECK item');
     do_test(TEST_ITEM);
 
     if (item_amount($item[Vicar's Tutu]) > 0) {
