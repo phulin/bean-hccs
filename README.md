@@ -1,10 +1,10 @@
 This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann` on Discord) to do 1-day Hardcore Community Service runs as a Sauceror in the Wallaby moon sign.
-The script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary; if you are missing more than one or two of the leveling ones in particular (Prof/Kramco, NEP, Garbage Tote), the script will fail to level enough to cap the stat tests. That will very likely mean missing daycount.
+The script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary; if you are missing more than one or two of the leveling ones in particular (Prof/Kramco, NEP, Garbage Tote), the script will fail to level enough to cap the stat tests. That will very likely mean missing daycount. If you are missing Synth, you can compensate by wishing for Experimental Effect G-9 or New and Improved to replace the +Myst buff (depending on the day), and Different Way of Seeing Things to replace the XP buff. You can still make 1-day using that plan but it will be tight.
 Besides leveling, the Genie Bottle and Pizza Cube each save a ridiculous number of turns with wishes.
 Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, Garbage Tote, SongBoom, Moon Spoon, and Genie. It also assumes VIP lounge access, which is crucial.
-It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish or the fax to fight that guy.
-It also assumes that you have access to Peppermint Garden as a candy sorce. It will plan around other candy sources if you add code to harvest them.
-Finally, it assumes that you have access to essentially every CS-relevant perm. The big ones are the +HP% perms, as they allow you to avoid using a wish on the HP test. You will need Song of Starch (50%), Spirit of Ravioli (25%), and Abs of Tin (10%) at the very least, and you probably also need one or two of the 5% perms.
+It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish or the fax to fight that guy. He saves 12 turns if you can get the weapon damage test to less than 28 turns. The fax is allocated to a factory worker, which saves 9 turns.
+For candy, the script assumes that you have access to Peppermint Garden and the Crimbo Candy Cookbook (it also gets the Stocking Mimic's bag of many confections, but this is only one piece). It will plan around other candy sources if you add code to harvest them.
+Finally, it assumes that you have access to essentially every CS-relevant perm. The big ones are the +HP% perms, as they allow you to avoid using a wish on the HP test. You will need Song of Starch (50%), Spirit of Ravioli (25%), and Abs of Tin (10%) at the very least, and you probably also need one or two of the 5% perms. If you don't have these perms yet, you will need to use a wish/pizza for Preemptive Medicine on the HP test. Bow-Legged Swagger and Steely-Eyed Squint are also crucial, as you would expect. And there are quite a few miscellaneous +item and +weapon damage perms; they all save turns, many of them several.
 
 The current route uses Smith's Tome to make This Charming Flans to get to 60 advs to coil wire on turn 0; any other resource that uses 6 fullness or fewer would work.
 
@@ -14,7 +14,7 @@ I expect most folks will need to make some changes, unless your set of IotMs is 
 - Beach Comb beachhead buffs would save turns in a variety of places.
 - Any alternative way to get to 60 adventures to coil wire on turn 0 would help; you could use Borrowed Time from the Tome of Clip Art, for example. That would free up 4 stomach from the current route and enable you to fit in two more pizzas.
 
-The script is fine to run twice; if it breaks somewhere, fix it manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this is not at the same quality level as autoscend. It may very well mess up spectacularly;. You have been warned.
+The script is fine to run twice; if it breaks somewhere, fix the problem manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this code is not at the same quality level as autoscend. It may very well mess up spectacularly, and it has done so at times in my runs. You have been warned.
 
 To install:
 `svn checkout https://github.com/phulin/bean-hccs/branches/master`
@@ -44,6 +44,7 @@ abort
 ```
 
 The script follows this rough plan (list skips some steps):
+- Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the statuette if you want to save a turn.
 - Eat 4 This Charming Flan to get enough adventures to coil wire.
 - TEST: Coil Wire (60 turns).
 - Get available XP buffs: Synthesis, Inscrutable Gaze. Make meatcar and tune moon to Blender for simple candy at Gno-Mart.
