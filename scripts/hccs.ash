@@ -1010,6 +1010,107 @@ if (!test_done(TEST_MOX)) {
     do_test(TEST_MOX);
 }
 
+if (!test_done(TEST_ITEM)) {
+    ensure_mp_sausage(500);
+
+    if (item_amount($item[cyclops eyedrops]) == 0 && have_effect($effect[One Very Clear Eye]) == 0) {
+        cli_execute('pillkeeper semirare');
+        if (get_property_int('semirareCounter') != 0) {
+            error('Semirare should be now. Something went wrong.');
+        }
+        cli_execute('mood apathetic');
+        cli_execute('counters nowarn Fortune Cookie');
+        adv1($location[The Limerick Dungeon], -1, '');
+    }
+
+    if (my_inebriety() != 5) {
+        error('Too drunk. Something went wrong.');
+    }
+
+    try_use(1, $item[astral six-pack]);
+    while (item_amount($item[astral pilsner]) > 0) {
+        ensure_ode(1);
+        drink(1, $item[astral pilsner]);
+    }
+
+    // Make A Light that Never Goes Out
+    if (item_amount($item[A Light That Never Goes Out]) == 0) {
+        ensure_item(1, $item[third-hand lantern]);
+        ensure_item(1, $item[tenderizing hammer]);
+        create(1, $item[A Light That Never Goes Out]);
+    }
+
+    if (item_amount($item[Vicar's Tutu]) == 0) {
+        ensure_item(1, $item[frilly skirt]);
+        ensure_item(1, $item[tenderizing hammer]);
+        create(1, $item[Vicar's Tutu]);
+    }
+
+    if (!get_property_boolean('_clanFortuneBuffUsed')) {
+        ensure_effect($effect[There's No N In Love]);
+    }
+
+    ensure_effect($effect[Fat Leon's Phat Loot Lyric]);
+    ensure_effect($effect[Singer's Faithful Ocelot]);
+    ensure_effect($effect[The Spirit of Taking]);
+
+    effect[int] subsequent;
+    synthesis_plan($effect[Synthesis: Collection], subsequent);
+
+    // Use cyclops eyedrops.
+    ensure_effect($effect[One Very Clear Eye]);
+    // Use bag of grain.
+    ensure_effect($effect[Nearly All-Natural]);
+    ensure_effect($effect[Steely-Eyed Squint]);
+
+    if (have_effect($effect[Certainty]) == 0) {
+        use_familiar($familiar[Rock Lobster]);
+        if (item_amount($item[blood-faced volleyball]) == 0) {
+            ensure_hermit_item(1, $item[volleyball]);
+            ensure_hermit_item(1, $item[seal tooth]);
+            use(1, $item[seal tooth]);
+            use(1, $item[volleyball]);
+        }
+        pizza_effect(
+            $effect[Certainty],
+            $item[clove-flavored lip balm],
+            $item[ectoplasm <i>au jus</i>],
+            item_priority($item[ravioli hat], $item[red pixel], $item[ratty knitted cap]),
+            $item[blood-faced volleyball] // get extra-strength rubber bands
+        );
+    }
+
+    if (have_effect($effect[Infernal Thirst]) == 0) {
+        use_familiar($familiar[Cornbeefadon]);
+        if (item_amount($item[Irish Coffee, English Heart]) == 0) {
+            if (item_amount($item[handful of Smithereens]) == 0) {
+                ensure_item(1, $item[third-hand lantern]);
+                ensure_item(1, $item[tenderizing hammer]);
+                create(1, $item[A Light that Never Goes Out]);
+                cli_execute('smash 1 A Light That Never Goes Out');
+            }
+            ensure_item(1, $item[cup of lukewarm tea]);
+            create(1, $item[Irish Coffee, English Heart]);
+        }
+        pizza_effect(
+            $effect[Infernal Thirst],
+            $item[Irish Coffee, English Heart],
+            item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
+            $item[Flaskfull of Hollow],
+            $item[extra-strength rubber bands] // get amulet coin
+        );
+    }
+
+    maximize('item, 2 booze drop, equip Vicar\'s Tutu, -equip broken champagne bottle', false);
+
+    abort('CHECK item');
+    do_test(TEST_ITEM);
+
+    if (item_amount($item[Vicar's Tutu]) > 0) {
+        cli_execute('smash 1 Vicar\'s Tutu');
+    }
+}
+
 if (!test_done(TEST_HOT_RES)) {
     ensure_mp_sausage(500);
 
@@ -1017,7 +1118,7 @@ if (!test_done(TEST_HOT_RES)) {
         if (my_meat() < 500) {
             error('Not enough meat. Please autosell stuff.');
         }
-        if (my_inebriety() > 3) {
+        if (my_inebriety() != 11) {
             error('Too drunk. Something is wrong.');
         }
         ensure_ode(2);
@@ -1114,117 +1215,13 @@ if (!test_done(TEST_HOT_RES)) {
     autosell(1, $item[heat-resistant gloves]);
 }
 
-if (!test_done(TEST_ITEM)) {
-    ensure_mp_sausage(500);
-
-    if (item_amount($item[cyclops eyedrops]) == 0 && have_effect($effect[One Very Clear Eye]) == 0) {
-        cli_execute('pillkeeper semirare');
-        if (get_property_int('semirareCounter') != 0) {
-            error('Semirare should be now. Something went wrong.');
-        }
-        cli_execute('mood apathetic');
-        cli_execute('counters Fortune Cookie nowarn');
-        adv1($location[The Limerick Dungeon], -1, '');
-    }
-
-    try_use(1, $item[astral six-pack]);
-    while (item_amount($item[astral pilsner]) > 0) {
-        ensure_ode(1);
-        drink(1, $item[astral pilsner]);
-    }
-
-    if (my_inebriety() != 13) {
-        error('Too drunk. Something went wrong.');
-    }
-
-    // Make A Light that Never Goes Out
-    if (item_amount($item[A Light That Never Goes Out]) == 0) {
-        ensure_item(1, $item[third-hand lantern]);
-        ensure_item(1, $item[tenderizing hammer]);
-        create(1, $item[A Light That Never Goes Out]);
-    }
-
-    if (item_amount($item[Vicar's Tutu]) == 0) {
-        ensure_item(1, $item[frilly skirt]);
-        ensure_item(1, $item[tenderizing hammer]);
-        create(1, $item[Vicar's Tutu]);
-    }
-
-    if (!get_property_boolean('_clanFortuneBuffUsed')) {
-        ensure_effect($effect[There's No N In Love]);
-    }
-
-    ensure_effect($effect[Fat Leon's Phat Loot Lyric]);
-    ensure_effect($effect[Singer's Faithful Ocelot]);
-    ensure_effect($effect[The Spirit of Taking]);
-
-    effect[int] subsequent;
-    synthesis_plan($effect[Synthesis: Collection], subsequent);
-
-    // This will fall through to familiar weight.
-    ensure_effect($effect[Billiards Belligerence]);
-
-    // Use cyclops eyedrops.
-    ensure_effect($effect[One Very Clear Eye]);
-    // Use bag of grain.
-    ensure_effect($effect[Nearly All-Natural]);
-    ensure_effect($effect[Steely-Eyed Squint]);
-
-    if (have_effect($effect[Certainty]) == 0) {
-        use_familiar($familiar[Rock Lobster]);
-        if (item_amount($item[blood-faced volleyball]) == 0) {
-            ensure_hermit_item(1, $item[volleyball]);
-            ensure_hermit_item(1, $item[seal tooth]);
-            use(1, $item[seal tooth]);
-            use(1, $item[volleyball]);
-        }
-        pizza_effect(
-            $effect[Certainty],
-            $item[clove-flavored lip balm],
-            $item[ectoplasm <i>au jus</i>],
-            item_priority($item[ravioli hat], $item[red pixel], $item[ratty knitted cap]),
-            $item[blood-faced volleyball] // get extra-strength rubber bands
-        );
-    }
-
-    if (have_effect($effect[Infernal Thirst]) == 0) {
-        use_familiar($familiar[Cornbeefadon]);
-        if (item_amount($item[Irish Coffee, English Heart]) == 0) {
-            if (item_amount($item[handful of Smithereens]) == 0) {
-                ensure_item(1, $item[third-hand lantern]);
-                ensure_item(1, $item[tenderizing hammer]);
-                create(1, $item[A Light that Never Goes Out]);
-                cli_execute('smash 1 A Light That Never Goes Out');
-            }
-            ensure_item(1, $item[cup of lukewarm tea]);
-            create(1, $item[Irish Coffee, English Heart]);
-        }
-        pizza_effect(
-            $effect[Infernal Thirst],
-            $item[Irish Coffee, English Heart],
-            item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
-            $item[Flaskfull of Hollow],
-            $item[extra-strength rubber bands] // get amulet coin
-        );
-    }
-
-    maximize('item, 2 booze drop, equip Vicar\'s Tutu, -equip broken champagne bottle', false);
-
-    abort('CHECK item');
-    do_test(TEST_ITEM);
-
-    if (item_amount($item[Vicar's Tutu]) > 0) {
-        cli_execute('smash 1 Vicar\'s Tutu');
-    }
-}
-
 if (!test_done(TEST_FAMILIAR)) {
-    // This one should fall through from the previous test.
+    // This one should have fallen through all the way from leveling.
     if (have_effect($effect[Fidoxene]) == 0) {
         cli_execute('pillkeeper familiar');
     }
 
-    // Pool buff. Should have fallen through from hot res.
+    // Pool buff.
     ensure_effect($effect[Billiards Belligerence]);
 
     if (my_hp() < 30) use_skill(1, $skill[Cannelloni Cocoon]);
@@ -1314,6 +1311,7 @@ if (!test_done(TEST_WEAPON)) {
         matcher m = create_matcher('alt="Painting of an? ([^(]*) .1."', chateau_text);
         if (m.find() && m.group(1) == 'ungulith') {
             cli_execute('mood apathetic');
+            set_hccs_combat_mode(MODE_SABER_YR);
             visit_url('place.php?whichplace=chateau&action=chateau_painting', false);
             run_combat();
             saber_yr();
