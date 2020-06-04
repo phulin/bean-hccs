@@ -42,6 +42,7 @@ void assert_meat(int meat) {
 }
 
 void ensure_item(int quantity, item it) {
+    if (have_equipped(it)) equip(it.to_slot(), $item[none]);
     if (item_amount(it) < quantity) {
         buy(quantity - item_amount(it), it);
     }
@@ -984,6 +985,7 @@ if (!test_done(TEST_MYS)) {
         }
     }
     do_test(TEST_MYS);
+    if (have_equipped($item[Saucepanic])) equip($item[Saucepanic].to_slot(), $item[none]);
     if (item_amount($item[Saucepanic]) > 0) {
         cli_execute('smash 1 Saucepanic');
     }
@@ -1023,11 +1025,11 @@ if (!test_done(TEST_ITEM)) {
         adv1($location[The Limerick Dungeon], -1, '');
     }
 
-    if (my_inebriety() != 5) {
+    try_use(1, $item[astral six-pack]);
+    if (item_amount($item[astral pilsner]) > 0 && my_inebriety() != 5) {
         error('Too drunk. Something went wrong.');
     }
 
-    try_use(1, $item[astral six-pack]);
     while (item_amount($item[astral pilsner]) > 0) {
         ensure_ode(1);
         drink(1, $item[astral pilsner]);
@@ -1081,7 +1083,7 @@ if (!test_done(TEST_ITEM)) {
     }
 
     if (have_effect($effect[Infernal Thirst]) == 0) {
-        use_familiar($familiar[Cornbeefadon]);
+        use_familiar($familiar[Exotic Parrot]);
         if (item_amount($item[Irish Coffee, English Heart]) == 0) {
             if (item_amount($item[handful of Smithereens]) == 0) {
                 ensure_item(1, $item[third-hand lantern]);
@@ -1097,13 +1099,12 @@ if (!test_done(TEST_ITEM)) {
             $item[Irish Coffee, English Heart],
             item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
             $item[Flaskfull of Hollow],
-            $item[extra-strength rubber bands] // get amulet coin
+            $item[extra-strength rubber bands] // get cracker
         );
     }
 
     maximize('item, 2 booze drop, equip Vicar\'s Tutu, -equip broken champagne bottle', false);
 
-    abort('CHECK item');
     do_test(TEST_ITEM);
 
     if (item_amount($item[Vicar's Tutu]) > 0) {
@@ -1149,10 +1150,13 @@ if (!test_done(TEST_HOT_RES)) {
     }
 
     use_familiar($familiar[Exotic Parrot]);
-    try_equip($item[amulet coin]);
+    try_equip($item[cracker]);
     ensure_effect($effect[Blood Bond]);
     ensure_effect($effect[Leash of Linguini]);
     ensure_effect($effect[Empathy]);
+
+    // Pool buff. This will fall through to fam weight.
+    ensure_effect($effect[Billiards Belligerence]);
 
     if (have_effect($effect[Rainbowolin]) == 0) {
         cli_execute('pillkeeper elemental');
@@ -1208,7 +1212,6 @@ if (!test_done(TEST_HOT_RES)) {
         error('Something went wrong building hot res.');
     }
 
-    abort('CHECK hot res');
     do_test(TEST_HOT_RES);
 
     autosell(1, $item[lava-proof pants]);
@@ -1337,6 +1340,7 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Song of the North]);
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Frenzied, Bloody]);
+    ensure_effect($effect[Scowl of the Auk]);
 
     // Hatter buff
     ensure_item(1, $item[goofily-plumed helmet]);
@@ -1388,29 +1392,6 @@ if (!test_done(TEST_SPELL)) {
     ensure_item(1, $item[obsidian nutcracker]);
 
     maximize('spell damage', false);
-
-    int turns = 60 - floor(numeric_modifier('spell damage') / 50 + 0.001) - floor(numeric_modifier('spell damage percent') / 50 + 0.001);
-    if (turns > my_adventures()) {
-        while (my_meat() > 111 * (get_property_int('_sausagesMade') + 1)) {
-            create(1, $item[magical sausage]);
-            eat(1, $item[magical sausage]);
-        }
-    }
-
-    if (turns > my_adventures() && my_fullness() + 2 <= fullness_limit()) {
-        if (item_amount($item[This Charming Flan]) == 0) {
-            if (item_amount($item[handful of smithereens]) == 0) {
-                cli_execute('smash A Light That Never Goes Out');
-            }
-            ensure_item(1, $item[pickled egg]);
-            create(1, $item[This Charming Flan]);
-        }
-        eat(1, $item[This Charming Flan]);
-    }
-
-    if (turns > my_adventures()) {
-        error('Not enough turns for last test. Autosell stuff for sausages, stooper, etc., or PVP and overdrink.');
-    }
 
     do_test(TEST_SPELL);
 }

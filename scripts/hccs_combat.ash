@@ -60,7 +60,7 @@ string m_submit(buffer macro) {
 }
 
 buffer m_step(buffer macro, string next) {
-    macro.append(";");
+    if (macro.length() > 0) macro.append(";");
     macro.append(next);
     return macro;
 }
@@ -198,7 +198,7 @@ void main(int initround, monster foe, string page) {
             use_skill(1, $skill[Use the Force]);
         } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "reflex hammer", loc)) {
             use_skill(1, $skill[Reflex Hammer]);
-        } else if (have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "snokebomb", loc)) {
+        } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "snokebomb", loc)) {
             use_skill(1, $skill[Snokebomb]);
         } else if (have_skill($skill[CHEAT CODE: Replace Enemy]) && get_property_int("_powerfulGloveBatteryPowerUsed") <= 80) {
             int original_battery = get_property_int("_powerfulGloveBatteryPowerUsed");
