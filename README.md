@@ -1,23 +1,22 @@
 This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann` on Discord) to do 1-day Hardcore Community Service runs as a Sauceror in the Wallaby moon sign.
-The script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary; if you are missing more than one or two of the leveling ones in particular (Prof/Kramco, NEP, Garbage Tote), the script will fail to level enough to cap the stat tests. That will very likely mean missing daycount. If you are missing Synth, you can compensate by wishing for Experimental Effect G-9 or New and Improved to replace the +Myst buff (depending on the day), and Different Way of Seeing Things to replace the XP buff. You can still make 1-day using that plan but it will be tight.
-Besides leveling, the Genie Bottle and Pizza Cube each save a ridiculous number of turns with wishes.
-Recent IotMs include Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, Garbage Tote, SongBoom, Moon Spoon, and Genie. It also assumes VIP lounge access, which is crucial.
-It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish or the fax to fight that guy. He saves 12 turns if you can get the weapon damage test to less than 28 turns. The fax is allocated to a factory worker, which saves 9 turns.
-For candy, the script assumes that you have access to Peppermint Garden and the Crimbo Candy Cookbook (it also gets the Stocking Mimic's bag of many confections, but this is only one piece). It will plan around other candy sources if you add code to harvest them.
-Finally, it assumes that you have access to essentially every CS-relevant perm. The big ones are the +HP% perms, as they allow you to avoid using a wish on the HP test. You will need Song of Starch (50%), Spirit of Ravioli (25%), and Abs of Tin (10%) at the very least, and you probably also need one or two of the 5% perms. If you don't have these perms yet, you will need to use a wish/pizza for Preemptive Medicine on the HP test. Bow-Legged Swagger and Steely-Eyed Squint are also crucial, as you would expect. And there are quite a few miscellaneous +item and +weapon damage perms; they all save turns, many of them several. Some unexpected skills help too: if you have Chateau, all the free rest skills save leveling turns.
-
-The current route uses Smith's Tome to make This Charming Flans to get to 60 advs to coil wire on turn 0; any other resource that uses 6 fullness or fewer would work.
-
-I expect most folks will need to make some changes, unless your set of IotMs is a strict superset of mine. This is supposed to be an outline that can get you to daycount with some work. IotMs that will save you substantial turns on top of what I have include:
-- Bastille will likely obviate the need to spend any turns leveling. Add it right after the +XP% buffs. It could replace Chateau, or it could get you to level 5 on turn 0 instead of turn 60 so that you could drink a perfect drink then to get to 60 adventures
-- Distant Woods is a great XP buff that should also help reduce leveling turns.
-- Beach Comb beachhead buffs would save turns in a variety of places.
-- Any alternative way to get to 60 adventures to coil wire on turn 0 would help; you could use Borrowed Time from the Tome of Clip Art, for example. That would free up 4 stomach from the current route and enable you to fit in two more pizzas.
-
-The script is fine to run twice; if it breaks somewhere, fix the problem manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this code is not at the same quality level as autoscend. It may very well mess up spectacularly, and it has done so at times in my runs. You have been warned.
 
 To install:
-`svn checkout https://github.com/phulin/bean-hccs/branches/master`
+`svn checkout https://github.com/phulin/bean-hccs/branches/master/KoLmafia`
+
+Notes:
+- The script assumes that you have Sweet Synthesis and a bunch of IotMs, but none of them are strictly necessary; if you are missing more than one or two of the leveling ones in particular (Prof/Kramco, NEP, Garbage Tote), the script will fail to level enough to cap the stat tests. That will very likely mean missing daycount. If you are missing Synth, you can compensate by wishing for Experimental Effect G-9 or New and Improved to replace the +Myst buff (depending on the day), and Different Way of Seeing Things to replace the XP buff. You can still make 1-day using that plan but it will be tight.
+- Besides leveling, the Genie Bottle and Pizza Cube each save a ridiculous number of turns with wishes.
+- Recent IotMs include Bastille, Glove, Pill Keeper, Pizza Cube, Professor, Saber, Kramco, NEP, Garbage Tote, SongBoom, Moon Spoon, and Genie. It also assumes VIP lounge access, which is crucial.
+- It assumes that you have painted Ungulith in Chateau Mantegna; if you don't have it, you can reallocate a wish or the fax to fight that guy. He saves 12 turns if you can get the weapon damage test to less than 28 turns. The fax is allocated to a factory worker, which saves 9 turns.
+- For candy, the script assumes that you have access to Peppermint Garden and the Crimbo Candy Cookbook (it also gets the Stocking Mimic's bag of many confections, but this is only one piece). It will plan around other candy sources if you add code to harvest them.
+- Finally, it assumes that you have access to essentially every CS-relevant perm. The big ones are the +HP% perms, as they allow you to avoid using a wish on the HP test. You will need Song of Starch (50%), Spirit of Ravioli (25%), and Abs of Tin (10%) at the very least, and you probably also need one or two of the 5% perms. If you don't have these perms yet, you will need to use a wish/pizza for Preemptive Medicine on the HP test. Bow-Legged Swagger and Steely-Eyed Squint are also crucial, as you would expect. And there are quite a few miscellaneous +item and +weapon damage perms; they all save turns, many of them several. Some unexpected skills help too: if you have Chateau, all the free rest skills save leveling turns.
+
+I expect most folks will need to make some changes, unless your set of IotMs is a strict superset of mine. This is supposed to be an outline that can get you to daycount with some work. IotMs that will save you substantial turns on top of what I have include:
+- Distant Woods is a great XP buff that should also help reduce leveling turns.
+- Beach Comb beachhead buffs would save turns in a variety of places.
+- Any alternative way to get to 60 adventures to coil wire on turn 0 would help; you could use Borrowed Time from the Tome of Clip Art, for example. That would free up 4 stomach from the current route and enable you to fit in two more pizzas. The current route uses Bastille and the Pizza Cube to make an adventure/spleen pizza to hit level 5. It then drinks a perfect drink.
+
+The script is fine to run twice; if it breaks somewhere, fix the problem manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this code is not at the same quality level as autoscend. It may very well mess up spectacularly, and it has done so at times in my runs. You have been warned.
 
 You'll need to set up CCS and moods named "hccs" (for most leveling combats) and "hccs-early" (for early leveling, before you have much MP).
 hccs CCS:
@@ -45,7 +44,9 @@ abort
 
 The script follows this rough plan (list skips some steps):
 - Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the statuette if you want to save a turn.
-- Eat 4 This Charming Flan to get enough adventures to coil wire.
+- Cast inscrutable gaze and use Bastille.
+- Make a medicinal pizza with any spleen item and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
+- Cast Prevent Scurvy and Perfect Freeze; drink a perfect dark and stormy.
 - TEST: Coil Wire (60 turns).
 - Get available XP buffs: Synthesis, Inscrutable Gaze. Make meatcar and tune moon to Blender for simple candy at Gno-Mart.
 - Pizza for DIFferent Way of Seeing Things (+50% Mys XP). Get a Prof chip.
@@ -90,7 +91,8 @@ The script follows this rough plan (list skips some steps):
 - Smash stuff for twinkly nuggets.
 - Buy goofily-plumed helmet and get Weapon of Mass Destruction from the Hatter.
 - Use a punching potion if you got one while leveling.
-- Wish for Outer Wolf.
+- Pizza for OUter Wolf (e.g. ointment of the occult/unremarkable duffel/whatever).
+- Wish for Pyramid Power.
 - Cast bow-legged swagger.
 - TEST: Reduce Gazelle Population (Weapon Damage, 21 turns).
 - Cast Simmer (1 turn).
