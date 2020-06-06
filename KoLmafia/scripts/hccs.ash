@@ -430,6 +430,7 @@ equip($item[Kramco Sausage-o-Matic&trade;]);
 equip($item[old sweatpants]);
 equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
 equip($slot[acc2], $item[Powerful Glove]);
+equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
 if (!test_done(TEST_COIL_WIRE)) {
     // Ice house remaindered skeleton
@@ -465,8 +466,8 @@ if (!test_done(TEST_COIL_WIRE)) {
     ensure_item(1, $item[toy accordion]);
 
     ensure_effect($effect[The Magical Mojomuscular Melody]);
-    ensure_mp_tonic(2 * (3 - get_property_int('tomeSummons')));
-    use_skill(3 - get_property_int('tomeSummons'), $skill[Summon Smithsness]);
+    ensure_mp_tonic(2 * (2 - get_property_int('tomeSummons')));
+    use_skill(2 - get_property_int('tomeSummons'), $skill[Summon Smithsness]);
 
     if (have_effect($effect[Inscrutable Gaze]) == 0) {
         ensure_mp_tonic(10);
@@ -475,6 +476,18 @@ if (!test_done(TEST_COIL_WIRE)) {
 
     // Depends on Ez's Bastille script.
     cli_execute('bastille myst');
+
+    // Find a spleen item in the Barrels.
+    foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
+        // Smash the barrel.
+        string page_text = visit_url(`choice.php?whichchoice=1099&option=1&slot={barrel}`);
+        if (page_text.contains_text('Combat!')) {
+            set_hccs_combat_mode(MODE_RUN_UNLESS_FREE);
+            run_combat();
+            set_hccs_combat_mode(MODE_NULL);
+        }
+        if (item_amount($item[magicalness-in-a-can]) + item_amount($item[strongness elixir]) > 0) break;
+    }
 
     if (my_fullness() < 3) {
         int count = 3 - item_amount($item[cog and sprocket assembly]);
@@ -487,7 +500,7 @@ if (!test_done(TEST_COIL_WIRE)) {
             $item[cog and sprocket assembly],
             $item[cog and sprocket assembly],
             $item[cog and sprocket assembly],
-            $item[handful of Smithereens]
+            item_priority($item[magicalness-in-a-can], $item[strongness elixir], $item[moxie weed]),
         );
     }
 
@@ -624,6 +637,7 @@ if (!test_done(TEST_HP)) {
         equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
         // Get a frilly skirt for later
         ensure_item(1, $item[frilly skirt]);
+        create(1, $item[Vicar's Tutu]);
         // Actually tune the moon.
         visit_url('inv_use.php?whichitem=10254&doit=96&whichsign=8');
     }
@@ -1050,12 +1064,8 @@ if (!test_done(TEST_ITEM)) {
         create(1, $item[A Light That Never Goes Out]);
     }
 
-    if (item_amount($item[Vicar's Tutu]) == 0) {
-        ensure_item(1, $item[lump of Brituminous coal]);
-        ensure_item(1, $item[frilly skirt]);
-        ensure_item(1, $item[tenderizing hammer]);
-        create(1, $item[Vicar's Tutu]);
-    }
+    // Should have a frilly skirt from tuning code above.
+    ensure_create_item(1, $item[Vicar's Tutu]);
 
     if (!get_property_boolean('_clanFortuneBuffUsed')) {
         ensure_effect($effect[There's No N In Love]);
@@ -1094,12 +1104,6 @@ if (!test_done(TEST_ITEM)) {
     if (have_effect($effect[Infernal Thirst]) == 0) {
         use_familiar($familiar[Exotic Parrot]);
         if (item_amount($item[Irish Coffee, English Heart]) == 0) {
-            if (item_amount($item[handful of Smithereens]) == 0) {
-                ensure_item(1, $item[third-hand lantern]);
-                ensure_item(1, $item[tenderizing hammer]);
-                create(1, $item[A Light that Never Goes Out]);
-                cli_execute('smash 1 A Light That Never Goes Out');
-            }
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
@@ -1417,9 +1421,14 @@ if (!test_done(TEST_SPELL)) {
     // Pool buff
     ensure_effect($effect[Mental A-cue-ity]);
 
-    ensure_item(1, $item[obsidian nutcracker]);
+    ensure_item(2, $item[obsidian nutcracker]);
+
+    use_skill(1, $skill[Summon Sugar Sheets]);
+    cli_execute('fold sugar chapeau');
 
     maximize('spell damage', false);
+
+    error('CHECK spell damage');
 
     do_test(TEST_SPELL);
 }

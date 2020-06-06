@@ -256,13 +256,14 @@ void main(int initround, monster foe, string page) {
                 .m_skill($skill[Curse of Weaksauce])
                 .m_skill($skill[Saucegeyser])
                 .m_repeat_submit();
-        } else if (get_property_int("_banderRunaways") < my_familiar_weight() / 5) {
+        } else if (my_familiar() == $familiar[Frumious Bandersnatch]
+                && get_property_int("_banderRunaways") < my_familiar_weight() / 5) {
             runaway();
             set_property_int("_banderRunaways", get_property_int("_banderRunaways") + 1);
-        } else if (have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3) {
-            use_skill(1, $skill[Snokebomb]);
         } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3) {
             use_skill(1, $skill[Reflex Hammer]);
+        } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3) {
+            use_skill(1, $skill[Snokebomb]);
         } else {
             abort("Something went wrong.");
         }
