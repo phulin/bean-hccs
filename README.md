@@ -1,4 +1,4 @@
-This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann` on Discord) to do 1-day Hardcore Community Service runs as a Sauceror in the Wallaby moon sign.
+This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Hardcore Community Service runs as a Sauceror in the Wallaby moon sign.
 
 To install:
 `svn checkout https://github.com/phulin/bean-hccs/branches/master/KoLmafia`
@@ -14,13 +14,13 @@ Notes:
 I expect most folks will need to make some changes, unless your set of IotMs is a strict superset of mine. This is supposed to be an outline that can get you to daycount with some work. IotMs that will save you substantial turns on top of what I have include:
 - Distant Woods is a great XP buff that should also help reduce leveling turns.
 - Beach Comb beachhead buffs would save turns in a variety of places.
-- Any alternative way to get to 60 adventures to coil wire on turn 0 would help; you could use Borrowed Time from the Tome of Clip Art, for example. That would free up 4 stomach from the current route and enable you to fit in two more pizzas. The current route uses Bastille and the Pizza Cube to make an adventure/spleen pizza to hit level 5. It then drinks a perfect drink.
+- Any alternative way to get to 60 adventures to coil wire on turn 0 would help; you could use Borrowed Time from the Tome of Clip Art, for example. That would free up 3 stomach from the current route and enable you to fit in another pizza. The current route uses Bastille and the Pizza Cube to make an adventure/spleen pizza to hit level 5. It then drinks a perfect drink.
 
 The script is fine to run twice; if it breaks somewhere, fix the problem manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this code is not at the same quality level as autoscend. It may very well mess up spectacularly, and it has done so at times in my runs. You have been warned.
 
 You'll need to set up a mood named "hccs" with whatever you have (+ML, +stats, +mainstat) for leveling combats.
 
-The script follows this rough plan (list skips some steps):
+The script follows this rough plan (list skips many steps):
 - Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the astral mask if you want to save one and a third turns on the item test and you aren't capping that test already.
 - Cast inscrutable gaze and use Bastille.
 - Make a medicinal pizza with any spleen item (barrels) and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
