@@ -18,7 +18,7 @@ int TEST_HOT_RES = 10;
 int TEST_COIL_WIRE = 11;
 
 boolean try_use(int quantity, item it) {
-    if (item_amount(it) > 0) {
+    if (available_amount(it) > 0) {
         return use(quantity, it);
     } else {
         return false;
@@ -26,11 +26,11 @@ boolean try_use(int quantity, item it) {
 }
 
 boolean use_all(item it) {
-    return use(item_amount(it), it);
+    return use(available_amount(it), it);
 }
 
 boolean try_equip(item it) {
-    if (item_amount(it) > 0) {
+    if (available_amount(it) > 0) {
         return equip(it);
     } else {
         return false;
@@ -43,7 +43,7 @@ void assert_meat(int meat) {
 
 void ensure_item(int quantity, item it) {
     if (available_amount(it) < quantity) {
-        buy(quantity - item_amount(it), it);
+        buy(quantity - available_amount(it), it);
     }
     if (available_amount(it) < quantity) {
         error('Could not buy item' + it.name + '.');
@@ -52,7 +52,7 @@ void ensure_item(int quantity, item it) {
 
 void ensure_create_item(int quantity, item it) {
     if (available_amount(it) < quantity) {
-        create(quantity - item_amount(it), it);
+        create(quantity - available_amount(it), it);
     }
     if (available_amount(it) < quantity) {
         error('Could not create item.');
@@ -93,7 +93,7 @@ void ensure_npc_effect(effect ef, int quantity, item potion) {
 
 void ensure_potion_effect(effect ef, item potion) {
     if (have_effect(ef) == 0) {
-        if (item_amount(potion) == 0) {
+        if (available_amount(potion) == 0) {
             create(1, potion);
         }
         if (!cli_execute(ef.default) || have_effect(ef) == 0) {
@@ -127,28 +127,28 @@ void wish_effect(effect ef) {
 }
 
 item item_priority(item it1, item it2) {
-    if (item_amount(it1) > 0) return it1;
+    if (available_amount(it1) > 0) return it1;
     else return it2;
 }
 
 item item_priority(item it1, item it2, item it3) {
-    if (item_amount(it1) > 0) return it1;
-    else if (item_amount(it2) > 0) return it2;
+    if (available_amount(it1) > 0) return it1;
+    else if (available_amount(it2) > 0) return it2;
     else return it3;
 }
 
 item item_priority(item it1, item it2, item it3, item it4) {
-    if (item_amount(it1) > 0) return it1;
-    else if (item_amount(it2) > 0) return it2;
-    else if (item_amount(it3) > 0) return it3;
+    if (available_amount(it1) > 0) return it1;
+    else if (available_amount(it2) > 0) return it2;
+    else if (available_amount(it3) > 0) return it3;
     else return it4;
 }
 
 void eat_pizza(item it1, item it2, item it3, item it4) {
-    if (item_amount($item[diabolic pizza]) > 0) {
+    if (available_amount($item[diabolic pizza]) > 0) {
         error('Already have a pizza.');
     }
-    if (item_amount(it1) == 0 || item_amount(it2) == 0 || item_amount(it3) == 0 || item_amount(it4) == 0) {
+    if (available_amount(it1) == 0 || available_amount(it2) == 0 || available_amount(it3) == 0 || available_amount(it4) == 0) {
         error('Missing items for pizza.');
     }
     visit_url('campground.php?action=makepizza&pizza=' + it1.to_int() + ',' + it2.to_int() + ',' + it3.to_int() + ',' + it4.to_int());
@@ -372,8 +372,8 @@ void ensure_ode(int turns) {
 
 boolean summon_bricko_oyster() {
     if (get_property_int('_brickoFights') >= 3) return false;
-    if (item_amount($item[BRICKO oyster]) > 0) return true;
-    while (get_property_int('libramSummons') < 10 && (item_amount($item[BRICKO eye brick]) < 1 || item_amount($item[BRICKO brick]) < 8)) {
+    if (available_amount($item[BRICKO oyster]) > 0) return true;
+    while (get_property_int('libramSummons') < 10 && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
         use_skill(1, $skill[Summon BRICKOs]);
     }
     return use(8, $item[BRICKO brick]);
@@ -478,7 +478,7 @@ if (!test_done(TEST_COIL_WIRE)) {
 
     // Find a spleen item in the Barrels.
     foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
-        if (item_amount($item[magicalness-in-a-can]) + item_amount($item[strongness elixir]) > 0) break;
+        if (available_amount($item[magicalness-in-a-can]) + available_amount($item[strongness elixir]) > 0) break;
 
         // Smash the barrel.
         visit_url('barrels.php');
@@ -491,7 +491,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     }
 
     if (my_fullness() < 3) {
-        int count = 3 - item_amount($item[cog and sprocket assembly]);
+        int count = 3 - available_amount($item[cog and sprocket assembly]);
         ensure_item(count, $item[cog]);
         ensure_item(count, $item[sprocket]);
         ensure_item(count, $item[spring]);
@@ -506,11 +506,11 @@ if (!test_done(TEST_COIL_WIRE)) {
     }
 
     if (my_inebriety() < 3) {
-        if (item_amount($item[bottle of rum]) == 0) {
+        if (available_amount($item[bottle of rum]) == 0) {
             ensure_mp_tonic(50);
             use_skill(1, $skill[Prevent Scurvy and Sobriety]);
         }
-        if (item_amount($item[perfect ice cube]) == 0) {
+        if (available_amount($item[perfect ice cube]) == 0) {
             ensure_mp_tonic(10);
             use_skill(1, $skill[Perfect Freeze]);
         }
@@ -545,17 +545,17 @@ if (my_turncount() < 60) error('Something went wrong coiling wire.');
 
 if (!test_done(TEST_HP)) {
     if (have_effect($effect[Different Way of Seeing Things]) == 0) {
-        if (item_amount($item[dripping meat crossbow]) == 0) {
+        if (available_amount($item[dripping meat crossbow]) == 0) {
             // ensure_item(1, $item[tenderizing hammer]);
             ensure_item(1, $item[crossbow string]);
-            if (item_amount($item[meat stack]) == 0) {
+            if (available_amount($item[meat stack]) == 0) {
                 create(1, $item[meat stack]);
             }
             ensure_hermit_item(1, $item[catsup]);
             create(1, $item[dripping meat crossbow]);
         }
-        if (item_amount($item[Irish Coffee, English Heart]) == 0) {
-            /*if (item_amount($item[handful of Smithereens]) == 0) {
+        if (available_amount($item[Irish Coffee, English Heart]) == 0) {
+            /*if (available_amount($item[handful of Smithereens]) == 0) {
                 ensure_item(1, $item[third-hand lantern]);
                 // ensure_item(1, $item[tenderizing hammer]);
                 create(1, $item[A Light that Never Goes Out]);
@@ -564,7 +564,7 @@ if (!test_done(TEST_HP)) {
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
-        if (item_amount($item[blood-faced volleyball]) == 0) {
+        if (available_amount($item[blood-faced volleyball]) == 0) {
             ensure_hermit_item(1, $item[volleyball]);
             ensure_hermit_item(1, $item[seal tooth]);
             use(1, $item[seal tooth]);
@@ -601,7 +601,7 @@ if (!test_done(TEST_HP)) {
     item love_potion = $item[Love Potion #0];
     effect love_effect = $effect[Tainted Love Potion];
     if (have_effect(love_effect) == 0) {
-        if (item_amount(love_potion) == 0) {
+        if (available_amount(love_potion) == 0) {
             use_skill(1, $skill[Love Mixology]);
         }
         visit_url('desc_effect.php?whicheffect=' + love_effect.descid);
@@ -620,7 +620,7 @@ if (!test_done(TEST_HP)) {
     ensure_effect($effect[Thaumodynamic]);
 
     // Get beach access.
-    if (item_amount($item[bitchin' meatcar]) == 0) {
+    if (available_amount($item[bitchin' meatcar]) == 0) {
         ensure_item(1, $item[cog]);
         ensure_item(1, $item[sprocket]);
         ensure_item(1, $item[spring]);
@@ -657,7 +657,7 @@ if (!test_done(TEST_HP)) {
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
     while (summon_bricko_oyster()) {
-        if (item_amount($item[bag of many confections]) == 0) {
+        if (available_amount($item[bag of many confections]) == 0) {
             // Use one of these fights to get a bag of many confections.
             use_familiar($familiar[Stocking Mimic]);
             equip($slot[familiar], $item[none]);
@@ -741,7 +741,7 @@ if (!test_done(TEST_HP)) {
     equip($slot[off-hand], $item[none]);
 
     // Tomato in pantry (Saber YR)
-    if (item_amount($item[tomato juice of powerful power]) == 0 && item_amount($item[tomato]) == 0 && have_effect($effect[Tomato Power]) == 0) {
+    if (available_amount($item[tomato juice of powerful power]) == 0 && available_amount($item[tomato]) == 0 && have_effect($effect[Tomato Power]) == 0) {
         cli_execute('mood apathetic');
 
         ensure_effect($effect[Musk of the Moose]);
@@ -752,8 +752,8 @@ if (!test_done(TEST_HP)) {
     }
 
     // Fruits in skeleton store (Saber YR)
-    if ((item_amount($item[ointment of the occult]) == 0 && item_amount($item[grapefruit]) == 0 && have_effect($effect[Mystically Oiled]) == 0)
-            || (item_amount($item[oil of expertise]) == 0 && item_amount($item[cherry]) == 0 && have_effect($effect[Expert Oiliness]) == 0)) {
+    if ((available_amount($item[ointment of the occult]) == 0 && available_amount($item[grapefruit]) == 0 && have_effect($effect[Mystically Oiled]) == 0)
+            || (available_amount($item[oil of expertise]) == 0 && available_amount($item[cherry]) == 0 && have_effect($effect[Expert Oiliness]) == 0)) {
         cli_execute('mood apathetic');
 
         if (get_property('questM23Meatsmith') == 'unstarted') {
@@ -1027,7 +1027,7 @@ if (!test_done(TEST_MOX)) {
     ensure_effect($effect[Quiet Desperation]);
     ensure_effect($effect[Tomato Power]);
     ensure_npc_effect($effect[Butt-Rock Hair], 5, $item[hair spray]);
-    use(item_amount($item[rhinestone]), $item[rhinestone]);
+    use(available_amount($item[rhinestone]), $item[rhinestone]);
     if (have_effect($effect[Unrunnable Face]) == 0) {
         try_use(1, $item[runproof mascara]);
     }
@@ -1041,7 +1041,7 @@ if (!test_done(TEST_MOX)) {
 if (!test_done(TEST_ITEM)) {
     ensure_mp_sausage(500);
 
-    if (item_amount($item[cyclops eyedrops]) == 0 && have_effect($effect[One Very Clear Eye]) == 0) {
+    if (available_amount($item[cyclops eyedrops]) == 0 && have_effect($effect[One Very Clear Eye]) == 0) {
         cli_execute('pillkeeper semirare');
         if (get_property_int('semirareCounter') != 0) {
             error('Semirare should be now. Something went wrong.');
@@ -1052,17 +1052,17 @@ if (!test_done(TEST_ITEM)) {
     }
 
     try_use(1, $item[astral six-pack]);
-    if (item_amount($item[astral pilsner]) > 0 && my_inebriety() != 5) {
+    if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 5) {
         error('Too drunk. Something went wrong.');
     }
 
-    while (item_amount($item[astral pilsner]) > 0) {
+    while (available_amount($item[astral pilsner]) > 0) {
         ensure_ode(1);
         drink(1, $item[astral pilsner]);
     }
 
     // Make A Light that Never Goes Out
-    if (item_amount($item[A Light That Never Goes Out]) == 0) {
+    if (available_amount($item[A Light That Never Goes Out]) == 0) {
         ensure_item(1, $item[lump of Brituminous coal]);
         ensure_item(1, $item[third-hand lantern]);
         ensure_item(1, $item[tenderizing hammer]);
@@ -1091,7 +1091,7 @@ if (!test_done(TEST_ITEM)) {
 
     if (have_effect($effect[Certainty]) == 0) {
         use_familiar($familiar[Rock Lobster]);
-        if (item_amount($item[blood-faced volleyball]) == 0) {
+        if (available_amount($item[blood-faced volleyball]) == 0) {
             ensure_hermit_item(1, $item[volleyball]);
             ensure_hermit_item(1, $item[seal tooth]);
             use(1, $item[seal tooth]);
@@ -1108,7 +1108,7 @@ if (!test_done(TEST_ITEM)) {
 
     if (have_effect($effect[Infernal Thirst]) == 0) {
         use_familiar($familiar[Exotic Parrot]);
-        if (item_amount($item[Irish Coffee, English Heart]) == 0) {
+        if (available_amount($item[Irish Coffee, English Heart]) == 0) {
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
@@ -1125,7 +1125,7 @@ if (!test_done(TEST_ITEM)) {
 
     do_test(TEST_ITEM);
 
-    if (item_amount($item[Vicar's Tutu]) > 0) {
+    if (available_amount($item[Vicar's Tutu]) > 0) {
         cli_execute('smash 1 Vicar\'s Tutu');
     }
 }
@@ -1149,8 +1149,8 @@ if (!test_done(TEST_HOT_RES)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
-    if (item_amount($item[heat-resistant gloves]) == 0) {
-        if (item_amount($item[photocopied monster]) == 0) {
+    if (available_amount($item[heat-resistant gloves]) == 0) {
+        if (available_amount($item[photocopied monster]) == 0) {
             cli_execute('faxbot factory worker');
         }
         cli_execute('mood apathetic');
@@ -1186,15 +1186,15 @@ if (!test_done(TEST_HOT_RES)) {
     autosell(10, $item[hot nuggets]);
     autosell(10, $item[twinkly powder]);
 
-    if (item_amount($item[hot powder]) > 0) {
+    if (available_amount($item[hot powder]) > 0) {
         ensure_effect($effect[Flame-Retardant Trousers]);
     }
 
-    if (item_amount($item[sleaze nuggets]) > 0 || item_amount($item[lotion of sleaziness]) > 0) {
+    if (available_amount($item[sleaze nuggets]) > 0 || available_amount($item[lotion of sleaziness]) > 0) {
         ensure_potion_effect($effect[Sleazy Hands], $item[lotion of sleaziness]);
     }
 
-    if (get_property_int('_genieWishesUsed') < 3 || item_amount($item[pocket wish]) > 0) {
+    if (get_property_int('_genieWishesUsed') < 3 || available_amount($item[pocket wish]) > 0) {
         wish_effect($effect[Fireproof Lips]);
     }
 
@@ -1279,20 +1279,20 @@ if (!test_done(TEST_NONCOMBAT)) {
     ensure_effect($effect[A Rose by Any Other Material]);
 
     /*if (have_effect($effect[Disquiet Riot]) == 0) {
-        if (item_amount($item[dripping meat crossbow]) == 0) {
+        if (available_amount($item[dripping meat crossbow]) == 0) {
             ensure_item(1, $item[crossbow string]);
-            if (item_amount($item[meat stack]) == 0) {
+            if (available_amount($item[meat stack]) == 0) {
                 create(1, $item[meat stack]);
             }
             ensure_hermit_item(1, $item[catsup]);
             create(1, $item[dripping meat crossbow]);
         }
-        if (item_amount($item[Irish Coffee, English Heart]) == 0) {
-            if (item_amount($item[handful of Smithereens]) == 0) {
+        if (available_amount($item[Irish Coffee, English Heart]) == 0) {
+            if (available_amount($item[handful of Smithereens]) == 0) {
                 if (get_property_int('tomeSummons') < 3) {
                     use_skill(3 - get_property_int('tomeSummons'), $skill[Summon Smithsness]);
                 }
-                if (item_amount($item[A Light That Never Goes Out]) == 0 && item_amount($item[lump of Brituminous coal]) > 0) {
+                if (available_amount($item[A Light That Never Goes Out]) == 0 && available_amount($item[lump of Brituminous coal]) > 0) {
                     ensure_item(1, $item[third-hand lantern]);
                     ensure_item(1, $item[tenderizing hammer]);
                     create(1, $item[A Light that Never Goes Out]);
@@ -1302,7 +1302,7 @@ if (!test_done(TEST_NONCOMBAT)) {
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
-        if (item_amount($item[shot of grapefruit schnapps]) == 0) {
+        if (available_amount($item[shot of grapefruit schnapps]) == 0) {
             ensure_item(1, $item[fermenting powder]);
             create(1, $item[shot of grapefruit schnapps]);
         }
@@ -1353,7 +1353,7 @@ if (!test_done(TEST_WEAPON)) {
         cli_execute('drink Sockdollager');
     }
 
-    if (item_amount($item[twinkly nuggets]) > 0) {
+    if (available_amount($item[twinkly nuggets]) > 0) {
         ensure_effect($effect[Twinkly Weapon]);
     }
 
@@ -1372,7 +1372,7 @@ if (!test_done(TEST_WEAPON)) {
     }
 
     // Boombox potion - did we get one?
-    if (item_amount($item[Punching Potion]) > 0) {
+    if (available_amount($item[Punching Potion]) > 0) {
         ensure_effect($effect[Feeling Punchy]);
     }
 
@@ -1385,8 +1385,8 @@ if (!test_done(TEST_WEAPON)) {
     ensure_npc_effect($effect[Engorged Weapon], 1, $item[Meleegra&trade; pills]);
 
     if (have_effect($effect[Outer Wolf&trade;]) == 0) {
-        use(item_amount($item[van key]), $item[van key]);
-        if (item_amount($item[unremarkable duffel bag]) == 0) {
+        use(available_amount($item[van key]), $item[van key]);
+        if (available_amount($item[unremarkable duffel bag]) == 0) {
             // get useless powder.
             ensure_item(1, $item[cool whip]);
             cli_execute('smash 1 cool whip');
