@@ -18,50 +18,27 @@ I expect most folks will need to make some changes, unless your set of IotMs is 
 
 The script is fine to run twice; if it breaks somewhere, fix the problem manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this code is not at the same quality level as autoscend. It may very well mess up spectacularly, and it has done so at times in my runs. You have been warned.
 
-You'll need to set up CCS and moods named "hccs" (for most leveling combats) and "hccs-early" (for early leveling, before you have much MP).
-hccs CCS:
-```
-[ default ]
-while (snarfblat 113 && !monstername "possessed can of tomatoes") || (snarfblat 439 && !monstername "novelty tropical skeleton")
-    skill cheat code: replace enemy
-endwhile
-if monstername "novelty tropical skeleton" || monstername "possessed can of tomatoes" || monstername "factory worker" || monstername "ungulith"
-    skill use the force
-endif
-skill sing along # only if you have SongBoom
-if monstername "BRICKO oyster" || monstername "sausage goblin" || snarfblat 528 # NEP
-    if monstername "BRICKO oyster"
-        skill otoscope
-    endif
-    if monstername “sausage goblin”
-        skill lecture on relativity
-    endif
-    skill curse of weaksauce
-    skill saucegeyser
-endif
-abort
-```
+You'll need to set up moods named "hccs" (for most leveling combats) and "hccs-early" (for early leveling, before you have much MP).
 
 The script follows this rough plan (list skips some steps):
-- Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the astral mask if you want to save one and a third turns.
+- Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the astral mask if you want to save one and a third turns on the item test and you aren't capping that test already.
 - Cast inscrutable gaze and use Bastille.
 - Make a medicinal pizza with any spleen item (barrels) and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
-- Cast Prevent Scurvy and Perfect Freeze; drink a perfect dark and stormy.
+- Cast Prevent Scurvy and Perfect Freeze; drink a perfect dark and stormy (3 drunk).
 - TEST: Coil Wire (60 turns).
-- Get available XP buffs: Synthesis, Inscrutable Gaze. Make meatcar and tune moon to Blender for simple candy at Gno-Mart.
+- Make meatcar (and any other Knoll stuff you might need, like full meat tanks) and tune moon to Blender for simple candy at Gno-Mart.
+- Get available XP buffs: Synthesis, Inscrutable Gaze.
 - Pizza for DIFferent Way of Seeing Things (+50% Mys XP). Get a Prof chip.
 - Fight 3 BRICKO oysters. (This step is not critical but the early meat is nice.)
 - Buff mainstat to high heavens: Bee's Knees, Synthesis, Pill Keeper, Triple Size (2 drunk).
 - Use Pill Keeper for familiar weight.
 - Fight 10 copied sausage goblins at NEP, which burns the delay on the NEP noncombat.
-- Get tomato and fruits from skeleton store using Saber YRs to avoid spending turns; make and use potions.
+- Get tomato and fruits from skeleton store using Saber YRs (or free kills if you don't need them to level) to avoid spending turns; make and use potions.
 - Take Hovering Sombrero.
-- Get +20% Mys XP buff at NEP.
+- Get +20% Mys XP buff at NEP (first encounter).
 - 9 free fights at NEP, plus 7 free kills (Chest X-Ray, Shattering Punch, Gingerbread Mob Hit).
 - Boost -combat and use all available free runs to find more sausage goblins at the Haiku Dungeon.
-- Set BoomBox to weapon damage.
-- Adventure using turns at NEP until our stats are high enough to cap (usually 3 turns or so).
-- Drink perfect drink (3 drunk).
+- Set BoomBox to weapon damage and adventure using turns at NEP until our stats are high enough to cap (I don't need to do this, but you might).
 - Use oil of expertise, boost muscle and HP.
 - TEST: Donate Blood (HP, 1 turn).
 - TEST: Feed The Children (But Not Too Much) (Muscle, 1 turn).
@@ -70,20 +47,19 @@ The script follows this rough plan (list skips some steps):
 - Use Pill Keeper semirare to get cyclops eyedrops. Optimal dog would also work.
 - Drink astral pilsners (6 drunk).
 - Get +item fortune boff and use synth. Use bag of grain.
-- Pizza for CERtainty and INFErnal Thirst. Get an amulet coin.
+- Take exotic parrot.
+- Pizza for CERtainty and INFErnal Thirst. Get a cracker for Parrot.
 - Cast Steely-Eyed Squint.
-- TEST: Make Margaritas (Item/Booze, 4 turns).
+- TEST: Make Margaritas (Item/Booze, 2 turns with astral mask).
 - Drink Ish Kabibble (2 drunk).
 - Fax and saber YR a factory worker (female) (Cheesefax always gives female if you ask for "factory worker").
 - Pill Keeper elemental res.
 - Smash any ratty knitted caps and red-hot sausage forks for hot powder and sleaze nuggets (for lotion of sleaziness).
 - Use pocket maze.
-- Take exotic parrot.
 - TEST: Clean Steam Tunnels (Hot Resistance, 5-8 turns).
 - Pill Keeper familiar weight buff should still be active.
-- TEST: Breed More Collies (Familiar Weight, 46 turns).
+- TEST: Breed More Collies (Familiar Weight, 44 turns).
 - Use squeaky toy rose, shady shades.
-- Get pool buff.
 - Wish for Disquiet Riet.
 - TEST: Be a Living Statue (Noncombat, 1 turn).
 - Fight painted ungulith, use saber YR.
@@ -94,13 +70,13 @@ The script follows this rough plan (list skips some steps):
 - Pizza for OUter Wolf (e.g. ointment of the occult/unremarkable duffel/whatever).
 - Wish for Pyramid Power.
 - Cast bow-legged swagger.
-- TEST: Reduce Gazelle Population (Weapon Damage, 21 turns).
+- TEST: Reduce Gazelle Population (Weapon Damage, 18 turns).
 - Cast Simmer (1 turn).
 - Buy 2 obsidian nutcrackers.
-- Cowrruption should still be active.
+- Cowrruption, In a Lather, and Pyramid Power should still be active.
 - Make a sugar chapeau.
 - If you need more turns, fill your stomach and eat magical sausages.
 - If that's not enough, use emergency margarita as your nightcap.
-- TEST: Make Sausage (Spell Damage, 42 turns).
+- TEST: Make Sausage (Spell Damage, 41 turns).
 
 The script is intended to be in the public domain. Please feel free to modify and distribute how you wish.
