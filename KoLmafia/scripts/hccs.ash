@@ -718,8 +718,6 @@ if (!test_done(TEST_HP)) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
     }
 
-    cli_execute('mood hccs-early');
-
     ensure_effect($effect[Song of Bravado]);
 
     if (get_property('boomBoxSong') != 'Total Eclipse of Your Meat') {
@@ -773,6 +771,8 @@ if (!test_done(TEST_HP)) {
     cli_execute('fold makeshift garbage shirt');
     equip($item[makeshift garbage shirt]);
 
+    cli_execute('mood hccs');
+
     // Professor 9x free sausage fight @ NEP
     if (get_property_int('_sausageFights') == 0) {
         use_familiar($familiar[Pocket Professor]);
@@ -780,8 +780,6 @@ if (!test_done(TEST_HP)) {
 
         equip($item[Kramco Sausage-o-Matic&trade;]);
         equip($slot[acc3], $item[hewn moon-rune spoon]);
-
-        cli_execute('mood hccs-early');
 
         while (get_property_int('_sausageFights') == 0) {
             if (my_hp() < .8 * my_maxhp()) {
