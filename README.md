@@ -45,7 +45,7 @@ abort
 The script follows this rough plan (list skips some steps):
 - Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the statuette if you want to save a turn.
 - Cast inscrutable gaze and use Bastille.
-- Make a medicinal pizza with any spleen item and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
+- Make a medicinal pizza with any spleen item (barrels) and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
 - Cast Prevent Scurvy and Perfect Freeze; drink a perfect dark and stormy.
 - TEST: Coil Wire (60 turns).
 - Get available XP buffs: Synthesis, Inscrutable Gaze. Make meatcar and tune moon to Blender for simple candy at Gno-Mart.
@@ -96,10 +96,11 @@ The script follows this rough plan (list skips some steps):
 - Cast bow-legged swagger.
 - TEST: Reduce Gazelle Population (Weapon Damage, 21 turns).
 - Cast Simmer (1 turn).
-- Buy obsidian nutcracker.
+- Buy 2 obsidian nutcrackers.
 - Cowrruption should still be active.
+- Make a sugar chapeau.
 - If you need more turns, fill your stomach and eat magical sausages.
 - If that's not enough, use emergency margarita as your nightcap.
-- TEST: Make Sausage (Spell Damage, 45 turns).
+- TEST: Make Sausage (Spell Damage, 42 turns).
 
 The script is intended to be in the public domain. Please feel free to modify and distribute how you wish.
