@@ -1,4 +1,4 @@
-This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Hardcore Community Service runs as a Sauceror in the Wallaby moon sign.
+This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Hardcore Community Service runs as a Sauceror in the Wallaby moon sign. I have used it successfully for a 1/180 run.
 
 To install:
 `svn checkout https://github.com/phulin/bean-hccs/branches/master/KoLmafia`
