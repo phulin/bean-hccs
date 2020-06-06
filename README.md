@@ -43,7 +43,7 @@ abort
 ```
 
 The script follows this rough plan (list skips some steps):
-- Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the statuette if you want to save a turn.
+- Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the astral mask if you want to save one and a third turns.
 - Cast inscrutable gaze and use Bastille.
 - Make a medicinal pizza with any spleen item (barrels) and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
 - Cast Prevent Scurvy and Perfect Freeze; drink a perfect dark and stormy.

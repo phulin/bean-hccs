@@ -42,38 +42,37 @@ void assert_meat(int meat) {
 }
 
 void ensure_item(int quantity, item it) {
-    if (have_equipped(it)) equip(it.to_slot(), $item[none]);
-    if (item_amount(it) < quantity) {
+    if (available_amount(it) < quantity) {
         buy(quantity - item_amount(it), it);
     }
-    if (item_amount(it) < quantity) {
+    if (available_amount(it) < quantity) {
         error('Could not buy item' + it.name + '.');
     }
 }
 
 void ensure_create_item(int quantity, item it) {
-    if (item_amount(it) < quantity) {
+    if (available_amount(it) < quantity) {
         create(quantity - item_amount(it), it);
     }
-    if (item_amount(it) < quantity) {
+    if (available_amount(it) < quantity) {
         error('Could not create item.');
     }
 }
 
 void ensure_sewer_item(int quantity, item it) {
-    int count = quantity - item_amount(it);
-    while (item_amount(it) < quantity) {
+    int count = quantity - available_amount(it);
+    while (available_amount(it) < quantity) {
         ensure_item(1, $item[chewing gum on a string]);
         use(1, $item[chewing gum on a string]);
     }
 }
 
 void ensure_hermit_item(int quantity, item it) {
-    if (item_amount(it) >= quantity) {
+    if (available_amount(it) >= quantity) {
         return;
     }
-    int count = quantity - item_amount(it);
-    while (item_amount($item[worthless trinket]) + item_amount($item[worthless gewgaw]) + item_amount($item[worthless knick-knack]) < count) {
+    int count = quantity - available_amount(it);
+    while (available_amount($item[worthless trinket]) + available_amount($item[worthless gewgaw]) + available_amount($item[worthless knick-knack]) < count) {
         ensure_item(1, $item[chewing gum on a string]);
         use(1, $item[chewing gum on a string]);
     }
@@ -479,14 +478,16 @@ if (!test_done(TEST_COIL_WIRE)) {
 
     // Find a spleen item in the Barrels.
     foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
+        if (item_amount($item[magicalness-in-a-can]) + item_amount($item[strongness elixir]) > 0) break;
+
         // Smash the barrel.
+        visit_url('barrels.php');
         string page_text = visit_url(`choice.php?whichchoice=1099&option=1&slot={barrel}`);
         if (page_text.contains_text('Combat!')) {
             set_hccs_combat_mode(MODE_RUN_UNLESS_FREE);
             run_combat();
             set_hccs_combat_mode(MODE_NULL);
         }
-        if (item_amount($item[magicalness-in-a-can]) + item_amount($item[strongness elixir]) > 0) break;
     }
 
     if (my_fullness() < 3) {
@@ -500,7 +501,7 @@ if (!test_done(TEST_COIL_WIRE)) {
             $item[cog and sprocket assembly],
             $item[cog and sprocket assembly],
             $item[cog and sprocket assembly],
-            item_priority($item[magicalness-in-a-can], $item[strongness elixir], $item[moxie weed]),
+            item_priority($item[magicalness-in-a-can], $item[strongness elixir], $item[moxie weed])
         );
     }
 
@@ -638,6 +639,10 @@ if (!test_done(TEST_HP)) {
         // Get a frilly skirt for later
         ensure_item(1, $item[frilly skirt]);
         create(1, $item[Vicar's Tutu]);
+        // Get a full meat tank for later
+        ensure_item(1, $item[empty meat tank]);
+        ensure_create_item(1, $item[meat stack]);
+        create(1, $item[full meat tank]);
         // Actually tune the moon.
         visit_url('inv_use.php?whichitem=10254&doit=96&whichsign=8');
     }
@@ -1111,7 +1116,7 @@ if (!test_done(TEST_ITEM)) {
             $effect[Infernal Thirst],
             $item[Irish Coffee, English Heart],
             item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
-            $item[Flaskfull of Hollow],
+            $item[full meat tank],
             $item[extra-strength rubber bands] // get cracker
         );
     }
