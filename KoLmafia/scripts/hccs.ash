@@ -474,7 +474,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     }
 
     // Depends on Ez's Bastille script.
-    cli_execute('bastille myst');
+    cli_execute('bastille myst brutalist');
 
     // Find a spleen item in the Barrels.
     foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
@@ -1430,8 +1430,6 @@ if (!test_done(TEST_SPELL)) {
     cli_execute('fold sugar chapeau');
 
     maximize('spell damage', false);
-
-    error('CHECK spell damage');
 
     do_test(TEST_SPELL);
 }
