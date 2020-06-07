@@ -909,7 +909,7 @@ if (!test_done(TEST_HP)) {
         }
 
         if (get_property_int('_neverendingPartyFreeTurns') < 10) {
-            adventure_kill($location[The Neverending Party]);
+            adventure_kill($location[The Neverending Party], $monster[burnout]);
         } else {
             adventure_free_kill($location[The Neverending Party]);
         }

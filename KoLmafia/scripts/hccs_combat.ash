@@ -187,11 +187,11 @@ boolean used_banisher_in_zone(monster[string] banished, string banisher, locatio
 void main(int initround, monster foe, string page) {
     string mode = get_hccs_combat_mode();
     location loc = my_location();
+    string monster_name = get_hccs_combat_arg1();
+    monster desired = monster_name.to_monster();
     if (mode == MODE_SABER_YR) {
         use_skill(1, $skill[Use the Force]);
     } else if (mode == MODE_FIND_MONSTER_SABER_YR) {
-        string monster_name = get_hccs_combat_arg1();
-        monster desired = monster_name.to_monster();
         monster[string] banished = banished_monsters();
         if (foe == desired) {
             set_property("_hccsCombatFound", "true");
@@ -211,22 +211,20 @@ void main(int initround, monster foe, string page) {
             // Hopefully at this point it comes back to the consult script.
         }
     } else if (mode == MODE_COPY) {
-        string monster_name = get_hccs_combat_arg1();
-        monster desired = monster_name.to_monster();
         if (foe != desired) {
             abort(`Ran into the wrong monster while trying to copy {desired.name}.`);
         }
         m_new()
-            .m_skill($skill[Sing Along])
             .m_skill($skill[Curse of Weaksauce])
+            .m_skill($skill[Sing Along])
             .m_skill($skill[Lecture on Relativity])
             .m_skill($skill[Saucegeyser])
             .m_repeat_submit();
     } else if (mode == MODE_FREE_KILL) {
         if (foe.attributes.contains_text("FREE")) {
             m_new()
-                .m_skill($skill[Sing Along])
                 .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Sing Along])
                 .m_skill($skill[Saucegeyser])
                 .m_repeat_submit();
         } else if (have_skill($skill[Chest X-Ray]) && get_property_int("_chestXRayUsed") < 3) {
@@ -237,23 +235,33 @@ void main(int initround, monster foe, string page) {
             use_skill(1, $skill[Gingerbread Mob Hit]);
         }
     } else if (mode == MODE_KILL) {
-        m_new()
-            .m_skill($skill[Sing Along])
-            .m_skill($skill[Curse of Weaksauce])
-            .m_skill($skill[Saucegeyser])
-            .m_repeat_submit();
+        if (foe == desired) {
+            m_new()
+                .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Sing Along])
+                .m_skill($skill[Transcendent Olfaction])
+                .m_skill($skill[Gallapagosian Mating Call])
+                .m_skill($skill[Saucegeyser])
+                .m_repeat_submit();
+        } else {
+            m_new()
+                .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Sing Along])
+                .m_skill($skill[Saucegeyser])
+                .m_repeat_submit();
+        }
     } else if (mode == MODE_OTOSCOPE) {
         m_new()
-            .m_skill($skill[Sing Along])
             .m_skill($skill[Curse of Weaksauce])
+            .m_skill($skill[Sing Along])
             .m_skill($skill[Otoscope])
             .m_skill($skill[Saucegeyser])
             .m_repeat_submit();
     } else if (mode == MODE_RUN_UNLESS_FREE) {
         if (foe.attributes.contains_text('FREE')) {
             m_new()
-                .m_skill($skill[Sing Along])
                 .m_skill($skill[Curse of Weaksauce])
+                .m_skill($skill[Sing Along])
                 .m_skill($skill[Saucegeyser])
                 .m_repeat_submit();
         } else if (my_familiar() == $familiar[Frumious Bandersnatch]
@@ -300,6 +308,12 @@ void adventure_copy(location loc, monster foe) {
 
 void adventure_kill(location loc) {
     set_hccs_combat_mode(MODE_KILL);
+    adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL);
+}
+
+void adventure_kill(location loc, monster foe) {
+    set_hccs_combat_mode(MODE_KILL, foe.name);
     adv1(loc, -1, "");
     set_hccs_combat_mode(MODE_NULL);
 }
