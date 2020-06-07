@@ -1322,11 +1322,11 @@ if (!test_done(TEST_NONCOMBAT)) {
 
     wish_effect($effect[Disquiet Riot]);
 
+    maximize('-combat, 0.01 familiar weight', false);
+
     if (round(numeric_modifier('combat rate')) > -40) {
         error('Not enough -combat to cap.');
     }
-
-    maximize('-combat, 0.01 familiar weight', false);
 
     do_test(TEST_NONCOMBAT);
 }
