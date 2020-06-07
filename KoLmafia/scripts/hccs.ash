@@ -479,9 +479,9 @@ if (!test_done(TEST_COIL_WIRE)) {
     // Find a spleen item in the Barrels.
     foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
         if (available_amount($item[magicalness-in-a-can]) + available_amount($item[strongness elixir]) > 0) break;
-
+        print(`Trying barrel in slot {barrel}.`);
         // Smash the barrel.
-        visit_url('barrels.php');
+        visit_url('barrel.php');
         string page_text = visit_url(`choice.php?whichchoice=1099&option=1&slot={barrel}`);
         if (page_text.contains_text('Combat!')) {
             set_hccs_combat_mode(MODE_RUN_UNLESS_FREE);
@@ -1124,6 +1124,7 @@ if (!test_done(TEST_ITEM)) {
     do_test(TEST_ITEM);
 
     if (available_amount($item[Vicar's Tutu]) > 0) {
+        if (have_equipped($item[Vicar's Tutu])) equip($item[old sweatpants]);
         cli_execute('smash 1 Vicar\'s Tutu');
     }
 }
@@ -1427,7 +1428,9 @@ if (!test_done(TEST_SPELL)) {
     ensure_item(2, $item[obsidian nutcracker]);
 
     use_skill(1, $skill[Summon Sugar Sheets]);
-    cli_execute('fold sugar chapeau');
+    if (available_amount($item[sugar chapeau]) == 0 && available_amount($item[sugar sheet]) > 0) {
+        create(1, $item[sugar chapeau]);
+    }
 
     maximize('spell damage', false);
 

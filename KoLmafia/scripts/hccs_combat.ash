@@ -257,6 +257,7 @@ void main(int initround, monster foe, string page) {
                 .m_skill($skill[Saucegeyser])
                 .m_repeat_submit();
         } else if (my_familiar() == $familiar[Frumious Bandersnatch]
+                && have_effect($effect[Ode to Booze]) > 0
                 && get_property_int("_banderRunaways") < my_familiar_weight() / 5) {
             runaway();
             set_property_int("_banderRunaways", get_property_int("_banderRunaways") + 1);
