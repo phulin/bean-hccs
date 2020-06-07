@@ -412,6 +412,10 @@ void do_test(int test_num) {
 set_property('_saved_autoSatisfyWithNPCs', get_property('autoSatisfyWithNPCs'));
 set_property('autoSatisfyWithNPCs', 'false');
 
+// Do buy stuff from coinmasters (hermit).
+set_property('_saved_autoSatisfyWithCoinmasters', get_property('autoSatisfyWithCoinmasters'));
+set_property('autoSatisfyWithCoinmasters', 'false');
+
 // Initialize council.
 visit_url('council.php');
 
@@ -1438,6 +1442,7 @@ if (!test_done(TEST_SPELL)) {
 }
 
 set_property('autoSatisfyWithNPCs', get_property('_saved_autoSatisfyWithNPCs'));
+set_property('autoSatisfyWithCoinmasters', get_property('_saved_autoSatisfyWithCoinmasters'));
 set_property('hpAutoRecovery', '0.8');
 
 cli_execute('mood default');
