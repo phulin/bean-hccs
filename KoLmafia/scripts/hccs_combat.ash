@@ -297,13 +297,13 @@ void find_monster_saber_yr(location loc, monster foe) {
         adv1(loc, -1, "");
     }
     saber_yr();
-    set_hccs_combat_mode(MODE_NULL);
+    set_hccs_combat_mode(MODE_NULL, '');
 }
 
 void adventure_copy(location loc, monster foe) {
     set_hccs_combat_mode(MODE_COPY, foe.name);
     adv1(loc, -1, "");
-    set_hccs_combat_mode(MODE_NULL);
+    set_hccs_combat_mode(MODE_NULL, '');
 }
 
 void adventure_kill(location loc) {
@@ -315,7 +315,7 @@ void adventure_kill(location loc) {
 void adventure_kill(location loc, monster foe) {
     set_hccs_combat_mode(MODE_KILL, foe.name);
     adv1(loc, -1, "");
-    set_hccs_combat_mode(MODE_NULL);
+    set_hccs_combat_mode(MODE_NULL, '');
 }
 
 void adventure_free_kill(location loc) {

@@ -373,7 +373,7 @@ void ensure_ode(int turns) {
 boolean summon_bricko_oyster() {
     if (get_property_int('_brickoFights') >= 3) return false;
     if (available_amount($item[BRICKO oyster]) > 0) return true;
-    while (get_property_int('libramSummons') < 10 && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
+    while (get_property_int('libramSummons') < 6 && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
         use_skill(1, $skill[Summon BRICKOs]);
     }
     return use(8, $item[BRICKO brick]);
@@ -414,7 +414,7 @@ set_property('autoSatisfyWithNPCs', 'false');
 
 // Do buy stuff from coinmasters (hermit).
 set_property('_saved_autoSatisfyWithCoinmasters', get_property('autoSatisfyWithCoinmasters'));
-set_property('autoSatisfyWithCoinmasters', 'false');
+set_property('autoSatisfyWithCoinmasters', 'true');
 
 // Initialize council.
 visit_url('council.php');
@@ -647,6 +647,12 @@ if (!test_done(TEST_HP)) {
         ensure_item(1, $item[empty meat tank]);
         ensure_create_item(1, $item[meat stack]);
         create(1, $item[full meat tank]);
+        // Get some CSAs for later pizzas
+        int count = 3 - available_amount($item[cog and sprocket assembly]);
+        ensure_item(count, $item[cog]);
+        ensure_item(count, $item[sprocket]);
+        ensure_item(count, $item[spring]);
+        create(count, $item[cog and sprocket assembly]);
         // Actually tune the moon.
         visit_url('inv_use.php?whichitem=10254&doit=96&whichsign=8');
     }
@@ -866,7 +872,7 @@ if (!test_done(TEST_HP)) {
     ensure_potion_effect($effect[Mystically Oiled], $item[ointment of the occult]);
 
     // Take hovering sombrero
-    use_familiar($familiar[Hovering Sombrero]);
+    // use_familiar($familiar[Hovering Sombrero]);
     try_equip($item[amulet coin]);
     try_equip($item[astral pet sweater]);
 
@@ -909,7 +915,7 @@ if (!test_done(TEST_HP)) {
         }
 
         if (get_property_int('_neverendingPartyFreeTurns') < 10) {
-            adventure_kill($location[The Neverending Party], $monster[burnout]);
+            adventure_kill($location[The Neverending Party]);
         } else {
             adventure_free_kill($location[The Neverending Party]);
         }
@@ -1093,6 +1099,10 @@ if (!test_done(TEST_ITEM)) {
 
     if (have_effect($effect[Certainty]) == 0) {
         use_familiar($familiar[Rock Lobster]);
+        if (available_amount($item[ectoplasm <i>au jus</i>]) + available_amount($item[eyedrops of the ermine]) == 0) {
+            // should have strawberry already.
+            create(1, $item[eyedrops of the ermine]);
+        }
         if (available_amount($item[blood-faced volleyball]) == 0) {
             ensure_hermit_item(1, $item[volleyball]);
             ensure_hermit_item(1, $item[seal tooth]);
@@ -1101,8 +1111,8 @@ if (!test_done(TEST_ITEM)) {
         }
         pizza_effect(
             $effect[Certainty],
-            $item[clove-flavored lip balm],
-            $item[ectoplasm <i>au jus</i>],
+            $item[cog and sprocket assembly],
+            item_priority($item[ectoplasm <i>au jus</i>], $item[eyedrops of the ermine]),
             item_priority($item[ravioli hat], $item[red pixel], $item[ratty knitted cap]),
             $item[blood-faced volleyball] // get extra-strength rubber bands
         );
@@ -1366,6 +1376,10 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Frenzied, Bloody]);
     ensure_effect($effect[Scowl of the Auk]);
 
+    if (available_amount($item[vial of hamethyst juice]) > 0) {
+        ensure_effect($effect[Ham-Fisted]);
+    }
+
     // Hatter buff
     ensure_item(1, $item[goofily-plumed helmet]);
     ensure_effect($effect[Weapon of Mass Destruction]);
@@ -1389,6 +1403,10 @@ if (!test_done(TEST_WEAPON)) {
 
     if (have_effect($effect[Outer Wolf&trade;]) == 0) {
         use(available_amount($item[van key]), $item[van key]);
+        if (available_amount($item[ointment of the occult]) == 0) {
+            // Should have a second grapefruit from Scurvy.
+            create(1, $item[ointment of the occult]);
+        }
         if (available_amount($item[unremarkable duffel bag]) == 0) {
             // get useless powder.
             ensure_item(1, $item[cool whip]);
@@ -1398,8 +1416,8 @@ if (!test_done(TEST_WEAPON)) {
             $effect[Outer Wolf&trade;],
             $item[ointment of the occult],
             item_priority($item[unremarkable duffel bag], $item[useless powder]),
-            $item[tomato juice of powerful power],
-            $item[tomato juice of powerful power]
+            $item[cog and sprocket assembly],
+            $item[cog and sprocket assembly]
         );
     }
 
@@ -1428,6 +1446,10 @@ if (!test_done(TEST_SPELL)) {
 
     // Pool buff
     ensure_effect($effect[Mental A-cue-ity]);
+
+    if (available_amount($item[flask of baconstone juice]) > 0) {
+        ensure_effect($effect[Baconstoned]);
+    }
 
     ensure_item(2, $item[obsidian nutcracker]);
 
