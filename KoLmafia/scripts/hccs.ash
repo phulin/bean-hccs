@@ -385,8 +385,8 @@ boolean stat_ready() {
     int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + muscle_multiplier) * my_basestat($stat[Mysticality]);
     boolean muscle_met = buffed_muscle - my_basestat($stat[Muscle]) >= 1770;
     print('Buffed muscle: ' + floor(buffed_muscle) + ' (' + muscle_met + ')');
-    // Synth, Hair spray, runproof mascara, Quiet Desperation
-    float moxie_multiplier = 3.9;
+    // Synth, Hair spray, runproof mascara, Quiet Desperation, wad of used tape, Beach Comb, Beach Comb buff
+    float moxie_multiplier = 4.7;
     int buffed_moxie = 60 + (1 + numeric_modifier('moxie percent') / 100 + 3.9) * my_basestat($stat[Mysticality]);
     boolean moxie_met = buffed_moxie - my_basestat($stat[Moxie]) >= 1770;
     print('Buffed moxie: ' + floor(buffed_moxie) + ' (' + moxie_met + ')');
@@ -865,7 +865,7 @@ if (!test_done(TEST_HP)) {
     equip($item[Fourth of May Cosplay Saber]);
     equip($item[Kramco Sausage-o-Matic&trade;]);
     equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
-    equip($slot[acc2], $item[Powerful Glove]);
+    equip($slot[acc2], $item[Brutal brogues]);
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
     if (have_effect($effect[Carlweather's Cantata of Confrontation]) > 0) {
@@ -898,6 +898,7 @@ if (!test_done(TEST_HP)) {
             set_choice(1324, 5);
         }
 
+        ensure_mp_sausage(100);
         if (get_property_int('_neverendingPartyFreeTurns') < 10) {
             adventure_kill($location[The Neverending Party]);
         } else {
@@ -930,6 +931,7 @@ if (!test_done(TEST_HP)) {
 
         // Skip fairy gravy NC
         set_choice(297, 3);
+        ensure_mp_sausage(100);
         adventure_run_unless_free($location[The Haiku Dungeon]);
     }
 
@@ -952,11 +954,12 @@ if (!test_done(TEST_HP)) {
         while (my_turncount() < 62 || (!stat_ready() && my_basestat($stat[Mysticality]) < 178 && get_property_int('garbageShirtCharge') > 0)) {
             ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
+            ensure_mp_sausage(100);
             adventure_kill($location[The Neverending Party]);
 
             turns_spent += 1;
             print('Spent ' + turns_spent + ' turns trying to level.');
-            if (my_turncount() >= 62) error('CHECK leveling.');
+            if (my_turncount() > 62) error('CHECK leveling.');
         }
     }
 
@@ -1013,6 +1016,9 @@ if (!test_done(TEST_MYS)) {
 if (!test_done(TEST_MOX)) {
     effect[int] subsequent = { $effect[Synthesis: Collection] };
     synthesis_plan($effect[Synthesis: Cool], subsequent);
+
+    // Beach Comb
+    ensure_effect($effect[Pomp & Circumstands]);
 
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
