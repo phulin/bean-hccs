@@ -480,7 +480,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     // Depends on Ez's Bastille script.
     cli_execute('bastille myst brutalist');
 
-    // Find a spleen item in the Barrels.
+    /* // Find a spleen item in the Barrels.
     foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
         if (available_amount($item[magicalness-in-a-can]) + available_amount($item[strongness elixir]) > 0) break;
         print(`Trying barrel in slot {barrel}.`);
@@ -507,6 +507,15 @@ if (!test_done(TEST_COIL_WIRE)) {
             $item[cog and sprocket assembly],
             item_priority($item[magicalness-in-a-can], $item[strongness elixir], $item[moxie weed])
         );
+    }*/
+
+    // Use a couple chateau rests to hit level 5. Should also give us a ton of MP.
+    while (get_property_int('timesRested') < 2) {
+        visit_url('place.php?whichplace=chateau&action=chateau_restbox');
+    }
+
+    if (my_level() < 5) {
+        error('Failed to hit level 5 for perfect drink. Oops.');
     }
 
     if (my_inebriety() < 3) {
@@ -519,11 +528,9 @@ if (!test_done(TEST_COIL_WIRE)) {
             use_skill(1, $skill[Perfect Freeze]);
         }
         ensure_create_item(1, $item[perfect dark and stormy]);
-        // ensure_ode(3);
+        ensure_ode(3);
         drink(1, $item[perfect dark and stormy]);
     }
-
-    ensure_effect($effect[Merry Smithsness]);
 
     // Upgrade saber for fam wt
     visit_url('main.php?action=may4');
@@ -550,7 +557,6 @@ if (my_turncount() < 60) error('Something went wrong coiling wire.');
 if (!test_done(TEST_HP)) {
     if (have_effect($effect[Different Way of Seeing Things]) == 0) {
         if (available_amount($item[dripping meat crossbow]) == 0) {
-            // ensure_item(1, $item[tenderizing hammer]);
             ensure_item(1, $item[crossbow string]);
             if (available_amount($item[meat stack]) == 0) {
                 create(1, $item[meat stack]);
@@ -559,12 +565,6 @@ if (!test_done(TEST_HP)) {
             create(1, $item[dripping meat crossbow]);
         }
         if (available_amount($item[Irish Coffee, English Heart]) == 0) {
-            /*if (available_amount($item[handful of Smithereens]) == 0) {
-                ensure_item(1, $item[third-hand lantern]);
-                // ensure_item(1, $item[tenderizing hammer]);
-                create(1, $item[A Light that Never Goes Out]);
-                cli_execute('smash 1 A Light That Never Goes Out');
-            }*/
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
@@ -575,7 +575,9 @@ if (!test_done(TEST_HP)) {
             use(1, $item[volleyball]);
         }
         // Get a pocket professor chip.
-        use_familiar($familiar[Pocket Professor]);
+        // use_familiar($familiar[Pocket Professor]);
+        // Actually, get a quadroculars for DISQ later.
+        use_familiar($familiar[He-Boulder]);
         pizza_effect(
             $effect[Different Way of Seeing Things],
             $item[dripping meat crossbow],
@@ -616,6 +618,8 @@ if (!test_done(TEST_HP)) {
             use(1, love_potion);
         }
     }
+
+    ensure_effect($effect[Merry Smithsness]);
 
     // Cast inscrutable gaze
     ensure_effect($effect[Inscrutable Gaze]);
@@ -673,7 +677,6 @@ if (!test_done(TEST_HP)) {
             equip($slot[familiar], $item[none]);
         } else {
             use_familiar($familiar[Pocket Professor]);
-            try_equip($item[Pocket Professor memory chip]);
         }
         if (my_hp() < .8 * my_maxhp()) {
             visit_url('clan_viplounge.php?where=hottub');
@@ -854,8 +857,8 @@ if (!test_done(TEST_HP)) {
     }*/
 
     // Autosell stuff
-    //autosell(1, $item[strawberry]);
-    autosell(1, $item[orange]);
+    // autosell(1, $item[strawberry]);
+    // autosell(1, $item[orange]);
     autosell(1, $item[razor-sharp can lid]);
     // autosell(5, $item[red pixel]);
     autosell(5, $item[green pixel]);
@@ -872,7 +875,7 @@ if (!test_done(TEST_HP)) {
     ensure_potion_effect($effect[Mystically Oiled], $item[ointment of the occult]);
 
     // Take hovering sombrero
-    // use_familiar($familiar[Hovering Sombrero]);
+    use_familiar($familiar[Hovering Sombrero]);
     try_equip($item[amulet coin]);
     try_equip($item[astral pet sweater]);
 
@@ -1269,8 +1272,6 @@ if (!test_done(TEST_FAMILIAR)) {
 }
 
 if (!test_done(TEST_NONCOMBAT)) {
-    use_familiar($familiar[Disgeist]);
-
     if (my_hp() < 30) use_skill(1, $skill[Cannelloni Cocoon]);
     ensure_effect($effect[Blood Bond]);
     ensure_effect($effect[Leash of Linguini]);
@@ -1291,7 +1292,9 @@ if (!test_done(TEST_NONCOMBAT)) {
     ensure_effect($effect[Throwing Some Shade]);
     ensure_effect($effect[A Rose by Any Other Material]);
 
-    /*if (have_effect($effect[Disquiet Riot]) == 0) {
+    if (have_effect($effect[Disquiet Riot]) == 0) {
+        // For aftercore.
+        use_familiar($familiar[Cornbeefadon]);
         if (available_amount($item[dripping meat crossbow]) == 0) {
             ensure_item(1, $item[crossbow string]);
             if (available_amount($item[meat stack]) == 0) {
@@ -1302,22 +1305,15 @@ if (!test_done(TEST_NONCOMBAT)) {
         }
         if (available_amount($item[Irish Coffee, English Heart]) == 0) {
             if (available_amount($item[handful of Smithereens]) == 0) {
-                if (get_property_int('tomeSummons') < 3) {
-                    use_skill(3 - get_property_int('tomeSummons'), $skill[Summon Smithsness]);
-                }
-                if (available_amount($item[A Light That Never Goes Out]) == 0 && available_amount($item[lump of Brituminous coal]) > 0) {
-                    ensure_item(1, $item[third-hand lantern]);
-                    ensure_item(1, $item[tenderizing hammer]);
-                    create(1, $item[A Light that Never Goes Out]);
-                }
                 cli_execute('smash 1 A Light That Never Goes Out');
             }
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
-        if (available_amount($item[shot of grapefruit schnapps]) == 0) {
+        // Should have a spare orange from fruit skeleton.
+        if (available_amount($item[shot of orange schnapps]) == 0) {
             ensure_item(1, $item[fermenting powder]);
-            create(1, $item[shot of grapefruit schnapps]);
+            create(1, $item[shot of orange schnapps]);
         }
         // sometimes the qaudroculars end up equipped...
         retrieve_item(1, $item[quadroculars]);
@@ -1325,12 +1321,14 @@ if (!test_done(TEST_NONCOMBAT)) {
             $effect[Disquiet Riot],
             $item[dripping meat crossbow],
             $item[Irish Coffee, English Heart],
-            $item[shot of grapefruit schnapps],
+            $item[shot of orange schnapps],
             $item[quadroculars]
         );
-    }*/
+    }
 
-    wish_effect($effect[Disquiet Riot]);
+    // wish_effect($effect[Disquiet Riot]);
+
+    use_familiar($familiar[Disgeist]);
 
     maximize('-combat, 0.01 familiar weight', false);
 
@@ -1422,15 +1420,13 @@ if (!test_done(TEST_WEAPON)) {
     }
 
     wish_effect($effect[Pyramid Power]);
+    wish_effect($effect[Wasabi With You]);
 
     ensure_effect($effect[Bow-Legged Swagger]);
 
-    // If this is day 2 we need to get a fish hatchet.
-    retrieve_item(1, $item[fish hatchet]);
-
     maximize('weapon damage', false);
 
-    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) > 28) {
+    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) > 15) {
         abort('Something went wrong with weapon damage.');
     }
 
