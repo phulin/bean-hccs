@@ -380,11 +380,13 @@ boolean summon_bricko_oyster() {
 }
 
 boolean stat_ready() {
-    // Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet
-    int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + 4.7) * my_basestat($stat[Mysticality]);
+    // Synth, Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet
+    float muscle_multiplier = 4.7;
+    int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + muscle_multiplier) * my_basestat($stat[Mysticality]);
     boolean muscle_met = buffed_muscle - my_basestat($stat[Muscle]) >= 1770;
     print('Buffed muscle: ' + floor(buffed_muscle) + ' (' + muscle_met + ')');
-    // Hair spray, runproof mascara, Quiet Desperation
+    // Synth, Hair spray, runproof mascara, Quiet Desperation
+    float moxie_multiplier = 3.9;
     int buffed_moxie = 60 + (1 + numeric_modifier('moxie percent') / 100 + 3.9) * my_basestat($stat[Mysticality]);
     boolean moxie_met = buffed_moxie - my_basestat($stat[Moxie]) >= 1770;
     print('Buffed moxie: ' + floor(buffed_moxie) + ' (' + moxie_met + ')');
@@ -512,6 +514,9 @@ if (!test_done(TEST_COIL_WIRE)) {
     // Use a couple chateau rests to hit level 5. Should also give us a ton of MP.
     while (get_property_int('timesRested') < 2) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
+        if (my_mp() > 50 && available_amount($item[bottle of rum]) == 0) {
+            use_skill(1, $skill[Prevent Scurvy and Sobriety]);
+        }
     }
 
     if (my_level() < 5) {
@@ -627,6 +632,9 @@ if (!test_done(TEST_HP)) {
     // Shower lukewarm
     ensure_effect($effect[Thaumodynamic]);
 
+    // Beach Comb
+    ensure_effect($effect[You Learned Something Maybe!]);
+
     // Get beach access.
     if (available_amount($item[bitchin' meatcar]) == 0) {
         ensure_item(1, $item[cog]);
@@ -718,13 +726,12 @@ if (!test_done(TEST_HP)) {
     ensure_song($effect[The Magical Mojomuscular Melody]);
     ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
-    if (have_effect($effect[Hulkien]) == 0) {
-        cli_execute('pillkeeper stats');
-    }
-    // Plan is for this to fall all the way through to item -> hot res -> fam weight.
-    if (have_effect($effect[Fidoxene]) == 0) {
-        cli_execute('pillkeeper familiar');
-    }
+    // Pill Keeper stats.
+    ensure_effect($effect[Hulkien]);
+
+    // Plan is for Beach Comb + PK buffs to fall all the way through to item -> hot res -> fam weight.
+    ensure_effect($effect[Fidoxene]);
+    ensure_effect($effect[Do I Know You From Somewhere?]);
 
     // Chateau rest
     while (get_property_int('timesRested') < total_free_rests()) {
@@ -792,7 +799,8 @@ if (!test_done(TEST_HP)) {
         try_equip($item[Pocket Professor memory chip]);
 
         equip($item[Kramco Sausage-o-Matic&trade;]);
-        equip($slot[acc3], $item[hewn moon-rune spoon]);
+        equip($slot[acc2], $item[Brutal brogues]);
+        equip($slot[acc3], $item[Beach Comb]);
 
         while (get_property_int('_sausageFights') == 0) {
             if (my_hp() < .8 * my_maxhp()) {
@@ -828,33 +836,6 @@ if (!test_done(TEST_HP)) {
     autosell(3, $item[coconut shell]);
     autosell(3, $item[magical ice cubes]);
     autosell(3, $item[little paper umbrella]);
-
-    /*string guild_text = visit_url('guild.php');
-    matcher guild_matcher = create_matcher('guild.php\\?place=', guild_text);
-    int guild_options = guild_matcher.count_matches();
-    if (guild_options == 1) {
-        // Talk to guild leader
-        visit_url('guild.php?place=challenge');
-
-        // Open guild
-        cli_execute('ccs runaway');
-        use_familiar($familiar[Frumious Bandersnatch]);
-        try_equip($item[amulet coin]);
-
-        open_song_slot();
-        ensure_ode();
-        ensure_effect($effect[Musk of the Moose]);
-
-        while (last_choice() != 544) {
-            if (get_property_int('_banderRunaways') > my_familiar_weight() / 5) {
-                error('Ran out of bander runaways. Oops.');
-            }
-            adv1($location[The Haunted Pantry], -1, '');
-        }
-        visit_url('guild.php?place=challenge');
-    } else if (guild_options == 0) {
-        error('Cannot tell whether guild is open.');
-    }*/
 
     // Autosell stuff
     // autosell(1, $item[strawberry]);
@@ -975,6 +956,7 @@ if (!test_done(TEST_HP)) {
 
             turns_spent += 1;
             print('Spent ' + turns_spent + ' turns trying to level.');
+            if (my_turncount() >= 62) error('CHECK leveling.');
         }
     }
 
@@ -1236,6 +1218,9 @@ if (!test_done(TEST_HOT_RES)) {
         use_skill(1, $skill[Deep Dark Visions]);
     }
 
+    // Beach comb buff.
+    ensure_effect($effect[Hot-Headed]);
+
     // Use pocket maze
     ensure_effect($effect[Amazing]);
 
@@ -1253,10 +1238,9 @@ if (!test_done(TEST_HOT_RES)) {
 }
 
 if (!test_done(TEST_FAMILIAR)) {
-    // This one should have fallen through all the way from leveling.
-    if (have_effect($effect[Fidoxene]) == 0) {
-        cli_execute('pillkeeper familiar');
-    }
+    // These should have fallen through all the way from leveling.
+    ensure_effect($effect[Fidoxene]);
+    ensure_effect($effect[Do I Know You From Somewhere?]);
 
     // Pool buff.
     ensure_effect($effect[Billiards Belligerence]);
@@ -1382,6 +1366,9 @@ if (!test_done(TEST_WEAPON)) {
     ensure_item(1, $item[goofily-plumed helmet]);
     ensure_effect($effect[Weapon of Mass Destruction]);
 
+    // Beach Comb
+    ensure_effect($effect[Lack of Body-Building]);
+
     if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
         cli_execute('boombox damage');
     }
@@ -1414,8 +1401,8 @@ if (!test_done(TEST_WEAPON)) {
             $effect[Outer Wolf&trade;],
             $item[ointment of the occult],
             item_priority($item[unremarkable duffel bag], $item[useless powder]),
-            $item[cog and sprocket assembly],
-            $item[cog and sprocket assembly]
+            item_priority($item[Middle of the Road&trade; brand whiskey], $item[cog and sprocket assembly]),
+            item_priority($item[PB&J with the crusts cut off], $item[cog and sprocket assembly])
         );
     }
 
@@ -1442,6 +1429,9 @@ if (!test_done(TEST_SPELL)) {
 
     // Pool buff
     ensure_effect($effect[Mental A-cue-ity]);
+
+    // Beach Comb
+    ensure_effect($effect[We're All Made of Starfish]);
 
     if (available_amount($item[flask of baconstone juice]) > 0) {
         ensure_effect($effect[Baconstoned]);
