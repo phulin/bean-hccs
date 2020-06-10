@@ -41,6 +41,10 @@ void assert_meat(int meat) {
     if (my_meat() < meat) error('Not enough meat.');
 }
 
+void autosell_all(item it) {
+    autosell(item_amount(it), it);
+}
+
 void wish_effect(effect ef) {
     if (have_effect(ef) == 0) {
         cli_execute('genie effect ' + ef.name);
@@ -249,7 +253,7 @@ void shrug(effect ef) {
 }
 
 // We have Phat Loot, Ur-Kel's on at all times during leveling (managed via mood); third and fourth slots are variable.
-boolean[effect] song_slot_3 = $effects[Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze];
+boolean[effect] song_slot_3 = $effects[Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction];
 boolean[effect] song_slot_4 = $effects[Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Polka of Plenty];
 void open_song_slot(effect song) {
     boolean[effect] song_slot;
@@ -282,15 +286,15 @@ void ensure_ode(int turns) {
 boolean summon_bricko_oyster() {
     if (get_property_int('_brickoFights') >= 3) return false;
     if (available_amount($item[BRICKO oyster]) > 0) return true;
-    while (get_property_int('libramSummons') < 6 && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
+    while (get_property_int('libramSummons') < 7 && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
         use_skill(1, $skill[Summon BRICKOs]);
     }
     return use(8, $item[BRICKO brick]);
 }
 
 boolean stat_ready() {
-    // Synth, Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet
-    float muscle_multiplier = 4.7;
+    // Synth, Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet, Brutal brogues
+    float muscle_multiplier = 5.2;
     int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + muscle_multiplier) * my_basestat($stat[Mysticality]);
     boolean muscle_met = buffed_muscle - my_basestat($stat[Muscle]) >= 1770;
     print('Buffed muscle: ' + floor(buffed_muscle) + ' (' + muscle_met + ')');
@@ -927,7 +931,7 @@ if (!test_done(TEST_MOX)) {
     synthesis_plan($effect[Synthesis: Cool], subsequent);
 
     // Beach Comb
-    ensure_effect($effect[Pomp & Circumstands]);
+    ensure_effect($effect[Pomp & Circumsands]);
 
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
@@ -1272,6 +1276,7 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Frenzied, Bloody]);
     ensure_effect($effect[Scowl of the Auk]);
+    ensure_song($effect[Jackasses' Symphony of Destruction]);
 
     if (available_amount($item[vial of hamethyst juice]) > 0) {
         ensure_effect($effect[Ham-Fisted]);
@@ -1317,7 +1322,7 @@ if (!test_done(TEST_WEAPON)) {
             $item[ointment of the occult],
             item_priority($item[unremarkable duffel bag], $item[useless powder]),
             item_priority($item[Middle of the Road&trade; brand whiskey], $item[cog and sprocket assembly]),
-            item_priority($item[PB&J with the crusts cut off], $item[cog and sprocket assembly])
+            item_priority($item[surprisingly capacious handbag], $item[cog and sprocket assembly])
         );
     }
 
@@ -1351,6 +1356,19 @@ if (!test_done(TEST_SPELL)) {
     if (available_amount($item[flask of baconstone juice]) > 0) {
         ensure_effect($effect[Baconstoned]);
     }
+
+    autosell_all($item[neverending wallet chain]);
+    autosell_all($item[pentagram bandana]);
+    autosell_all($item[denim jacket]);
+    autosell_all($item[jam band bootleg]);
+    autosell_all($item[cosmetic football]);
+    autosell_all($item[shoe ad t-shirt]);
+    autosell_all($item[PB&J with the crusts cut off]);
+    autosell_all($item[runproof mascara]);
+    autosell_all($item[very small red dress]);
+    autosell_all($item[noticeable pumps]);
+    autosell_all($item[electronics kit]);
+    autosell_all($item[surprisingly capacious handbag]);
 
     ensure_item(2, $item[obsidian nutcracker]);
 

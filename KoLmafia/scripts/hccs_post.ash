@@ -1,5 +1,27 @@
 import <hccs_lib.ash>
 
+void get(int qty, item it, int max_price) {
+    if (qty > 15) abort('Bad get!');
+
+    int remaining = qty - item_amount(it);
+    if (remaining <= 0) return;
+
+    int get_closet = min(remaining, closet_amount(it));
+    if (!take_closet(get_closet, it)) abort();
+    remaining -= get_closet;
+    if (remaining <= 0) return;
+
+    int get_mall = min(remaining, shop_amount(it));
+    if (!take_shop(get_mall, it)) abort();
+    remaining -= get_mall;
+    if (remaining <= 0) return;
+
+    if (!retrieve_item(remaining, it)) {
+        if (it.mall_price() > max_price) abort('Mall price too high.');
+        if (!buy(remaining, it)) abort();
+    }
+}
+
 if (!can_interact()) abort('Break prism first.');
 
 set_property('autoSatisfyWithNPCs', 'true');
@@ -60,6 +82,23 @@ if (my_inebriety() + 1 == inebriety_limit()) {
     ensure_mp_sausage(100);
     ensure_effect($effect[Ode to Booze]);
     drink(1, $item[meadeorite]);
+}
+
+item[class] choco;
+choco[$class[Seal Clubber]] = $item[chocolate seal-clubbing club];
+choco[$class[Turtle Tamer]] = $item[chocolate turtle totem];
+choco[$class[Pastamancer]] = $item[chocolate pasta spoon];
+choco[$class[Sauceror]] = $item[chocolate saucepan];
+choco[$class[Accordion Thief]] = $item[chocolate stolen accordion];
+choco[$class[Disco Bandit]] = $item[chocolate disco ball];
+if (choco contains my_class() && get_property_int('_chocolatesUsed') < 3) {
+    int used = get_property_int('_chocolatesUsed');
+    while (used < 3) {
+        item it = choco[my_class()];
+        get(1, it, 6000);
+        use(1, it);
+        used++;
+    }
 }
 
 if (!get_property_boolean('_thesisDelivered') && get_property_int('_lastSausageMonsterTurn') + 50 < total_turns_played()) {
