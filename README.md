@@ -1,4 +1,4 @@
-This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Hardcore Community Service runs as a Pastamancer in the Wallaby moon sign. I have used it successfully for a 1/174 run. Expect to need to make some changes, unless your set of IotMs is a strict superset of mine. This is supposed to be an outline that can get you to daycount with some work.
+This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Hardcore Community Service runs as a Pastamancer in the Wallaby moon sign. I have used it successfully for a 1/160 run. Expect to need to make some changes, unless your set of IotMs is a strict superset of mine. This is supposed to be an outline that can get you to daycount with some work.
 
 To install:
 `svn checkout https://github.com/phulin/bean-hccs/branches/master/KoLmafia`
@@ -22,15 +22,15 @@ The script is fine to run twice; if it breaks somewhere, fix the problem manuall
 You'll need to set up a mood named "hccs" with whatever you have (+ML, +stats, +mainstat) for leveling combats.
 
 The script follows this rough plan (list skips many steps):
-- Ascend Sauceror/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the astral mask if you want to save one and a third turns on the item test and you aren't capping that test already.
+- Ascend Pastamancer/Wallaby. No pet needed if you have Pizza Cube, as the script will pizza for fam equipment. You can take the astral mask if you want to save one and a third turns on the item test and you aren't capping that test already.
 - Cast inscrutable gaze and use Bastille.
-- Make a medicinal pizza with any spleen item (barrels) and, e.g., 3 cog and sprocket assemblies. This should get you to level 5.
+- Rest twice at Chateau to reach Level 5 and restore MP.
 - Cast Prevent Scurvy and Perfect Freeze; drink a perfect dark and stormy (3 drunk).
 - TEST: Coil Wire (60 turns).
 - Make meatcar (and any other Knoll stuff you might need, like full meat tanks) and tune moon to Blender for simple candy at Gno-Mart.
 - Get available XP buffs: Synthesis, Inscrutable Gaze.
-- Pizza for DIFferent Way of Seeing Things (+50% Mys XP). Get a Prof chip.
-- Fight 3 BRICKO oysters. (This step is not critical but the early meat is nice.)
+- Pizza for DIFferent Way of Seeing Things (+50% Mys XP). Get a quadroculars for later DISQ pizza.
+- Fight 2 BRICKO oysters. (This step is not critical but the early meat is nice.)
 - Buff mainstat to high heavens: Bee's Knees, Synthesis, Pill Keeper, Triple Size (2 drunk).
 - Use Pill Keeper for familiar weight.
 - Fight 10 copied sausage goblins at NEP, which burns the delay on the NEP noncombat.
@@ -39,7 +39,7 @@ The script follows this rough plan (list skips many steps):
 - Get +20% Mys XP buff at NEP (first encounter).
 - 9 free fights at NEP, plus 7 free kills (Chest X-Ray, Shattering Punch, Gingerbread Mob Hit).
 - Boost -combat and use all available free runs to find more sausage goblins at the Haiku Dungeon.
-- Set BoomBox to weapon damage and adventure using turns at NEP until our stats are high enough to cap (I don't need to do this, but you might).
+- Set BoomBox to weapon damage and adventure using turns at NEP until our stats are high enough to cap (I don't need to do this, but you might; 2 adventures are effectively free since you get a punching potion).
 - Use oil of expertise, boost muscle and HP.
 - TEST: Donate Blood (HP, 1 turn).
 - TEST: Feed The Children (But Not Too Much) (Muscle, 1 turn).
@@ -56,12 +56,13 @@ The script follows this rough plan (list skips many steps):
 - Fax and saber YR a factory worker (female) (Cheesefax always gives female if you ask for "factory worker").
 - Pill Keeper elemental res.
 - Smash any ratty knitted caps and red-hot sausage forks for hot powder and sleaze nuggets (for lotion of sleaziness).
+- Wish for Fireproof Lips.
 - Use pocket maze.
 - TEST: Clean Steam Tunnels (Hot Resistance, 5-8 turns).
 - Pill Keeper familiar weight buff should still be active.
 - TEST: Breed More Collies (Familiar Weight, 44 turns).
 - Use squeaky toy rose, shady shades.
-- Wish for Disquiet Riet.
+- Pizza for DISQuiet Riot (quadroculars for Q; you'll need to use a wish if you don't have a Q source).
 - TEST: Be a Living Statue (Noncombat, 1 turn).
 - Fight painted ungulith, use saber YR.
 - Drink Sockdollager (2 drunk).
@@ -70,6 +71,7 @@ The script follows this rough plan (list skips many steps):
 - Use a punching potion if you got one while leveling.
 - Pizza for OUter Wolf (e.g. ointment of the occult/unremarkable duffel/whatever).
 - Wish for Pyramid Power.
+- Wish for Wasabi With You.
 - Cast bow-legged swagger.
 - TEST: Reduce Gazelle Population (Weapon Damage, 18 turns).
 - Cast Simmer (1 turn).
