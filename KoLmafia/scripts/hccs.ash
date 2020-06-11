@@ -1353,6 +1353,8 @@ if (!test_done(TEST_SPELL)) {
     // Beach Comb
     ensure_effect($effect[We're All Made of Starfish]);
 
+    use_skill(1, $skill[Spirit of Cayenne]);
+
     if (available_amount($item[flask of baconstone juice]) > 0) {
         ensure_effect($effect[Baconstoned]);
     }
