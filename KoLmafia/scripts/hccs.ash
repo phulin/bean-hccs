@@ -1107,7 +1107,7 @@ if (!test_done(TEST_HOT_RES)) {
         ensure_effect($effect[Flame-Retardant Trousers]);
     }
 
-    if (available_amount($item[sleaze nuggets]) > 0 || available_amount($item[lotion of sleaziness]) > 0) {
+    if (available_amount($item[sleaze powder]) > 0 || available_amount($item[lotion of sleaziness]) > 0) {
         ensure_potion_effect($effect[Sleazy Hands], $item[lotion of sleaziness]);
     }
 
