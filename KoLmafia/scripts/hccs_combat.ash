@@ -173,14 +173,16 @@ monster[string] banished_monsters() {
     for idx from 0 to banished_components.count() / 3 - 1 {
         monster foe = banished_components[idx * 3].to_monster();
         string banisher = banished_components[idx * 3 + 1];
+        print(`Banished {foe.name} using {banisher}`);
         result[banisher] = foe;
     }
     return result;
 }
 
 boolean used_banisher_in_zone(monster[string] banished, string banisher, location loc) {
-    banisher = banisher.to_lower_case();
+    print(`Checking to see if we've used {banisher} in {loc}.`);
     if (!(banished contains banisher)) return false;
+    print(`Used it to banish {banished[banisher].name}`);
     return (loc.get_location_monsters() contains banished[banisher]);
 }
 
@@ -196,9 +198,9 @@ void main(int initround, monster foe, string page) {
         if (foe == desired) {
             set_property("_hccsCombatFound", "true");
             use_skill(1, $skill[Use the Force]);
-        } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "reflex hammer", loc)) {
+        } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "Reflex Hammer", loc)) {
             use_skill(1, $skill[Reflex Hammer]);
-        } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "snokebomb", loc)) {
+        } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "Snokebomb", loc)) {
             use_skill(1, $skill[Snokebomb]);
         } else if (have_skill($skill[CHEAT CODE: Replace Enemy]) && get_property_int("_powerfulGloveBatteryPowerUsed") <= 80) {
             int original_battery = get_property_int("_powerfulGloveBatteryPowerUsed");
