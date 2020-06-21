@@ -824,6 +824,22 @@ if (!test_done(TEST_HP)) {
     try_equip($item[amulet coin]);
     try_equip($item[astral pet sweater]);
 
+    equip($item[Fourth of May Cosplay Saber]);
+    equip($item[latte lovers member's mug]);
+    equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
+    equip($slot[acc2], $item[Powerful Glove]);
+    equip($slot[acc3], $item[Beach Comb]);
+
+    while (get_property_int('_banderRunaways') < my_familiar_weight() / 5 && !get_property('latteUnlocks').contains_text('chili')) {
+        // Find latte ingredient.
+        ensure_ode(1);
+        adventure_run_unless_free($location[The Haunted Kitchen]);
+    }
+
+    if (get_property('latteUnlocks').contains_text('chili')) {
+        cli_execute('latte refill pumpkin chili vanilla');
+    }
+
     equip($item[fish hatchet]);
     equip($item[Kramco Sausage-o-Matic&trade;]);
 
