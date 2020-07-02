@@ -126,7 +126,7 @@ void ensure_mp_tonic(int mp) {
 }
 
 void ensure_mp_sausage(int mp) {
-    while (my_mp() < mp) {
+    while (my_mp() < min(mp, my_maxmp())) {
         ensure_create_item(1, $item[magical sausage]);
         eat(1, $item[magical sausage]);
     }

@@ -295,12 +295,12 @@ boolean summon_bricko_oyster() {
 boolean stat_ready() {
     // Synth, Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet, Brutal brogues
     float muscle_multiplier = 5.2;
-    int buffed_muscle = 60 + (1 + numeric_modifier('muscle percent') / 100 + muscle_multiplier) * my_basestat($stat[Mysticality]);
+    int buffed_muscle = max(60 + (1 + numeric_modifier('muscle percent') / 100 + muscle_multiplier) * my_basestat($stat[Mysticality]), my_buffedstat($stat[Muscle]));
     boolean muscle_met = buffed_muscle - my_basestat($stat[Muscle]) >= 1770;
     print('Buffed muscle: ' + floor(buffed_muscle) + ' (' + muscle_met + ')');
     // Synth, Hair spray, runproof mascara, Quiet Desperation, wad of used tape, Beach Comb, Beach Comb buff
     float moxie_multiplier = 4.7;
-    int buffed_moxie = 60 + (1 + numeric_modifier('moxie percent') / 100 + 3.9) * my_basestat($stat[Mysticality]);
+    int buffed_moxie = max(60 + (1 + numeric_modifier('moxie percent') / 100 + 3.9) * my_basestat($stat[Mysticality]), my_buffedstat($stat[Moxie]));
     boolean moxie_met = buffed_moxie - my_basestat($stat[Moxie]) >= 1770;
     print('Buffed moxie: ' + floor(buffed_moxie) + ' (' + moxie_met + ')');
     return muscle_met && moxie_met;
@@ -464,6 +464,17 @@ if (!test_done(TEST_COIL_WIRE)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Retrospecs]);
 
+    // Get cyclops eyedrops for later.
+    if (available_amount($item[cyclops eyedrops]) == 0) {
+        cli_execute('pillkeeper semirare');
+        if (get_property_int('semirareCounter') != 0) {
+            error('Semirare should be now. Something went wrong.');
+        }
+        cli_execute('mood apathetic');
+        cli_execute('counters nowarn Fortune Cookie');
+        adv1($location[The Limerick Dungeon], -1, '');
+    }
+
     // NOTE: No turn 0 sausage fight!
 
     // QUEST - Coil Wire
@@ -545,6 +556,11 @@ if (!test_done(TEST_HP)) {
     // Shower lukewarm
     ensure_effect($effect[Thaumodynamic]);
 
+    // Campsite
+    if (have_effect($effect[That's Just Cloud-Talk, Man]) == 0) {
+        visit_url('place.php?whichplace=campaway&action=campaway_sky');
+    }
+
     // Beach Comb
     ensure_effect($effect[You Learned Something Maybe!]);
 
@@ -591,7 +607,7 @@ if (!test_done(TEST_HP)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
-    while (summon_bricko_oyster()) {
+    while (summon_bricko_oyster() && available_amount($item[BRICKO oyster]) > 0) {
         if (available_amount($item[bag of many confections]) == 0) {
             // Use one of these fights to get a bag of many confections.
             use_familiar($familiar[Stocking Mimic]);
@@ -796,11 +812,6 @@ if (!test_done(TEST_HP)) {
         ensure_song($effect[The Magical Mojomuscular Melody]);
         ensure_song($effect[Polka of Plenty]);
 
-        // Get Punching Potion once we run out of free fights
-        if (get_property_int('_neverendingPartyFreeTurns') >= 10 && get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
-            cli_execute('boombox damage');
-        }
-
         cli_execute('mood execute');
         if (have_effect($effect[Tomes of Opportunity]) == 0) {
             // NEP noncombat. Get stat buff if we don't have it. This WILL spend an adventure if we're out.
@@ -827,7 +838,7 @@ if (!test_done(TEST_HP)) {
     equip($item[Fourth of May Cosplay Saber]);
     equip($item[latte lovers member's mug]);
     equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
-    equip($slot[acc2], $item[Powerful Glove]);
+    equip($slot[acc2], $item[Brutal brogues]);
     equip($slot[acc3], $item[Beach Comb]);
 
     while (get_property_int('_banderRunaways') < my_familiar_weight() / 5 && !get_property('latteUnlocks').contains_text('chili')) {
@@ -872,6 +883,10 @@ if (!test_done(TEST_HP)) {
     try_equip($item[amulet coin]);
     try_equip($item[astral pet sweater]);
 
+    if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
+        cli_execute('boombox damage');
+    }
+
     // Use turns to level to 14.
     int turns_spent = 0;
     // Fight
@@ -880,7 +895,7 @@ if (!test_done(TEST_HP)) {
         print('At level ' + my_level() + '. Going to level 14...');
         cli_execute('mood execute');
         // Turncount minimum is to make sure we get a punching potion.
-        while (my_turncount() < 62 || (!stat_ready() && my_basestat($stat[Mysticality]) < 178 && get_property_int('garbageShirtCharge') > 0)) {
+        while (my_turncount() < 63 || (!stat_ready() && my_basestat($stat[Mysticality]) < 180 && get_property_int('garbageShirtCharge') > 0)) {
             ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
             ensure_mp_sausage(100);
@@ -888,7 +903,7 @@ if (!test_done(TEST_HP)) {
 
             turns_spent += 1;
             print('Spent ' + turns_spent + ' turns trying to level.');
-            if (my_turncount() > 62) error('CHECK leveling.');
+            if (my_turncount() >= 64 && !stat_ready()) error('CHECK leveling.');
         }
     }
 
@@ -932,6 +947,7 @@ if (!test_done(TEST_MYS)) {
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
     ensure_song($effect[The Magical Mojomuscular Melody]);
+    ensure_effect($effect[Quiet Judgement]);
     ensure_effect($effect[Tomato Power]);
     ensure_effect($effect[Mystically Oiled]);
     ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
@@ -968,16 +984,6 @@ if (!test_done(TEST_MOX)) {
 
 if (!test_done(TEST_ITEM)) {
     ensure_mp_sausage(500);
-
-    if (available_amount($item[cyclops eyedrops]) == 0 && have_effect($effect[One Very Clear Eye]) == 0) {
-        cli_execute('pillkeeper semirare');
-        if (get_property_int('semirareCounter') != 0) {
-            error('Semirare should be now. Something went wrong.');
-        }
-        cli_execute('mood apathetic');
-        cli_execute('counters nowarn Fortune Cookie');
-        adv1($location[The Limerick Dungeon], -1, '');
-    }
 
     try_use(1, $item[astral six-pack]);
     if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 5) {
@@ -1017,6 +1023,11 @@ if (!test_done(TEST_ITEM)) {
     ensure_effect($effect[Nearly All-Natural]);
     ensure_effect($effect[Steely-Eyed Squint]);
 
+    if (get_property_int('_campAwaySmileBuffs') == 0) {
+        // See if we can get Big Smile of the Blender.
+        visit_url('place.php?whichplace=campaway&action=campaway_sky');
+    }
+
     if (have_effect($effect[Certainty]) == 0) {
         use_familiar($familiar[Rock Lobster]);
         if (available_amount($item[ectoplasm <i>au jus</i>]) + available_amount($item[eyedrops of the ermine]) == 0) {
@@ -1048,7 +1059,7 @@ if (!test_done(TEST_ITEM)) {
             $effect[Infernal Thirst],
             $item[Irish Coffee, English Heart],
             item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
-            $item[full meat tank],
+            item_priority($item[Flaskfull of Hollow], $item[full meat tank]),
             $item[extra-strength rubber bands] // get cracker
         );
     }
@@ -1135,7 +1146,7 @@ if (!test_done(TEST_HOT_RES)) {
     ensure_effect($effect[Astral Shell]);
 
     // Build up 100 turns of Deep Dark Visions for spell damage later.
-    while (have_skill($skill[Deep Dark Visions]) && have_effect($effect[Visions of the Deep Dark Deeps]) < 100) {
+    while (have_skill($skill[Deep Dark Visions]) && have_effect($effect[Visions of the Deep Dark Deeps]) < 80) {
         if (my_mp() < 20) {
             ensure_create_item(1, $item[magical sausage]);
             eat(1, $item[magical sausage]);
@@ -1148,7 +1159,10 @@ if (!test_done(TEST_HOT_RES)) {
             eat(1, $item[magical sausage]);
         }
         if (round(numeric_modifier('spooky resistance')) < 10) {
-            abort('Not enough spooky res for Deep Dark Visions.');
+            ensure_effect($effect[Does It Have a Skull In There??]);
+            if (round(numeric_modifier('spooky resistance')) < 10) {
+                abort('Not enough spooky res for Deep Dark Visions.');
+            }
         }
         use_skill(1, $skill[Deep Dark Visions]);
     }
@@ -1292,6 +1306,8 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Frenzied, Bloody]);
     ensure_effect($effect[Scowl of the Auk]);
+    ensure_effect($effect[Disdain of the War Snapper]);
+    ensure_effect($effect[Tenacity of the Snapper]);
     ensure_song($effect[Jackasses' Symphony of Destruction]);
 
     if (available_amount($item[vial of hamethyst juice]) > 0) {
@@ -1364,7 +1380,7 @@ if (!test_done(TEST_SPELL)) {
     ensure_effect($effect[Carol of the Hells]);
 
     // Pool buff
-    ensure_effect($effect[Mental A-cue-ity]);
+    if (get_property_int('_poolGames') < 3) ensure_effect($effect[Mental A-cue-ity]);
 
     // Beach Comb
     ensure_effect($effect[We're All Made of Starfish]);
