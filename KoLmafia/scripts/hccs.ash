@@ -71,6 +71,23 @@ item item_priority(item it1, item it2, item it3, item it4) {
     else return it4;
 }
 
+boolean pull_if_possible(int quantity, item it, int max_price) {
+    if (pulls_remaining() > 0) {
+        int quantity_pull = max(0, quantity - available_amount(it));
+        if (storage_amount(it) < quantity_pull) {
+            buy_using_storage(quantity_pull - storage_amount(it), it, max_price);
+        }
+        cli_execute(`pull {quantity_pull} {it.name}`);
+        return true;
+    } else return false;
+}
+
+void ensure_pull_effect(effect ef, item it) {
+    if (have_effect(ef) == 0 && pull_if_possible(1, it, 50000)) {
+        use(1, it);
+    }
+}
+
 void eat_pizza(item it1, item it2, item it3, item it4) {
     if (available_amount($item[diabolic pizza]) > 0) {
         error('Already have a pizza.');
@@ -506,7 +523,8 @@ if (!test_done(TEST_HP)) {
         // Get a pocket professor chip.
         // use_familiar($familiar[Pocket Professor]);
         // Actually, get a quadroculars for DISQ later.
-        use_familiar($familiar[He-Boulder]);
+        // use_familiar($familiar[He-Boulder]);
+        use_familiar($familiar[Rock Lobster]);
         pizza_effect(
             $effect[Different Way of Seeing Things],
             $item[dripping meat crossbow],
@@ -589,11 +607,11 @@ if (!test_done(TEST_HP)) {
         ensure_create_item(1, $item[meat stack]);
         create(1, $item[full meat tank]);
         // Get some CSAs for later pizzas
-        int count = 3 - available_amount($item[cog and sprocket assembly]);
+        /* int count = 3 - available_amount($item[cog and sprocket assembly]);
         ensure_item(count, $item[cog]);
         ensure_item(count, $item[sprocket]);
         ensure_item(count, $item[spring]);
-        create(count, $item[cog and sprocket assembly]);
+        create(count, $item[cog and sprocket assembly]); */
         // Actually tune the moon.
         visit_url('inv_use.php?whichitem=10254&doit=96&whichsign=8');
     }
@@ -677,11 +695,17 @@ if (!test_done(TEST_HP)) {
     ensure_sewer_item(1, $item[turtle totem]);
     ensure_sewer_item(1, $item[saucepan]);
 
-    // Cast Ode and drink bee's knees
-    if (have_effect($effect[On the Trolley]) == 0) {
+    /* if (pulls_remaining() > 0) {
+        ensure_pull_effect($effect[Gr8ness], $item[potion of temporary gr8ness]);
+    } else if (have_effect($effect[On the Trolley]) == 0) {
+        // Cast Ode and drink bee's knees
         assert_meat(500);
         ensure_ode(2);
         cli_execute('drink 1 Bee\'s Knees');
+    } */
+
+    if (available_amount($item[flask of baconstone juice]) > 0) {
+        ensure_effect($effect[Baconstoned]);
     }
 
     // Don't use Kramco here.
@@ -986,7 +1010,7 @@ if (!test_done(TEST_ITEM)) {
     ensure_mp_sausage(500);
 
     try_use(1, $item[astral six-pack]);
-    if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 5) {
+    if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 3) { // 5) {
         error('Too drunk. Something went wrong.');
     }
 
@@ -1028,7 +1052,7 @@ if (!test_done(TEST_ITEM)) {
         visit_url('place.php?whichplace=campaway&action=campaway_sky');
     }
 
-    if (have_effect($effect[Certainty]) == 0) {
+    /* if (have_effect($effect[Certainty]) == 0) {
         use_familiar($familiar[Rock Lobster]);
         if (available_amount($item[ectoplasm <i>au jus</i>]) + available_amount($item[eyedrops of the ermine]) == 0) {
             // should have strawberry already.
@@ -1047,7 +1071,7 @@ if (!test_done(TEST_ITEM)) {
             item_priority($item[ravioli hat], $item[red pixel], $item[ratty knitted cap]),
             $item[blood-faced volleyball] // get extra-strength rubber bands
         );
-    }
+    } */
 
     if (have_effect($effect[Infernal Thirst]) == 0) {
         use_familiar($familiar[Exotic Parrot]);
@@ -1077,7 +1101,7 @@ if (!test_done(TEST_ITEM)) {
 if (!test_done(TEST_HOT_RES)) {
     ensure_mp_sausage(500);
 
-    if (have_effect($effect[Feeling No Pain]) == 0) {
+    /* if (have_effect($effect[Feeling No Pain]) == 0) {
         if (my_meat() < 500) {
             error('Not enough meat. Please autosell stuff.');
         }
@@ -1086,7 +1110,7 @@ if (!test_done(TEST_HOT_RES)) {
         }
         ensure_ode(2);
         cli_execute('drink 1 Ish Kabibble');
-    }
+    } */
 
     // Make sure no moon spoon.
     equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
@@ -1120,9 +1144,9 @@ if (!test_done(TEST_HOT_RES)) {
     // Pool buff. This will fall through to fam weight.
     ensure_effect($effect[Billiards Belligerence]);
 
-    if (have_effect($effect[Rainbowolin]) == 0) {
+    /* if (have_effect($effect[Rainbowolin]) == 0) {
         cli_execute('pillkeeper elemental');
-    }
+    } */
 
     ensure_item(1, $item[tenderizing hammer]);
     cli_execute('smash * ratty knitted cap');
@@ -1139,7 +1163,7 @@ if (!test_done(TEST_HOT_RES)) {
     }
 
     if (get_property_int('_genieWishesUsed') < 3 || available_amount($item[pocket wish]) > 0) {
-        wish_effect($effect[Fireproof Lips]);
+        // wish_effect($effect[Fireproof Lips]);
     }
 
     ensure_effect($effect[Elemental Saucesphere]);
@@ -1176,7 +1200,15 @@ if (!test_done(TEST_HOT_RES)) {
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     maximize('hot res, 0.01 familiar weight', false);
 
-    if (numeric_modifier('hot resistance') < 40) {
+    if (round(numeric_modifier('hot resistance')) + 9 <= 59) {
+        ensure_pull_effect($effect[Fireproof Lips], $item[SPF 451 lip balm]);
+    }
+    // OK to waste one turn here
+    if (round(numeric_modifier('hot resistance')) + 5 <= 60) {
+        ensure_pull_effect($effect[Good Chance of Surviving Hell], $item[infernal snowball]);
+    }
+
+    if (round(numeric_modifier('hot resistance')) < 40) {
         error('Something went wrong building hot res.');
     }
 
@@ -1225,7 +1257,7 @@ if (!test_done(TEST_NONCOMBAT)) {
     ensure_effect($effect[Throwing Some Shade]);
     ensure_effect($effect[A Rose by Any Other Material]);
 
-    if (have_effect($effect[Disquiet Riot]) == 0) {
+    /* if (have_effect($effect[Disquiet Riot]) == 0) {
         // For aftercore.
         use_familiar($familiar[Cornbeefadon]);
         if (available_amount($item[dripping meat crossbow]) == 0) {
@@ -1257,9 +1289,9 @@ if (!test_done(TEST_NONCOMBAT)) {
             $item[shot of orange schnapps],
             $item[quadroculars]
         );
-    }
+    } */
 
-    // wish_effect($effect[Disquiet Riot]);
+    wish_effect($effect[Disquiet Riot]);
 
     use_familiar($familiar[Disgeist]);
 
@@ -1321,10 +1353,6 @@ if (!test_done(TEST_WEAPON)) {
     // Beach Comb
     ensure_effect($effect[Lack of Body-Building]);
 
-    if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
-        cli_execute('boombox damage');
-    }
-
     // Boombox potion - did we get one?
     if (available_amount($item[Punching Potion]) > 0) {
         ensure_effect($effect[Feeling Punchy]);
@@ -1338,7 +1366,7 @@ if (!test_done(TEST_WEAPON)) {
 
     ensure_npc_effect($effect[Engorged Weapon], 1, $item[Meleegra&trade; pills]);
 
-    if (have_effect($effect[Outer Wolf&trade;]) == 0) {
+    /* if (have_effect($effect[Outer Wolf&trade;]) == 0) {
         use(available_amount($item[van key]), $item[van key]);
         if (available_amount($item[ointment of the occult]) == 0) {
             // Should have a second grapefruit from Scurvy.
@@ -1356,18 +1384,22 @@ if (!test_done(TEST_WEAPON)) {
             item_priority($item[Middle of the Road&trade; brand whiskey], $item[cog and sprocket assembly]),
             item_priority($item[surprisingly capacious handbag], $item[cog and sprocket assembly])
         );
-    }
+    } */
 
-    wish_effect($effect[Pyramid Power]);
-    wish_effect($effect[Wasabi With You]);
+    ensure_pull_effect($effect[Wasabi With You], $item[wasabi marble soda]);
+    ensure_pull_effect($effect[Seeing Red], $item[red eye]);
+    wish_effect($effect[Outer Wolf&trade;]);
+
+    // wish_effect($effect[Pyramid Power]);
+    // wish_effect($effect[Wasabi With You]);
 
     ensure_effect($effect[Bow-Legged Swagger]);
 
     maximize('weapon damage', false);
 
-    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) > 15) {
+    /* if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) > 15) {
         abort('Something went wrong with weapon damage.');
-    }
+    } */
 
     do_test(TEST_WEAPON);
 }
@@ -1387,9 +1419,11 @@ if (!test_done(TEST_SPELL)) {
 
     use_skill(1, $skill[Spirit of Cayenne]);
 
-    if (available_amount($item[flask of baconstone juice]) > 0) {
+    /* if (available_amount($item[flask of baconstone juice]) > 0) {
         ensure_effect($effect[Baconstoned]);
-    }
+    } */
+
+    ensure_pull_effect($effect[Pisces in the Skyces], $item[tobiko marble soda]);
 
     autosell_all($item[neverending wallet chain]);
     autosell_all($item[pentagram bandana]);
