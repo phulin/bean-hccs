@@ -36,6 +36,9 @@ if (get_property('boomBoxSong') != 'Food Vibrations') {
 
 cli_execute('pull all');
 cli_execute('/whitelist ferengi');
+use_skill(1, $skill[Lock Picking]);
+run_choice(1);
+create(1, $item[Boris's key lime pie]);
 cli_execute('breakfast');
 
 if (get_campground()[$item[clockwork maid]] == 0) {
@@ -144,3 +147,5 @@ if (!get_property_boolean('_thesisDelivered') && get_property_int('_lastSausageM
     cli_execute('ccs thesis');
     adv1($location[The Neverending Party], -1, '');
 }
+
+cli_execute('send to buffy || 1500 reptilian jingle')
