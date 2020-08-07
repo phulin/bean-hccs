@@ -28,6 +28,11 @@ set_property('autoSatisfyWithNPCs', 'true');
 set_property('autoSatisfyWithCoinmasters', 'true');
 set_property('hpAutoRecovery', '0.8');
 
+if (!get_property_boolean('lockPicked')) {
+    use_skill(1, $skill[Lock Picking]);
+    run_choice(1);
+}
+
 cli_execute('mood default');
 cli_execute('ccs default');
 if (get_property('boomBoxSong') != 'Food Vibrations') {
@@ -36,16 +41,13 @@ if (get_property('boomBoxSong') != 'Food Vibrations') {
 
 cli_execute('pull all');
 cli_execute('/whitelist ferengi');
-use_skill(1, $skill[Lock Picking]);
-run_choice(1);
-create(1, $item[Boris's key lime pie]);
+if (available_amount($item[Boris's key]) > 0) {
+    create(1, $item[Boris's key lime pie]);
+}
 cli_execute('breakfast');
 
-if (get_campground()[$item[clockwork maid]] == 0) {
-    use(1, $item[clockwork maid]);
-}
-
 ensure_mp_sausage(500);
+use_skill(1, $skill[Cannelloni Cocoon]);
 cli_execute('mood execute');
 
 equip($item[Iunion Crown]);
@@ -104,7 +106,7 @@ if (choco contains my_class() && get_property_int('_chocolatesUsed') < 3) {
     }
 }
 
-if (!get_property_boolean('_thesisDelivered') && get_property_int('_lastSausageMonsterTurn') + 50 < total_turns_played()) {
+if (!get_property_boolean('_thesisDelivered') && sausage_fight_guaranteed()) {
     // Get thesis.
     use_familiar($familiar[Pocket Professor]);
     int needed_xp = 400 - $familiar[Pocket Professor].experience;
@@ -148,4 +150,19 @@ if (!get_property_boolean('_thesisDelivered') && get_property_int('_lastSausageM
     adv1($location[The Neverending Party], -1, '');
 }
 
-cli_execute('send to buffy || 1500 reptilian jingle')
+cli_execute('send to buffy || 1500 reptilian jingle');
+
+if (get_campground()[$item[clockwork maid]] == 0) {
+    use(1, $item[clockwork maid]);
+}
+
+if (my_fullness() >= 3 && my_inebriety() >= 3 && available_amount($item[spice melange]) > 0 && !get_property_boolean('spiceMelangeUsed')) {
+    use(1, $item[spice melange]);
+}
+
+cli_execute('hobodiet');
+
+if (fullness_limit() - my_fullness() == 3 && get_property_boolean('spiceMelangeUsed')) {
+    eat(1, $item[fudge spork]);
+    eat(1, $item[meteoreo]);
+}

@@ -131,3 +131,9 @@ void ensure_mp_sausage(int mp) {
         eat(1, $item[magical sausage]);
     }
 }
+
+boolean sausage_fight_guaranteed() {
+    int goblins_fought = get_property_int("_sausageFights");    
+    int next_guaranteed = get_property_int("_lastSausageMonsterTurn") + 4 + goblins_fought * 3 + max(0, goblins_fought - 5) ** 3;
+    return total_turns_played() >= next_guaranteed;
+}

@@ -192,7 +192,14 @@ void main(int initround, monster foe, string page) {
     string monster_name = get_hccs_combat_arg1();
     monster desired = monster_name.to_monster();
     if (mode == MODE_SABER_YR) {
-        use_skill(1, $skill[Use the Force]);
+        buffer macro = m_new();
+        string skill_name = get_hccs_combat_arg1();
+        if (skill_name.to_skill() != $skill[none]) {
+            macro = macro.m_skill(skill_name.to_skill());
+        }
+        macro
+            .m_skill($skill[Use the Force])
+            .m_repeat_submit();
     } else if (mode == MODE_FIND_MONSTER_SABER_YR) {
         monster[string] banished = banished_monsters();
         if (foe == desired) {
@@ -200,7 +207,7 @@ void main(int initround, monster foe, string page) {
             use_skill(1, $skill[Use the Force]);
         } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "Reflex Hammer", loc)) {
             use_skill(1, $skill[Reflex Hammer]);
-        } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "Snokebomb", loc)) {
+        } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "snokebomb", loc)) {
             use_skill(1, $skill[Snokebomb]);
         } else if (have_skill($skill[CHEAT CODE: Replace Enemy]) && get_property_int("_powerfulGloveBatteryPowerUsed") <= 80) {
             int original_battery = get_property_int("_powerfulGloveBatteryPowerUsed");
@@ -296,13 +303,21 @@ void saber_yr() {
     }
 }
 
+void adventure_saber_yr(location loc, skill sk) {
+    set_hccs_combat_mode(MODE_SABER_YR, sk.name);
+    set_property("choiceAdventure1387", "3");
+    adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL, '');
+}
+
 void find_monster_saber_yr(location loc, monster foe) {
     set_hccs_combat_mode(MODE_FIND_MONSTER_SABER_YR, foe.name);
     set_property("_hccsCombatFound", "false");
+    set_property("choiceAdventure1387", "3");
     while (get_property("_hccsCombatFound") != "true") {
         adv1(loc, -1, "");
     }
-    saber_yr();
+    // this appears to be handled automatically now: saber_yr();
     set_hccs_combat_mode(MODE_NULL, '');
 }
 

@@ -300,13 +300,31 @@ void ensure_ode(int turns) {
     }
 }
 
-boolean summon_bricko_oyster() {
+boolean summon_bricko_oyster(int max_summons) {
     if (get_property_int('_brickoFights') >= 3) return false;
     if (available_amount($item[BRICKO oyster]) > 0) return true;
-    while (get_property_int('libramSummons') < 7 && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
+    while (get_property_int('libramSummons') < max_summons && (available_amount($item[BRICKO eye brick]) < 1 || available_amount($item[BRICKO brick]) < 8)) {
         use_skill(1, $skill[Summon BRICKOs]);
     }
     return use(8, $item[BRICKO brick]);
+}
+
+void fight_sausage_if_guaranteed() {
+    if (sausage_fight_guaranteed()) {
+        equip($item[Iunion Crown]);
+        equip($slot[shirt], $item[none]);
+        equip($item[Fourth of May Cosplay Saber]);
+        equip($item[Kramco Sausage-o-Matic&trade;]);
+        equip($item[old sweatpants]);
+        equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
+        equip($slot[acc2], $item[Powerful Glove]);
+        equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
+
+        use_familiar($familiar[Melodramedary]);
+        equip($item[dromedary drinking helmet]);
+
+        adventure_kill($location[The Neverending Party]);
+    }
 }
 
 boolean stat_ready() {
@@ -360,6 +378,7 @@ set_choice(1340, 3);
 // Default equipment.
 equip($item[Iunion Crown]);
 equip($slot[shirt], $item[none]);
+equip($item[vampyric cloake]);
 equip($item[Fourth of May Cosplay Saber]);
 equip($item[Kramco Sausage-o-Matic&trade;]);
 equip($item[old sweatpants]);
@@ -381,7 +400,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     }
 
     cli_execute('/whitelist ferengi');
-    retrieve_item(1, $item[fish hatchet]);
+    // retrieve_item(1, $item[fish hatchet]);
 
     // Chateau juice bar
     visit_url('place.php?whichplace=chateau&action=chateau_desk2');
@@ -409,12 +428,17 @@ if (!test_done(TEST_COIL_WIRE)) {
         ensure_effect($effect[Inscrutable Gaze]);
     }
 
+    // Campsite
+    if (have_effect($effect[That's Just Cloud-Talk, Man]) == 0) {
+        visit_url('place.php?whichplace=campaway&action=campaway_sky');
+    }
+
     // Depends on Ez's Bastille script.
     cli_execute('bastille myst brutalist');
 
-    /* // Find a spleen item in the Barrels.
-    foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
-        if (available_amount($item[magicalness-in-a-can]) + available_amount($item[strongness elixir]) > 0) break;
+    // Find an E source in the barrels.
+    /* foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
+        if (available_amount($item[extra-strength strongness elixir]) + available_amount($item[enchanted barbell]) > 0) break;
         print(`Trying barrel in slot {barrel}.`);
         // Smash the barrel.
         visit_url('barrel.php');
@@ -424,25 +448,10 @@ if (!test_done(TEST_COIL_WIRE)) {
             run_combat();
             set_hccs_combat_mode(MODE_NULL);
         }
-    }
-
-    if (my_fullness() < 3) {
-        int count = 3 - available_amount($item[cog and sprocket assembly]);
-        ensure_item(count, $item[cog]);
-        ensure_item(count, $item[sprocket]);
-        ensure_item(count, $item[spring]);
-        create(count, $item[cog and sprocket assembly]);
-        // Medicinal pizza to get us to level 5 to drink perfect drink.
-        eat_pizza(
-            $item[cog and sprocket assembly],
-            $item[cog and sprocket assembly],
-            $item[cog and sprocket assembly],
-            item_priority($item[magicalness-in-a-can], $item[strongness elixir], $item[moxie weed])
-        );
-    }*/
+    } */
 
     // Use a couple chateau rests to hit level 5. Should also give us a ton of MP.
-    while (get_property_int('timesRested') < 2) {
+    while (get_property_int('timesRested') < 2 && my_level() < 5) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
         if (my_mp() > 50 && available_amount($item[bottle of rum]) == 0) {
             use_skill(1, $skill[Prevent Scurvy and Sobriety]);
@@ -470,6 +479,10 @@ if (!test_done(TEST_COIL_WIRE)) {
     // Upgrade saber for fam wt
     visit_url('main.php?action=may4');
     run_choice(4);
+
+    // Vote.
+    visit_url('place.php?whichplace=town_right&action=townright_vote');
+    visit_url('choice.php?option=1&whichchoice=1331&g=2&local%5B%5D=2&local%5B%5D=3');
 
     // Put on some regen gear
     equip($item[Iunion Crown]);
@@ -534,6 +547,28 @@ if (!test_done(TEST_HP)) {
         );
     }
 
+    // Get infernal thirst now so we can chain fam equip correctly.
+    if (have_effect($effect[Infernal Thirst]) == 0) {
+        use_familiar($familiar[Melodramedary]);
+        if (available_amount($item[Irish Coffee, English Heart]) == 0) {
+            ensure_item(1, $item[cup of lukewarm tea]);
+            create(1, $item[Irish Coffee, English Heart]);
+        }
+        if (available_amount($item[full meat tank]) == 0) {
+            // Get a full meat tank for later
+            ensure_item(1, $item[empty meat tank]);
+            ensure_create_item(1, $item[meat stack]);
+            create(1, $item[full meat tank]);
+        }
+        pizza_effect(
+            $effect[Infernal Thirst],
+            $item[Irish Coffee, English Heart],
+            $item[Newbiesport&trade; tent],
+            $item[full meat tank],
+            $item[extra-strength rubber bands] // get camel equip
+        );
+    }
+
     /*
     // Check G-9, then genie effect Experimental Effect G-9/New and Improved
     effect g9 = $effect[Experimental Effect G-9];
@@ -566,18 +601,18 @@ if (!test_done(TEST_HP)) {
         }
     }
 
-    ensure_effect($effect[Merry Smithsness]);
+    if (available_amount($item[Flaskfull of Hollow]) > 0) {
+        ensure_effect($effect[Merry Smithsness]);
+    }
+
+    // Boxing Daycare
+    ensure_effect($effect[Uncucumbered]);
 
     // Cast inscrutable gaze
     ensure_effect($effect[Inscrutable Gaze]);
 
     // Shower lukewarm
     ensure_effect($effect[Thaumodynamic]);
-
-    // Campsite
-    if (have_effect($effect[That's Just Cloud-Talk, Man]) == 0) {
-        visit_url('place.php?whichplace=campaway&action=campaway_sky');
-    }
 
     // Beach Comb
     ensure_effect($effect[You Learned Something Maybe!]);
@@ -602,10 +637,6 @@ if (!test_done(TEST_HP)) {
         // Get a frilly skirt for later
         ensure_item(1, $item[frilly skirt]);
         create(1, $item[Vicar's Tutu]);
-        // Get a full meat tank for later
-        ensure_item(1, $item[empty meat tank]);
-        ensure_create_item(1, $item[meat stack]);
-        create(1, $item[full meat tank]);
         // Get some CSAs for later pizzas
         /* int count = 3 - available_amount($item[cog and sprocket assembly]);
         ensure_item(count, $item[cog]);
@@ -625,14 +656,10 @@ if (!test_done(TEST_HP)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
-    while (summon_bricko_oyster() && available_amount($item[BRICKO oyster]) > 0) {
-        if (available_amount($item[bag of many confections]) == 0) {
-            // Use one of these fights to get a bag of many confections.
-            use_familiar($familiar[Stocking Mimic]);
-            equip($slot[familiar], $item[none]);
-        } else {
-            use_familiar($familiar[Pocket Professor]);
-        }
+    if (get_property_int('_brickoFights') == 0 && summon_bricko_oyster(7) && available_amount($item[BRICKO oyster]) > 0) {
+        if (available_amount($item[bag of many confections]) > 0) error('We should not have a bag yet.');
+        use_familiar($familiar[Stocking Mimic]);
+        equip($slot[familiar], $item[none]);
         if (my_hp() < .8 * my_maxhp()) {
             visit_url('clan_viplounge.php?where=hottub');
         }
@@ -659,7 +686,7 @@ if (!test_done(TEST_HP)) {
     synthesis_plan($effect[Synthesis: Learning], subsequent);
     synthesis_plan($effect[Synthesis: Smart], tail(subsequent));
 
-    if (numeric_modifier('mysticality experience percent') < 124.999) {
+    if (numeric_modifier('mysticality experience percent') < 149.999) {
         error('Insufficient +stat%.');
     }
 
@@ -683,6 +710,19 @@ if (!test_done(TEST_HP)) {
     // Chateau rest
     while (get_property_int('timesRested') < total_free_rests()) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
+    }
+
+    while (summon_bricko_oyster(11) && available_amount($item[BRICKO oyster]) > 0) {
+        use_familiar($familiar[Melodramedary]);
+        equip($item[dromedary drinking helmet]);
+        if (my_hp() < .8 * my_maxhp()) {
+            visit_url('clan_viplounge.php?where=hottub');
+        }
+        ensure_mp_sausage(32);
+        set_hccs_combat_mode(MODE_OTOSCOPE);
+        use(1, $item[BRICKO oyster]);
+        autosell(1, $item[BRICKO pearl]);
+        set_hccs_combat_mode(MODE_NULL);
     }
 
     ensure_effect($effect[Song of Bravado]);
@@ -808,10 +848,9 @@ if (!test_done(TEST_HP)) {
     ensure_potion_effect($effect[Tomato Power], $item[tomato juice of powerful power]);
     ensure_potion_effect($effect[Mystically Oiled], $item[ointment of the occult]);
 
-    // Take hovering sombrero
-    use_familiar($familiar[Hovering Sombrero]);
-    try_equip($item[amulet coin]);
-    try_equip($item[astral pet sweater]);
+    // Take camel
+    use_familiar($familiar[Melodramedary]);
+    equip($item[dromedary drinking helmet]);
 
     // Maximize familiar weight
     equip($item[makeshift garbage shirt]);
@@ -837,14 +876,14 @@ if (!test_done(TEST_HP)) {
         ensure_song($effect[Polka of Plenty]);
 
         cli_execute('mood execute');
-        if (have_effect($effect[Tomes of Opportunity]) == 0) {
+        /* if (have_effect($effect[Tomes of Opportunity]) == 0) {
             // NEP noncombat. Get stat buff if we don't have it. This WILL spend an adventure if we're out.
             set_choice(1324, 1);
             set_choice(1325, 2);
-        } else {
-            // Otherwise fight.
-            set_choice(1324, 5);
-        }
+        } else { */
+        // Otherwise fight.
+        set_choice(1324, 5);
+        // }
 
         ensure_mp_sausage(100);
         if (get_property_int('_neverendingPartyFreeTurns') < 10) {
@@ -853,6 +892,19 @@ if (!test_done(TEST_HP)) {
             adventure_free_kill($location[The Neverending Party]);
         }
     }   
+
+    use_familiar($familiar[God Lobster]);
+    while (get_property('_godLobsterFights') < 2) {
+        // Get equipment from the fight.
+        set_property('choiceAdventure1310', '1');
+        try_equip($item[God Lobster's Scepter]);
+        visit_url('main.php?fightgodlobster=1');
+        set_hccs_combat_mode(MODE_KILL);
+        run_combat();
+        visit_url('choice.php');
+        if (handling_choice()) run_choice(1);
+        set_hccs_combat_mode(MODE_NULL);
+    }
 
     // Spend our free runs finding gobbos. We do this in the Haiku Dungeon since there is a single skippable NC.
     use_familiar($familiar[Frumious Bandersnatch]);
@@ -871,11 +923,11 @@ if (!test_done(TEST_HP)) {
         adventure_run_unless_free($location[The Haunted Kitchen]);
     }
 
-    if (get_property('latteUnlocks').contains_text('chili')) {
+    if (get_property('latteUnlocks').contains_text('chili') && get_property_int('_latteRefillsUsed') == 0) {
         cli_execute('latte refill pumpkin chili vanilla');
     }
 
-    equip($item[fish hatchet]);
+    // equip($item[fish hatchet]);
     equip($item[Kramco Sausage-o-Matic&trade;]);
 
     while ((get_property_int('_banderRunaways') < my_familiar_weight() / 5
@@ -891,6 +943,9 @@ if (!test_done(TEST_HP)) {
         }
         if (get_property_int('_banderRunaways') < my_familiar_weight() / 5) {
             ensure_ode(1);
+        } else {
+            use_familiar($familiar[Melodramedary]);
+            equip($item[dromedary drinking helmet]);
         }
 
         // Skip fairy gravy NC
@@ -903,9 +958,8 @@ if (!test_done(TEST_HP)) {
 
     equip($item[Fourth of May Cosplay Saber]);
     equip($item[makeshift garbage shirt]);
-    use_familiar($familiar[Hovering Sombrero]);
-    try_equip($item[amulet coin]);
-    try_equip($item[astral pet sweater]);
+    use_familiar($familiar[Melodramedary]);
+    equip($item[dromedary drinking helmet]);
 
     if (get_property('boomBoxSong') != 'These Fists Were Made for Punchin\'') {
         cli_execute('boombox damage');
@@ -1009,6 +1063,12 @@ if (!test_done(TEST_MOX)) {
 if (!test_done(TEST_ITEM)) {
     ensure_mp_sausage(500);
 
+    fight_sausage_if_guaranteed();
+
+    if (have_effect($effect[Bat-Adjacent Form]) == 0) {
+        adventure_saber_yr($location[The Neverending Party], $skill[Become a Bat]);
+    }
+
     try_use(1, $item[astral six-pack]);
     if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 3) { // 5) {
         error('Too drunk. Something went wrong.');
@@ -1073,21 +1133,6 @@ if (!test_done(TEST_ITEM)) {
         );
     } */
 
-    if (have_effect($effect[Infernal Thirst]) == 0) {
-        use_familiar($familiar[Exotic Parrot]);
-        if (available_amount($item[Irish Coffee, English Heart]) == 0) {
-            ensure_item(1, $item[cup of lukewarm tea]);
-            create(1, $item[Irish Coffee, English Heart]);
-        }
-        pizza_effect(
-            $effect[Infernal Thirst],
-            $item[Irish Coffee, English Heart],
-            item_priority($item[neverending wallet chain], $item[Newbiesport&trade; tent]),
-            item_priority($item[Flaskfull of Hollow], $item[full meat tank]),
-            $item[extra-strength rubber bands] // get cracker
-        );
-    }
-
     maximize('item, 2 booze drop, equip Vicar\'s Tutu, -equip broken champagne bottle', false);
 
     do_test(TEST_ITEM);
@@ -1100,6 +1145,8 @@ if (!test_done(TEST_ITEM)) {
 
 if (!test_done(TEST_HOT_RES)) {
     ensure_mp_sausage(500);
+
+    fight_sausage_if_guaranteed();
 
     /* if (have_effect($effect[Feeling No Pain]) == 0) {
         if (my_meat() < 500) {
@@ -1119,13 +1166,14 @@ if (!test_done(TEST_HOT_RES)) {
 
     if (available_amount($item[heat-resistant gloves]) == 0) {
         if (available_amount($item[photocopied monster]) == 0) {
-            cli_execute('faxbot factory worker');
+            // cli_execute('faxbot factory worker');
+            faxbot($monster[factory worker (female)], 'cheesefax');
         }
         cli_execute('mood apathetic');
         equip($item[Fourth of May Cosplay Saber]);
-        set_hccs_combat_mode(MODE_SABER_YR);
+        set_hccs_combat_mode(MODE_SABER_YR, "Become a Cloud of Mist");
+        set_property("choiceAdventure1387", "3");
         use(1, $item[photocopied monster]);
-        saber_yr();
         set_hccs_combat_mode(MODE_NULL);
     }
     autosell(1, $item[very hot lunch]);
@@ -1195,7 +1243,9 @@ if (!test_done(TEST_HOT_RES)) {
     ensure_effect($effect[Hot-Headed]);
 
     // Use pocket maze
-    ensure_effect($effect[Amazing]);
+    if (available_amount($item[pocket maze]) > 0) ensure_effect($effect[Amazing]);
+
+    pull_if_possible(1, $item[cracker], 20000);
 
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     maximize('hot res, 0.01 familiar weight', false);
@@ -1219,6 +1269,9 @@ if (!test_done(TEST_HOT_RES)) {
 }
 
 if (!test_done(TEST_FAMILIAR)) {
+    // Get gobbo fight.
+    fight_sausage_if_guaranteed();
+
     // These should have fallen through all the way from leveling.
     ensure_effect($effect[Fidoxene]);
     ensure_effect($effect[Do I Know You From Somewhere?]);
@@ -1231,6 +1284,12 @@ if (!test_done(TEST_FAMILIAR)) {
     ensure_effect($effect[Leash of Linguini]);
     ensure_effect($effect[Empathy]);
 
+    if (available_amount($item[cracker]) > 0) {
+        // This is the best familiar weight accessory.
+        use_familiar($familiar[Exotic Parrot]);
+        equip($item[cracker]);
+    }
+
     maximize('familiar weight', false);
 
     do_test(TEST_FAMILIAR);
@@ -1241,6 +1300,19 @@ if (!test_done(TEST_NONCOMBAT)) {
     ensure_effect($effect[Blood Bond]);
     ensure_effect($effect[Leash of Linguini]);
     ensure_effect($effect[Empathy]);
+
+    if (get_property('_godLobsterFights') < 3) {
+        if (my_hp() < 0.8 * my_maxhp()) use_skill(1, $skill[Cannelloni Cocoon]);
+        use_familiar($familiar[God Lobster]);
+        // Get -combat buff.
+        set_property('choiceAdventure1310', '2');
+        equip($item[God Lobster's Ring]);
+        visit_url('main.php?fightgodlobster=1');
+        set_hccs_combat_mode(MODE_KILL);
+        run_combat();
+        if (handling_choice()) run_choice(2);
+        set_hccs_combat_mode(MODE_NULL);
+    }
 
     // Pool buff. Should fall through to weapon damage.
     ensure_effect($effect[Billiards Belligerence]);
@@ -1305,18 +1377,21 @@ if (!test_done(TEST_NONCOMBAT)) {
 }
 
 if (!test_done(TEST_WEAPON)) {
+    // Get gobbo fight.
+    fight_sausage_if_guaranteed();
+
     // Paint ungulith (Saber YR)
     if (!get_property_boolean('_chateauMonsterFought')) {
         string chateau_text = visit_url('place.php?whichplace=chateau', false);
         matcher m = create_matcher('alt="Painting of an? ([^(]*) .1."', chateau_text);
         if (m.find() && m.group(1) == 'ungulith') {
             cli_execute('mood apathetic');
-            set_hccs_combat_mode(MODE_SABER_YR);
+            set_hccs_combat_mode(MODE_SABER_YR, "spit on me");
             visit_url('place.php?whichplace=chateau&action=chateau_painting', false);
             run_combat();
             saber_yr();
         } else {
-            abort('Wrong painting.');
+            error('Wrong painting.');
         }
     }
 
@@ -1386,8 +1461,6 @@ if (!test_done(TEST_WEAPON)) {
         );
     } */
 
-    ensure_pull_effect($effect[Wasabi With You], $item[wasabi marble soda]);
-    ensure_pull_effect($effect[Seeing Red], $item[red eye]);
     wish_effect($effect[Outer Wolf&trade;]);
 
     // wish_effect($effect[Pyramid Power]);
@@ -1396,6 +1469,11 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Bow-Legged Swagger]);
 
     maximize('weapon damage', false);
+
+    ensure_pull_effect($effect[Wasabi With You], $item[wasabi marble soda]);
+    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) >= 6) {
+        ensure_pull_effect($effect[Seeing Red], $item[red eye]);
+    }
 
     /* if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) > 15) {
         abort('Something went wrong with weapon damage.');
@@ -1423,22 +1501,15 @@ if (!test_done(TEST_SPELL)) {
         ensure_effect($effect[Baconstoned]);
     } */
 
+    // Get flimsy hardwood scraps.
+    visit_url('shop.php?whichshop=lathe');
+    if (available_amount($item[flimsy hardwood scraps]) > 0) {
+        visit_url('shop.php?whichshop=lathe&action=buyitem&quantity=1&whichrow=1162');
+    }
+
     ensure_pull_effect($effect[Pisces in the Skyces], $item[tobiko marble soda]);
 
-    autosell_all($item[neverending wallet chain]);
-    autosell_all($item[pentagram bandana]);
-    autosell_all($item[denim jacket]);
-    autosell_all($item[jam band bootleg]);
-    autosell_all($item[cosmetic football]);
-    autosell_all($item[shoe ad t-shirt]);
-    autosell_all($item[PB&J with the crusts cut off]);
-    autosell_all($item[runproof mascara]);
-    autosell_all($item[very small red dress]);
-    autosell_all($item[noticeable pumps]);
-    autosell_all($item[electronics kit]);
-    autosell_all($item[surprisingly capacious handbag]);
-
-    ensure_item(2, $item[obsidian nutcracker]);
+    ensure_item(1, $item[obsidian nutcracker]);
 
     use_skill(1, $skill[Summon Sugar Sheets]);
     if (available_amount($item[sugar chapeau]) == 0 && available_amount($item[sugar sheet]) > 0) {
