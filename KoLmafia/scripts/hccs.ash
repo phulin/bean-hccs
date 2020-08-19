@@ -451,7 +451,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     } */
 
     // Use a couple chateau rests to hit level 5. Should also give us a ton of MP.
-    while (get_property_int('timesRested') < 2 && my_level() < 5) {
+    if (get_property_int('timesRested') < 2 && my_level() < 5) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
         if (my_mp() > 50 && available_amount($item[bottle of rum]) == 0) {
             use_skill(1, $skill[Prevent Scurvy and Sobriety]);
@@ -734,19 +734,6 @@ if (!test_done(TEST_HP)) {
     // Get buff things
     ensure_sewer_item(1, $item[turtle totem]);
     ensure_sewer_item(1, $item[saucepan]);
-
-    /* if (pulls_remaining() > 0) {
-        ensure_pull_effect($effect[Gr8ness], $item[potion of temporary gr8ness]);
-    } else if (have_effect($effect[On the Trolley]) == 0) {
-        // Cast Ode and drink bee's knees
-        assert_meat(500);
-        ensure_ode(2);
-        cli_execute('drink 1 Bee\'s Knees');
-    } */
-
-    if (available_amount($item[flask of baconstone juice]) > 0) {
-        ensure_effect($effect[Baconstoned]);
-    }
 
     // Don't use Kramco here.
     equip($slot[off-hand], $item[none]);
@@ -1366,6 +1353,8 @@ if (!test_done(TEST_NONCOMBAT)) {
     wish_effect($effect[Disquiet Riot]);
 
     use_familiar($familiar[Disgeist]);
+
+    use_skill(1, $skill[Visit your Favorite Bird]);
 
     maximize('-combat, 0.01 familiar weight', false);
 
