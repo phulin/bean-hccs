@@ -1358,7 +1358,7 @@ if (!test_done(TEST_NONCOMBAT)) {
 
     maximize('-combat, 0.01 familiar weight', false);
 
-    if (round(numeric_modifier('combat rate')) > -40) {
+    if (round(numeric_modifier('combat rate')) > -39) {
         error('Not enough -combat to cap.');
     }
 
