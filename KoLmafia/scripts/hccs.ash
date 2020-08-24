@@ -638,11 +638,11 @@ if (!test_done(TEST_HP)) {
         ensure_item(1, $item[frilly skirt]);
         create(1, $item[Vicar's Tutu]);
         // Get some CSAs for later pizzas
-        /* int count = 3 - available_amount($item[cog and sprocket assembly]);
+        int count = 3 - available_amount($item[cog and sprocket assembly]);
         ensure_item(count, $item[cog]);
         ensure_item(count, $item[sprocket]);
         ensure_item(count, $item[spring]);
-        create(count, $item[cog and sprocket assembly]); */
+        create(count, $item[cog and sprocket assembly]);
         // Actually tune the moon.
         visit_url('inv_use.php?whichitem=10254&doit=96&whichsign=8');
     }
@@ -1198,7 +1198,7 @@ if (!test_done(TEST_HOT_RES)) {
     }
 
     if (get_property_int('_genieWishesUsed') < 3 || available_amount($item[pocket wish]) > 0) {
-        // wish_effect($effect[Fireproof Lips]);
+        wish_effect($effect[Fireproof Lips]);
     }
 
     ensure_effect($effect[Elemental Saucesphere]);
@@ -1232,18 +1232,8 @@ if (!test_done(TEST_HOT_RES)) {
     // Use pocket maze
     if (available_amount($item[pocket maze]) > 0) ensure_effect($effect[Amazing]);
 
-    pull_if_possible(1, $item[cracker], 20000);
-
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     maximize('hot res, 0.01 familiar weight', false);
-
-    if (round(numeric_modifier('hot resistance')) + 9 <= 59) {
-        ensure_pull_effect($effect[Fireproof Lips], $item[SPF 451 lip balm]);
-    }
-    // OK to waste one turn here
-    if (round(numeric_modifier('hot resistance')) + 5 <= 60) {
-        ensure_pull_effect($effect[Good Chance of Surviving Hell], $item[infernal snowball]);
-    }
 
     if (round(numeric_modifier('hot resistance')) < 40) {
         error('Something went wrong building hot res.');
@@ -1402,8 +1392,8 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Frenzied, Bloody]);
     ensure_effect($effect[Scowl of the Auk]);
-    ensure_effect($effect[Disdain of the War Snapper]);
-    ensure_effect($effect[Tenacity of the Snapper]);
+    // ensure_effect($effect[Disdain of the War Snapper]);
+    // ensure_effect($effect[Tenacity of the Snapper]);
     ensure_song($effect[Jackasses' Symphony of Destruction]);
 
     if (available_amount($item[vial of hamethyst juice]) > 0) {
@@ -1430,7 +1420,7 @@ if (!test_done(TEST_WEAPON)) {
 
     ensure_npc_effect($effect[Engorged Weapon], 1, $item[Meleegra&trade; pills]);
 
-    /* if (have_effect($effect[Outer Wolf&trade;]) == 0) {
+    if (have_effect($effect[Outer Wolf&trade;]) == 0) {
         use(available_amount($item[van key]), $item[van key]);
         if (available_amount($item[ointment of the occult]) == 0) {
             // Should have a second grapefruit from Scurvy.
@@ -1448,21 +1438,16 @@ if (!test_done(TEST_WEAPON)) {
             item_priority($item[Middle of the Road&trade; brand whiskey], $item[cog and sprocket assembly]),
             item_priority($item[surprisingly capacious handbag], $item[cog and sprocket assembly])
         );
-    } */
+    }
 
-    wish_effect($effect[Outer Wolf&trade;]);
+    // wish_effect($effect[Outer Wolf&trade;]);
 
-    // wish_effect($effect[Pyramid Power]);
+    wish_effect($effect[Pyramid Power]);
     // wish_effect($effect[Wasabi With You]);
 
     ensure_effect($effect[Bow-Legged Swagger]);
 
     maximize('weapon damage', false);
-
-    ensure_pull_effect($effect[Wasabi With You], $item[wasabi marble soda]);
-    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) >= 6) {
-        ensure_pull_effect($effect[Seeing Red], $item[red eye]);
-    }
 
     /* if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) > 15) {
         abort('Something went wrong with weapon damage.');
