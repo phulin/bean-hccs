@@ -53,24 +53,6 @@ void wish_effect(effect ef) {
     }
 }
 
-item item_priority(item it1, item it2) {
-    if (available_amount(it1) > 0) return it1;
-    else return it2;
-}
-
-item item_priority(item it1, item it2, item it3) {
-    if (available_amount(it1) > 0) return it1;
-    else if (available_amount(it2) > 0) return it2;
-    else return it3;
-}
-
-item item_priority(item it1, item it2, item it3, item it4) {
-    if (available_amount(it1) > 0) return it1;
-    else if (available_amount(it2) > 0) return it2;
-    else if (available_amount(it3) > 0) return it3;
-    else return it4;
-}
-
 boolean pull_if_possible(int quantity, item it, int max_price) {
     if (pulls_remaining() > 0) {
         int quantity_pull = max(0, quantity - available_amount(it));
@@ -271,7 +253,7 @@ void shrug(effect ef) {
 
 // We have Phat Loot, Ur-Kel's on at all times during leveling (managed via mood); third and fourth slots are variable.
 boolean[effect] song_slot_3 = $effects[Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction];
-boolean[effect] song_slot_4 = $effects[Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Polka of Plenty];
+boolean[effect] song_slot_4 = $effects[Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Polka of Plenty, Stevedave's Shanty of Superiority];
 void open_song_slot(effect song) {
     boolean[effect] song_slot;
     if (song_slot_3 contains song) song_slot = song_slot_3;
@@ -328,7 +310,7 @@ void fight_sausage_if_guaranteed() {
 }
 
 boolean stat_ready() {
-    // Synth, Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, fish hatchet, Brutal brogues
+    // Synth, Ben-Gal balm, Rage of the Reindeer, Quiet Determination, wad of used tape, Brutal brogues
     float muscle_multiplier = 5.2;
     int buffed_muscle = max(60 + (1 + numeric_modifier('muscle percent') / 100 + muscle_multiplier) * my_basestat($stat[Mysticality]), my_buffedstat($stat[Muscle]));
     boolean muscle_met = buffed_muscle - my_basestat($stat[Muscle]) >= 1770;
@@ -399,6 +381,12 @@ if (!test_done(TEST_COIL_WIRE)) {
         }
     }
 
+    if (my_level() == 1 && my_spleen_use() == 0) {
+        while (get_property_int('_universeCalculated') < get_property_int('skillLevel144')) {
+            cli_execute('numberology 69');
+        }
+    }
+
     cli_execute('/whitelist ferengi');
     // retrieve_item(1, $item[fish hatchet]);
 
@@ -423,7 +411,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     ensure_mp_tonic(2 * (2 - get_property_int('tomeSummons')));
     use_skill(2 - get_property_int('tomeSummons'), $skill[Summon Smithsness]);
 
-    if (have_effect($effect[Inscrutable Gaze]) == 0) {
+    /* if (have_effect($effect[Inscrutable Gaze]) == 0) {
         ensure_mp_tonic(10);
         ensure_effect($effect[Inscrutable Gaze]);
     }
@@ -434,7 +422,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     }
 
     // Depends on Ez's Bastille script.
-    cli_execute('bastille myst brutalist');
+    cli_execute('bastille myst brutalist'); */
 
     // Find an E source in the barrels.
     /* foreach barrel in $strings[00, 01, 02, 10, 11, 12, 20, 21, 22] {
@@ -450,6 +438,7 @@ if (!test_done(TEST_COIL_WIRE)) {
         }
     } */
 
+    /*
     // Use a couple chateau rests to hit level 5. Should also give us a ton of MP.
     if (get_property_int('timesRested') < 2 && my_level() < 5) {
         visit_url('place.php?whichplace=chateau&action=chateau_restbox');
@@ -474,7 +463,7 @@ if (!test_done(TEST_COIL_WIRE)) {
         ensure_create_item(1, $item[perfect dark and stormy]);
         ensure_ode(3);
         drink(1, $item[perfect dark and stormy]);
-    }
+    } */
 
     // Upgrade saber for fam wt
     visit_url('main.php?action=may4');
@@ -494,16 +483,8 @@ if (!test_done(TEST_COIL_WIRE)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Retrospecs]);
 
-    // Get cyclops eyedrops for later.
-    if (available_amount($item[cyclops eyedrops]) == 0) {
-        cli_execute('pillkeeper semirare');
-        if (get_property_int('semirareCounter') != 0) {
-            error('Semirare should be now. Something went wrong.');
-        }
-        cli_execute('mood apathetic');
-        cli_execute('counters nowarn Fortune Cookie');
-        adv1($location[The Limerick Dungeon], -1, '');
-    }
+    pull_if_possible(1, $item[borrowed time], 30000);
+    use(1, $item[borrowed time]);
 
     // NOTE: No turn 0 sausage fight!
 
@@ -537,7 +518,7 @@ if (!test_done(TEST_HP)) {
         // use_familiar($familiar[Pocket Professor]);
         // Actually, get a quadroculars for DISQ later.
         // use_familiar($familiar[He-Boulder]);
-        use_familiar($familiar[Rock Lobster]);
+        use_familiar($familiar[Melodramedary]);
         pizza_effect(
             $effect[Different Way of Seeing Things],
             $item[dripping meat crossbow],
@@ -547,14 +528,19 @@ if (!test_done(TEST_HP)) {
         );
     }
 
-    // Get infernal thirst now so we can chain fam equip correctly.
+    // Campsite
+    if (have_effect($effect[That's Just Cloud-Talk, Man]) == 0) {
+        visit_url('place.php?whichplace=campaway&action=campaway_sky');
+    }
+
+    /* // Get infernal thirst now to generate advs and so we can chain fam equip correctly.
     if (have_effect($effect[Infernal Thirst]) == 0) {
         use_familiar($familiar[Melodramedary]);
         if (available_amount($item[Irish Coffee, English Heart]) == 0) {
             ensure_item(1, $item[cup of lukewarm tea]);
             create(1, $item[Irish Coffee, English Heart]);
         }
-        if (available_amount($item[full meat tank]) == 0) {
+        if (available_amount($item[Flaskfull of Hollow]) + available_amount($item[full meat tank]) == 0) {
             // Get a full meat tank for later
             ensure_item(1, $item[empty meat tank]);
             ensure_create_item(1, $item[meat stack]);
@@ -564,27 +550,10 @@ if (!test_done(TEST_HP)) {
             $effect[Infernal Thirst],
             $item[Irish Coffee, English Heart],
             $item[Newbiesport&trade; tent],
-            $item[full meat tank],
-            $item[extra-strength rubber bands] // get camel equip
+            item_priority($item[Flaskfull of Hollow], $item[full meat tank]),
+            $item[ectoplasm <i>au just</i>] // get camel equip
         );
-    }
-
-    /*
-    // Check G-9, then genie effect Experimental Effect G-9/New and Improved
-    effect g9 = $effect[Experimental Effect G-9];
-    if (g9.numeric_modifier('mysticality percent') < 0.001) {
-        // Not cached. This should trick Mafia into caching the G-9 value for the day.
-        visit_url('desc_effect.php?whicheffect=' + g9.descid);
-        if (g9.numeric_modifier('mysticality percent') < 0.001) {
-            error('Check G9');
-        }
-    }
-    if (g9.numeric_modifier('mysticality percent') > 200) {
-        wish_effect(g9);
-    } else {
-        wish_effect($effect[New and Improved]);
-    }
-    */
+    } */
 
     item love_potion = $item[Love Potion #0];
     effect love_effect = $effect[Tainted Love Potion];
@@ -628,15 +597,15 @@ if (!test_done(TEST_HP)) {
         create(1, $item[bitchin' meatcar]);
     }
 
+    // Depends on Ez's Bastille script.
+    cli_execute('bastille myst brutalist');
+
     // Tune moon sign to Blender. Have to do this now to get chewing gum.
     if (!get_property_boolean('moonTuned')) {
         // Unequip spoon.
         equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
         equip($slot[acc2], $item[Powerful Glove]);
         equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
-        // Get a frilly skirt for later
-        ensure_item(1, $item[frilly skirt]);
-        create(1, $item[Vicar's Tutu]);
         // Get some CSAs for later pizzas
         /* int count = 3 - available_amount($item[cog and sprocket assembly]);
         ensure_item(count, $item[cog]);
@@ -700,9 +669,6 @@ if (!test_done(TEST_HP)) {
     ensure_song($effect[The Magical Mojomuscular Melody]);
     ensure_npc_effect($effect[Glittering Eyelashes], 5, $item[glittery mascara]);
 
-    // Pill Keeper stats.
-    ensure_effect($effect[Hulkien]);
-
     // Plan is for Beach Comb + PK buffs to fall all the way through to item -> hot res -> fam weight.
     ensure_effect($effect[Fidoxene]);
     ensure_effect($effect[Do I Know You From Somewhere?]);
@@ -726,6 +692,9 @@ if (!test_done(TEST_HP)) {
     }
 
     ensure_effect($effect[Song of Bravado]);
+
+    // Should be 200% myst for now.
+    ensure_effect($effect[Blessing of your favorite Bird]);
 
     if (get_property('boomBoxSong') != 'Total Eclipse of Your Meat') {
         cli_execute('boombox meat');
@@ -952,7 +921,7 @@ if (!test_done(TEST_HP)) {
         cli_execute('boombox damage');
     }
 
-    // Use turns to level to 14.
+    /* // Use turns to level to 14.
     int turns_spent = 0;
     // Fight
     set_property('choiceAdventure1324', '5');
@@ -970,7 +939,7 @@ if (!test_done(TEST_HP)) {
             print('Spent ' + turns_spent + ' turns trying to level.');
             if (my_turncount() >= 64 && !stat_ready()) error('CHECK leveling.');
         }
-    }
+    } */
 
     synthesis_plan($effect[Synthesis: Strong], tail(tail(subsequent)));
 
@@ -982,6 +951,7 @@ if (!test_done(TEST_HP)) {
     ensure_song($effect[Power Ballad of the Arrowsmith]);
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Quiet Determination]);
+    ensure_effect($effect[Disdain of the War Snapper]);
     ensure_npc_effect($effect[Go Get 'Em, Tiger!], 5, $item[Ben-Gal&trade; balm]);
     maximize('hp', false);
 
@@ -996,11 +966,14 @@ if (!test_done(TEST_HP)) {
 if (!test_done(TEST_MUS)) {
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
+    ensure_song($effect[Stevedave's Shanty of Superiority]);
     ensure_song($effect[Power Ballad of the Arrowsmith]);
     ensure_effect($effect[Rage of the Reindeer]);
     ensure_effect($effect[Quiet Determination]);
+    ensure_effect($effect[Disdain of the War Snapper]);
     ensure_effect($effect[Tomato Power]);
     ensure_npc_effect($effect[Go Get 'Em, Tiger!], 5, $item[Ben-Gal&trade; balm]);
+    ensure_effect($effect[Ham-Fisted]);
     maximize('muscle', false);
     if (my_buffedstat($stat[muscle]) - my_basestat($stat[muscle]) < 1770) {
         error('Not enough muscle to cap.');
@@ -1011,6 +984,7 @@ if (!test_done(TEST_MUS)) {
 if (!test_done(TEST_MYS)) {
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
+    ensure_song($effect[Stevedave's Shanty of Superiority]);
     ensure_song($effect[The Magical Mojomuscular Melody]);
     ensure_effect($effect[Quiet Judgement]);
     ensure_effect($effect[Tomato Power]);
@@ -1030,8 +1004,12 @@ if (!test_done(TEST_MOX)) {
     // Beach Comb
     ensure_effect($effect[Pomp & Circumsands]);
 
+    use(1, $item[Bird-a-Day Calendar]);
+    ensure_effect($effect[Blessing of the Bird]);
+
     ensure_effect($effect[Big]);
     ensure_effect($effect[Song of Bravado]);
+    ensure_song($effect[Stevedave's Shanty of Superiority]);
     ensure_song($effect[The Moxious Madrigal]);
     ensure_effect($effect[Quiet Desperation]);
     ensure_effect($effect[Tomato Power]);
@@ -1052,12 +1030,25 @@ if (!test_done(TEST_ITEM)) {
 
     fight_sausage_if_guaranteed();
 
+    // Get cyclops eyedrops for later.
+    if (available_amount($item[cyclops eyedrops]) == 0) {
+        cli_execute('pillkeeper semirare');
+        if (get_property_int('semirareCounter') != 0) {
+            error('Semirare should be now. Something went wrong.');
+        }
+        cli_execute('mood apathetic');
+        cli_execute('counters nowarn Fortune Cookie');
+        adv1($location[The Limerick Dungeon], -1, '');
+    }
+
+    fight_sausage_if_guaranteed();
+
     if (have_effect($effect[Bat-Adjacent Form]) == 0) {
         adventure_saber_yr($location[The Neverending Party], $skill[Become a Bat]);
     }
 
     try_use(1, $item[astral six-pack]);
-    if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 3) { // 5) {
+    if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 0) { // 5) {
         error('Too drunk. Something went wrong.');
     }
 
@@ -1068,14 +1059,12 @@ if (!test_done(TEST_ITEM)) {
 
     // Make A Light that Never Goes Out
     if (available_amount($item[A Light That Never Goes Out]) == 0) {
-        ensure_item(1, $item[lump of Brituminous coal]);
-        ensure_item(1, $item[third-hand lantern]);
-        ensure_item(1, $item[tenderizing hammer]);
-        create(1, $item[A Light That Never Goes Out]);
+        int count = 2 - available_amount($item[A Light That Never Goes Out]);
+        ensure_item(count, $item[lump of Brituminous coal]);
+        ensure_item(count, $item[third-hand lantern]);
+        ensure_item(count, $item[tenderizing hammer]);
+        create(count, $item[A Light That Never Goes Out]);
     }
-
-    // Should have a frilly skirt from tuning code above.
-    ensure_create_item(1, $item[Vicar's Tutu]);
 
     if (!get_property_boolean('_clanFortuneBuffUsed')) {
         ensure_effect($effect[There's No N In Love]);
@@ -1120,14 +1109,13 @@ if (!test_done(TEST_ITEM)) {
         );
     } */
 
-    maximize('item, 2 booze drop, equip Vicar\'s Tutu, -equip broken champagne bottle', false);
+    use_familiar($familiar[Left-Hand Man]);
+
+    maximize('item, 2 booze drop, -equip broken champagne bottle', false);
+
+    wish_effect($effect[Infernal Thirst]);
 
     do_test(TEST_ITEM);
-
-    if (available_amount($item[Vicar's Tutu]) > 0) {
-        if (have_equipped($item[Vicar's Tutu])) equip($item[old sweatpants]);
-        cli_execute('smash 1 Vicar\'s Tutu');
-    }
 }
 
 if (!test_done(TEST_HOT_RES)) {
@@ -1354,11 +1342,11 @@ if (!test_done(TEST_NONCOMBAT)) {
 
     use_familiar($familiar[Disgeist]);
 
-    use_skill(1, $skill[Visit your Favorite Bird]);
+    ensure_effect($effect[Blessing of the Bird]);
 
     maximize('-combat, 0.01 familiar weight', false);
 
-    if (round(numeric_modifier('combat rate')) > -39) {
+    if (round(numeric_modifier('combat rate')) > -40) {
         error('Not enough -combat to cap.');
     }
 
@@ -1415,7 +1403,9 @@ if (!test_done(TEST_WEAPON)) {
     ensure_effect($effect[Weapon of Mass Destruction]);
 
     // Beach Comb
-    ensure_effect($effect[Lack of Body-Building]);
+    if (!get_property('_beachHeadsUsed').contains_text('6')) {
+        ensure_effect($effect[Lack of Body-Building]);
+    }
 
     // Boombox potion - did we get one?
     if (available_amount($item[Punching Potion]) > 0) {
@@ -1427,6 +1417,9 @@ if (!test_done(TEST_WEAPON)) {
 
     // Corrupted marrow
     ensure_effect($effect[Cowrruption]);
+
+    // Pastamancer d1 is weapon damage.
+    ensure_effect($effect[Blessing of the Bird]);
 
     ensure_npc_effect($effect[Engorged Weapon], 1, $item[Meleegra&trade; pills]);
 
@@ -1459,8 +1452,10 @@ if (!test_done(TEST_WEAPON)) {
 
     maximize('weapon damage', false);
 
-    ensure_pull_effect($effect[Wasabi With You], $item[wasabi marble soda]);
-    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) >= 6) {
+    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) >= 5) {
+        ensure_pull_effect($effect[Wasabi With You], $item[wasabi marble soda]);
+    }
+    if (60 - floor(numeric_modifier('weapon damage') / 25 + 0.001) - floor(numeric_modifier('weapon damage percent') / 25 + 0.001) >= 5) {
         ensure_pull_effect($effect[Seeing Red], $item[red eye]);
     }
 
@@ -1503,6 +1498,11 @@ if (!test_done(TEST_SPELL)) {
     use_skill(1, $skill[Summon Sugar Sheets]);
     if (available_amount($item[sugar chapeau]) == 0 && available_amount($item[sugar sheet]) > 0) {
         create(1, $item[sugar chapeau]);
+    }
+
+    // Sigils of Yeg = 200% SD
+    if (true) { // have_effect($effect[2591]) == 0) {
+        abort("Cargo pocket 177");
     }
 
     maximize('spell damage', false);

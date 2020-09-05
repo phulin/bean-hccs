@@ -137,3 +137,21 @@ boolean sausage_fight_guaranteed() {
     int next_guaranteed = get_property_int("_lastSausageMonsterTurn") + 4 + goblins_fought * 3 + max(0, goblins_fought - 5) ** 3;
     return total_turns_played() >= next_guaranteed;
 }
+
+item item_priority(item it1, item it2) {
+    if (available_amount(it1) > 0) return it1;
+    else return it2;
+}
+
+item item_priority(item it1, item it2, item it3) {
+    if (available_amount(it1) > 0) return it1;
+    else if (available_amount(it2) > 0) return it2;
+    else return it3;
+}
+
+item item_priority(item it1, item it2, item it3, item it4) {
+    if (available_amount(it1) > 0) return it1;
+    else if (available_amount(it2) > 0) return it2;
+    else if (available_amount(it3) > 0) return it3;
+    else return it4;
+}

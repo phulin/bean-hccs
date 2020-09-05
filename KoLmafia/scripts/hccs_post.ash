@@ -78,35 +78,18 @@ if (my_fullness() + 1 == fullness_limit()) {
 }
 
 if (!get_property_boolean('_mimeArmyShotglassUsed') && item_amount($item[mime army shotglass]) > 0) {
-    ensure_mp_sausage(100);
+    ensure_mp_sausage(50);
     ensure_effect($effect[Ode to Booze]);
-    drink(1, $item[meadeorite]);
+    drink(1, item_priority($item[punch-drunk punch], $item[meadeorite]));
 }
 
 if (my_inebriety() + 1 == inebriety_limit()) {
-    ensure_mp_sausage(100);
+    ensure_mp_sausage(50);
     ensure_effect($effect[Ode to Booze]);
-    drink(1, $item[meadeorite]);
+    drink(1, item_priority($item[punch-drunk punch], $item[meadeorite]));
 }
 
-item[class] choco;
-choco[$class[Seal Clubber]] = $item[chocolate seal-clubbing club];
-choco[$class[Turtle Tamer]] = $item[chocolate turtle totem];
-choco[$class[Pastamancer]] = $item[chocolate pasta spoon];
-choco[$class[Sauceror]] = $item[chocolate saucepan];
-choco[$class[Accordion Thief]] = $item[chocolate stolen accordion];
-choco[$class[Disco Bandit]] = $item[chocolate disco ball];
-if (choco contains my_class() && get_property_int('_chocolatesUsed') < 3) {
-    int used = get_property_int('_chocolatesUsed');
-    while (used < 3) {
-        item it = choco[my_class()];
-        get(1, it, 6000);
-        use(1, it);
-        used++;
-    }
-}
-
-if (!get_property_boolean('_thesisDelivered') && sausage_fight_guaranteed()) {
+if (!get_property_boolean('_thesisDelivered')) {
     // Get thesis.
     use_familiar($familiar[Pocket Professor]);
     int needed_xp = 400 - $familiar[Pocket Professor].experience;
@@ -123,7 +106,7 @@ if (!get_property_boolean('_thesisDelivered') && sausage_fight_guaranteed()) {
     }
 
     // Boost muscle.
-    ensure_effect($effect[Expert Oiliness]);
+    if (my_class() == $class[Pastamancer] || my_class() == $class[Sauceror]) ensure_effect($effect[Expert Oiliness]);
     maximize('muscle, equip Kramco', false);
     ensure_effect($effect[Quiet Determination]);
     ensure_effect($effect[Merry Smithsness]);
@@ -151,10 +134,6 @@ if (!get_property_boolean('_thesisDelivered') && sausage_fight_guaranteed()) {
 }
 
 cli_execute('send to buffy || 1500 reptilian jingle');
-
-if (get_campground()[$item[clockwork maid]] == 0) {
-    use(1, $item[clockwork maid]);
-}
 
 if (my_fullness() >= 3 && my_inebriety() >= 3 && available_amount($item[spice melange]) > 0 && !get_property_boolean('spiceMelangeUsed')) {
     use(1, $item[spice melange]);
