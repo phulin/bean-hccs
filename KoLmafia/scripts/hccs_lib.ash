@@ -155,3 +155,23 @@ item item_priority(item it1, item it2, item it3, item it4) {
     else if (available_amount(it3) > 0) return it3;
     else return it4;
 }
+
+int[string] clan_cache;
+boolean set_clan(string target)
+{
+	if ( get_clan_name() != target ) {
+		if (!(clan_cache contains target)) {
+			string recruiter = visit_url("clan_signup.php");
+			matcher m = create_matcher(`<option value=([0-9]+)>([^<]+)</option>`, recruiter);
+			while (m.find()) {
+				clan_cache[m.group(2)] = m.group(1).to_int();
+			}
+		}
+
+		visit_url(`showclan.php?whichclan={clan_cache[target]}&action=joinclan&confirm=on&pwd={my_hash()}`);
+		if ( get_clan_name() != target ) {
+			abort ("failed to switch clans to " + target + ". Did you spell it correctly? Are you whitelisted?");
+		}
+	}
+	return true;
+}

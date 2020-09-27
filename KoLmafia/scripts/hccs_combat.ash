@@ -54,6 +54,12 @@ buffer m_new() {
     return buf;
 }
 
+buffer m_new(string init) {
+    buffer buf;
+    buf.append(init);
+    return buf;
+}
+
 string m_submit(buffer macro) {
     print(`Submitting macro: {macro}`);
     return visit_url("fight.php?action=macro&macrotext=" + url_encode(macro), true, true);
@@ -71,7 +77,8 @@ string m_monster(monster m) {
 
 buffer m_skill(buffer macro, skill sk) {
     if (have_skill(sk)) {
-        return macro.m_step(`skill {sk.name}`);
+        string name = sk.name.replace_string("%fn, ", "");
+        return macro.m_step(`skill {name}`);
     } else {
         return macro;
     }
@@ -99,6 +106,11 @@ buffer m_if(buffer macro, string condition, string next1, string next2) {
 
 buffer m_if(buffer macro, string condition, string next1, string next2, string next3) {
     return macro.m_if(condition, `{next1};{next2};{next3}`);
+}
+
+buffer m_external_if(buffer macro, boolean condition, buffer next) {
+    if (condition) return macro;
+    else return macro.m_step(next);
 }
 
 // Aborted attempt at manual combat handling.
@@ -140,7 +152,9 @@ adventure_result adventure_state() {
 }*/
 
 string MODE_NULL = "";
+string MODE_CUSTOM = "custom";
 string MODE_FIND_MONSTER_SABER_YR = "findsaber";
+string MODE_FIND_MONSTER_THEN = "findthen";
 string MODE_SABER_YR = "saber";
 string MODE_COPY = "copy";
 string MODE_FREE_KILL = "freekill";
@@ -157,12 +171,22 @@ void set_hccs_combat_mode(string mode, string arg) {
     set_property("_hccsCombatArg1", arg);
 }
 
+void set_hccs_combat_mode(string mode, string arg1, string arg2) {
+    set_property("_hccsCombatMode", mode);
+    set_property("_hccsCombatArg1", arg1);
+    set_property("_hccsCombatArg2", arg2);
+}
+
 string get_hccs_combat_mode() {
     return get_property("_hccsCombatMode");
 }
 
 string get_hccs_combat_arg1() {
     return get_property("_hccsCombatArg1");
+}
+
+string get_hccs_combat_arg2() {
+    return get_property("_hccsCombatArg2");
 }
 
 monster[string] banished_monsters() {
@@ -191,7 +215,9 @@ void main(int initround, monster foe, string page) {
     location loc = my_location();
     string monster_name = get_hccs_combat_arg1();
     monster desired = monster_name.to_monster();
-    if (mode == MODE_SABER_YR) {
+    if (mode == MODE_CUSTOM) {
+        m_new(get_hccs_combat_arg1()).m_repeat_submit();
+    } else if (mode == MODE_SABER_YR) {
         buffer macro = m_new();
         string skill_name = get_hccs_combat_arg1();
         if (skill_name.to_skill() != $skill[none]) {
@@ -200,15 +226,17 @@ void main(int initround, monster foe, string page) {
         macro
             .m_skill($skill[Use the Force])
             .m_repeat_submit();
-    } else if (mode == MODE_FIND_MONSTER_SABER_YR) {
+    } else if (mode == MODE_FIND_MONSTER_THEN) {
         monster[string] banished = banished_monsters();
         if (foe == desired) {
             set_property("_hccsCombatFound", "true");
-            use_skill(1, $skill[Use the Force]);
-        } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "Reflex Hammer", loc)) {
-            use_skill(1, $skill[Reflex Hammer]);
+            m_new(get_hccs_combat_arg2()).m_repeat_submit();
         } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3 && !used_banisher_in_zone(banished, "snokebomb", loc)) {
             use_skill(1, $skill[Snokebomb]);
+        /* } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "Reflex Hammer", loc)) {
+            use_skill(1, $skill[Reflex Hammer]); */
+        } else if (have_skill($skill[Macrometeorite]) && get_property_int("_macrometeoriteUses") < 10) {
+            use_skill(1, $skill[Macrometeorite]);
         } else if (have_skill($skill[CHEAT CODE: Replace Enemy]) && get_property_int("_powerfulGloveBatteryPowerUsed") <= 80) {
             int original_battery = get_property_int("_powerfulGloveBatteryPowerUsed");
             use_skill(1, $skill[CHEAT CODE: Replace Enemy]);
@@ -223,9 +251,14 @@ void main(int initround, monster foe, string page) {
         if (foe != desired) {
             abort(`Ran into the wrong monster while trying to copy {desired.name}.`);
         }
+        int weight = familiar_weight($familiar[Pocket Professor]) + weight_adjustment();
+        int lectures_used = get_property_int("_pocketProfessorLectures");
+        boolean have_chip = equipped_amount($item[Pocket Professor memory chip]) > 0;
+        int max_lectures = floor((weight - 1) ** 0.5) + 1 + (have_chip ? 2 : 0);
         m_new()
             .m_skill($skill[Curse of Weaksauce])
             .m_skill($skill[Sing Along])
+            // .m_external_if(lectures_used == max_lectures, m_new().m_skill($skill[Meteor Shower]))
             .m_skill($skill[Lecture on Relativity])
             .m_skill($skill[Saucegeyser])
             .m_repeat_submit();
@@ -282,8 +315,8 @@ void main(int initround, monster foe, string page) {
                 print("WARNING: Mafia is not tracking bander runaways correctly.");
                 set_property_int("_banderRunaways", banderRunaways + 1);
             }
-        } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3) {
-            use_skill(1, $skill[Reflex Hammer]);
+        /* } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3) {
+            use_skill(1, $skill[Reflex Hammer]); */
         } else if (my_mp() >= 50 && have_skill($skill[Snokebomb]) && get_property_int("_snokebombUsed") < 3) {
             use_skill(1, $skill[Snokebomb]);
         } else {
@@ -303,6 +336,12 @@ void saber_yr() {
     }
 }
 
+void adventure_macro(location loc, buffer macro) {
+    set_hccs_combat_mode(MODE_CUSTOM, macro);
+    adv1(loc, -1, "");
+    set_hccs_combat_mode(MODE_NULL, '');
+}
+
 void adventure_saber_yr(location loc, skill sk) {
     set_hccs_combat_mode(MODE_SABER_YR, sk.name);
     set_property("choiceAdventure1387", "3");
@@ -310,15 +349,18 @@ void adventure_saber_yr(location loc, skill sk) {
     set_hccs_combat_mode(MODE_NULL, '');
 }
 
-void find_monster_saber_yr(location loc, monster foe) {
-    set_hccs_combat_mode(MODE_FIND_MONSTER_SABER_YR, foe.name);
+void find_monster_then(location loc, monster foe, buffer macro) {
+    set_hccs_combat_mode(MODE_FIND_MONSTER_THEN, foe.name, macro);
     set_property("_hccsCombatFound", "false");
-    set_property("choiceAdventure1387", "3");
     while (get_property("_hccsCombatFound") != "true") {
         adv1(loc, -1, "");
     }
-    // this appears to be handled automatically now: saber_yr();
     set_hccs_combat_mode(MODE_NULL, '');
+}
+
+void find_monster_saber_yr(location loc, monster foe) {
+    set_property("choiceAdventure1387", "3");
+    find_monster_then(loc, foe, m_new().m_skill($skill[Use the Force]));
 }
 
 void adventure_copy(location loc, monster foe) {

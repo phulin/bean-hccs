@@ -24,6 +24,9 @@ void get(int qty, item it, int max_price) {
 
 if (!can_interact()) abort('Break prism first.');
 
+// cli_execute('pull all');
+cli_execute('pull * meat');
+
 set_property('autoSatisfyWithNPCs', 'true');
 set_property('autoSatisfyWithCoinmasters', 'true');
 set_property('hpAutoRecovery', '0.8');
@@ -39,7 +42,10 @@ if (get_property('boomBoxSong') != 'Food Vibrations') {
     cli_execute('boombox food');
 }
 
-cli_execute('pull all');
+if (my_adventures() == 0) {
+    eat(1, $item[magical sausage]);
+}
+
 cli_execute('/whitelist ferengi');
 if (available_amount($item[Boris's key]) > 0) {
     create(1, $item[Boris's key lime pie]);
@@ -54,40 +60,12 @@ equip($item[Iunion Crown]);
 equip($slot[shirt], $item[none]);
 equip($item[Fourth of May Cosplay Saber]);
 equip($item[Kramco Sausage-o-Matic&trade;]);
-equip($item[terra cotta trousers]);
+equip($item[Great Wolf's beastly trousers]);
 equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
 equip($slot[acc2], $item[Powerful Glove]);
 equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
 
-if (!get_property_boolean('_distentionPillUsed') && my_fullness() <= fullness_limit()) {
-    if (!use(1, $item[distention pill])) {
-        print('WARNING: Out of distention pills.');
-    }
-}
-
-if (!get_property_boolean('_syntheticDogHairPillUsed') && 1 <= my_inebriety() && my_inebriety() <= inebriety_limit()) {
-    if (!use(1, $item[synthetic dog hair pill])) {
-        print('WARNING: Out of synthetic dog hair pills.');
-    }
-}
-
-if (my_fullness() + 1 == fullness_limit()) {
-    use(1, $item[milk of magnesium]);
-    eat(1, $item[fudge spork]);
-    eat(1, $item[meteoreo]);
-}
-
-if (!get_property_boolean('_mimeArmyShotglassUsed') && item_amount($item[mime army shotglass]) > 0) {
-    ensure_mp_sausage(50);
-    ensure_effect($effect[Ode to Booze]);
-    drink(1, item_priority($item[punch-drunk punch], $item[meadeorite]));
-}
-
-if (my_inebriety() + 1 == inebriety_limit()) {
-    ensure_mp_sausage(50);
-    ensure_effect($effect[Ode to Booze]);
-    drink(1, item_priority($item[punch-drunk punch], $item[meadeorite]));
-}
+if (my_class() == $class[Pastamancer]) use_skill(1, $skill[Bind Undead Elbow Macaroni]);
 
 if (!get_property_boolean('_thesisDelivered')) {
     // Get thesis.
@@ -106,7 +84,7 @@ if (!get_property_boolean('_thesisDelivered')) {
     }
 
     // Boost muscle.
-    if (my_class() == $class[Pastamancer] || my_class() == $class[Sauceror]) ensure_effect($effect[Expert Oiliness]);
+    if (my_class() == $class[Sauceror]) ensure_effect($effect[Expert Oiliness]);
     maximize('muscle, equip Kramco', false);
     ensure_effect($effect[Quiet Determination]);
     ensure_effect($effect[Merry Smithsness]);
@@ -133,15 +111,21 @@ if (!get_property_boolean('_thesisDelivered')) {
     adv1($location[The Neverending Party], -1, '');
 }
 
-cli_execute('send to buffy || 1500 reptilian jingle');
-
-if (my_fullness() >= 3 && my_inebriety() >= 3 && available_amount($item[spice melange]) > 0 && !get_property_boolean('spiceMelangeUsed')) {
-    use(1, $item[spice melange]);
-}
+if (have_effect($effect[Jingle Jangle Jingle]) < 1500) cli_execute('send to buffy || 1800 jingle');
 
 cli_execute('hobodiet');
 
-if (fullness_limit() - my_fullness() == 3 && get_property_boolean('spiceMelangeUsed')) {
+if (fullness_limit() - my_fullness() == 1 && get_property_boolean('spiceMelangeUsed')) {
+    cli_execute('pull * glass of raw eggs');
     eat(1, $item[fudge spork]);
-    eat(1, $item[meteoreo]);
+    eat(1, item_priority($item[glass of raw eggs], $item[meteoreo]));
 }
+
+if (inebriety_limit() - my_inebriety() == 3) {
+    get(1, $item[Frosty's frosty mug], 50000);
+    drink(1, $item[Frosty's frosty mug]);
+    drink(1, $item[perfect negroni]);
+}
+
+retrieve_item(1, $item[skeletal skiff]);
+print('Time to do EL VIBRATO!', 'red');
