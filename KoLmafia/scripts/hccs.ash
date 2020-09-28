@@ -425,8 +425,14 @@ if (!test_done(TEST_COIL_WIRE)) {
     ensure_item(1, $item[toy accordion]);
 
     ensure_song($effect[The Magical Mojomuscular Melody]);
-    ensure_mp_tonic(2 * (2 - get_property_int('tomeSummons')));
-    use_skill(2 - get_property_int('tomeSummons'), $skill[Summon Smithsness]);
+    ensure_mp_tonic(2 * max(0, 2 - get_property_int('tomeSummons')));
+    use_skill(max(0, 2 - get_property_int('tomeSummons')), $skill[Summon Smithsness]);
+
+    // In case the script screws up.
+    if (available_amount($item[Louder Than Bomb]) == 0) {
+        ensure_item(1, $item[Ben-Gal&trade; balm]);
+        ensure_create_item(1, $item[Louder Than Bomb]);
+    }
 
     /* if (have_effect($effect[Inscrutable Gaze]) == 0) {
         ensure_mp_tonic(10);
@@ -489,6 +495,8 @@ if (!test_done(TEST_COIL_WIRE)) {
     // Vote.
     visit_url('place.php?whichplace=town_right&action=townright_vote');
     visit_url('choice.php?option=1&whichchoice=1331&g=2&local%5B%5D=2&local%5B%5D=3');
+    // Make sure initiative-tracking works.
+    visit_url('place.php?whichplace=town_right&action=townright_vote');
 
     // Put on some regen gear
     equip($item[Iunion Crown]);
@@ -621,6 +629,11 @@ if (!test_done(TEST_HP)) {
 
     // Tune moon sign to Blender. Have to do this now to get chewing gum.
     if (!get_property_boolean('moonTuned')) {
+        if (get_property_int('_campAwaySmileBuffs') == 0) {
+            // See if we can get Smile of the Blender before we tune.
+            visit_url('place.php?whichplace=campaway&action=campaway_sky');
+        }
+
         // Unequip spoon.
         equip($slot[acc1], $item[Eight Days a Week Pill Keeper]);
         equip($slot[acc2], $item[Powerful Glove]);
@@ -713,6 +726,10 @@ if (!test_done(TEST_HP)) {
     // Should be 200% myst for now.
     ensure_effect($effect[Blessing of your favorite Bird]);
 
+    if (available_amount($item[flask of baconstone juice]) > 0) {
+        ensure_effect($effect[Baconstoned]);
+    }
+
     if (get_property('boomBoxSong') != 'Total Eclipse of Your Meat') {
         cli_execute('boombox meat');
     }
@@ -738,6 +755,11 @@ if (!test_done(TEST_HP)) {
         find_monster_then($location[The Haunted Pantry], $monster[possessed can of tomatoes], m_new().m_skill($skill[Shattering Punch]));
         if (available_amount($item[tomato]) == 0) error("No tomato!");
     }
+
+    /* for i from 1 to 2 {
+        if (available_amount($item[stench powder]) + available_amount($item[lotion of stench]) > 0) break;
+        if ()
+    } */
 
     // Fruits in skeleton store (Saber YR)
     boolean missing_ointment = available_amount($item[ointment of the occult]) == 0 && available_amount($item[grapefruit]) == 0 && have_effect($effect[Mystically Oiled]) == 0;
@@ -899,8 +921,14 @@ if (!test_done(TEST_HP)) {
         adventure_run_unless_free($location[The Haunted Kitchen]);
     }
 
+    while (get_property_int('_banderRunaways') < my_familiar_weight() / 5 && !get_property('latteUnlocks').contains_text('carrot')) {
+        // Find latte ingredient.
+        ensure_ode(1);
+        adventure_run_unless_free($location[The Dire Warren]);
+    }
+
     if (get_property('latteUnlocks').contains_text('chili') && get_property_int('_latteRefillsUsed') == 0) {
-        cli_execute('latte refill pumpkin chili vanilla');
+        cli_execute('latte refill pumpkin chili carrot');
     }
 
     // equip($item[fish hatchet]);
@@ -974,6 +1002,9 @@ if (!test_done(TEST_HP)) {
     ensure_effect($effect[Quiet Determination]);
     ensure_effect($effect[Disdain of the War Snapper]);
     ensure_npc_effect($effect[Go Get 'Em, Tiger!], 5, $item[Ben-Gal&trade; balm]);
+
+    use_familiar($familiar[Left-Hand Man]);
+
     maximize('hp', false);
 
     // QUEST - Donate Blood (HP)
@@ -1057,7 +1088,7 @@ if (!test_done(TEST_ITEM)) {
 
     fight_sausage_if_guaranteed();
 
-    // Get cyclops eyedrops for later.
+    /* // Get cyclops eyedrops for later.
     if (available_amount($item[cyclops eyedrops]) == 0) {
         cli_execute('pillkeeper semirare');
         if (get_property_int('semirareCounter') != 0) {
@@ -1066,7 +1097,7 @@ if (!test_done(TEST_ITEM)) {
         cli_execute('mood apathetic');
         cli_execute('counters nowarn Fortune Cookie');
         adv1($location[The Limerick Dungeon], -1, '');
-    }
+    } */
 
     fight_sausage_if_guaranteed();
 
@@ -1078,22 +1109,20 @@ if (!test_done(TEST_ITEM)) {
     }
 
     try_use(1, $item[astral six-pack]);
-    if (available_amount($item[astral pilsner]) > 0 && my_inebriety() != 0) { // 5) {
+    if (!($ints[0, 5] contains my_inebriety())) {
         error('Too drunk. Something went wrong.');
     }
 
-    while (my_inebriety() < 5) {
-        ensure_ode(1);
-        drink(1, $item[astral pilsner]);
-    }
+    ensure_ode(5 - my_inebriety());
+    drink(5 - my_inebriety(), $item[astral pilsner]);
 
     // Make A Light that Never Goes Out
     if (available_amount($item[A Light That Never Goes Out]) == 0) {
-        int count = 2 - available_amount($item[A Light That Never Goes Out]);
-        ensure_item(count, $item[lump of Brituminous coal]);
-        ensure_item(count, $item[third-hand lantern]);
+        // int count = 2 - available_amount($item[A Light That Never Goes Out]);
+        ensure_item(1, $item[lump of Brituminous coal]);
+        ensure_item(1, $item[third-hand lantern]);
         ensure_item(1, $item[tenderizing hammer]);
-        create(count, $item[A Light That Never Goes Out]);
+        create(1, $item[A Light That Never Goes Out]);
     }
 
     if (!get_property_boolean('_clanFortuneBuffUsed')) {
@@ -1113,7 +1142,7 @@ if (!test_done(TEST_ITEM)) {
     ensure_effect($effect[Nearly All-Natural]);
     ensure_effect($effect[Steely-Eyed Squint]);
 
-    if (get_property_int('_campAwaySmileBuffs') == 0) {
+    if (get_property_int('_campAwaySmileBuffs') == 1) {
         // See if we can get Big Smile of the Blender.
         visit_url('place.php?whichplace=campaway&action=campaway_sky');
     }
@@ -1314,6 +1343,7 @@ if (!test_done(TEST_FAMILIAR)) {
     }
 
     if (have_effect($effect[Meteor Showered]) == 0) {
+        equip($item[Fourth of May Cosplay Saber]);
         adventure_macro($location[The Neverending Party],
             m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));
     }
@@ -1419,6 +1449,7 @@ if (!test_done(TEST_WEAPON)) {
         matcher m = create_matcher('alt="Painting of an? ([^(]*) .1."', chateau_text);
         if (m.find() && m.group(1) == 'ungulith') {
             cli_execute('mood apathetic');
+            equip($item[Fourth of May Cosplay Saber]);
             set_hccs_combat_mode(MODE_CUSTOM,
                 m_new()
                     .m_skill($skill[%fn, spit on me!])
@@ -1506,10 +1537,21 @@ if (!test_done(TEST_WEAPON)) {
 
     wish_effect($effect[Outer Wolf&trade;]);
 
+    // this is just an assert, effectively.
+    ensure_effect($effect[Meteor Showered]);
+
     // wish_effect($effect[Pyramid Power]);
     // wish_effect($effect[Wasabi With You]);
 
     ensure_effect($effect[Bow-Legged Swagger]);
+
+    // Get flimsy hardwood scraps.
+    visit_url('shop.php?whichshop=lathe');
+    if (available_amount($item[flimsy hardwood scraps]) > 0) {
+        visit_url('shop.php?whichshop=lathe&action=buyitem&quantity=1&whichrow=1162');
+    }
+
+    retrieve_item(1, $item[ebony epee]);
 
     maximize('weapon damage', false);
 
@@ -1524,11 +1566,11 @@ if (!test_done(TEST_WEAPON)) {
         ensure_pull_effect($effect[Seeing Red], $item[red eye]);
     }
 
-    if (weapon_turns() >= 3 && have_effect($effect[Medieval Mage Mayhem]) == 0) {
+    /* if (weapon_turns() >= 3 && have_effect($effect[Medieval Mage Mayhem]) == 0) {
         cli_execute('cargo 617');
-    }
+    } */
 
-    if (weapon_turns() > 5) {
+    if (weapon_turns() > 2) {
         error('Something went wrong with weapon damage.');
     }
 
@@ -1541,6 +1583,8 @@ if (!test_done(TEST_SPELL)) {
 
     ensure_effect($effect[Song of Sauce]);
     ensure_effect($effect[Carol of the Hells]);
+    ensure_effect($effect[Arched Eyebrow of the Archmage]);
+    ensure_song($effect[Jackasses' Symphony of Destruction]);
 
     // Pool buff
     ensure_effect($effect[Mental A-cue-ity]);
@@ -1554,13 +1598,16 @@ if (!test_done(TEST_SPELL)) {
         ensure_effect($effect[Baconstoned]);
     }
 
-    // Get flimsy hardwood scraps.
-    visit_url('shop.php?whichshop=lathe');
-    if (available_amount($item[flimsy hardwood scraps]) > 0) {
-        visit_url('shop.php?whichshop=lathe&action=buyitem&quantity=1&whichrow=1162');
-    }
-
     ensure_pull_effect($effect[Pisces in the Skyces], $item[tobiko marble soda]);
+
+    // Make Staff of the Headmaster's Victuals
+    if (available_amount($item[Staff of the Headmaster's Victuals]) == 0) {
+        // int count = 2 - available_amount($item[A Light That Never Goes Out]);
+        ensure_item(1, $item[lump of Brituminous coal]);
+        ensure_item(1, $item[big stick]);
+        ensure_item(1, $item[tenderizing hammer]);
+        create(1, $item[Staff of the Headmaster's Victuals]);
+    }
 
     ensure_item(1, $item[obsidian nutcracker]);
 
@@ -1569,7 +1616,16 @@ if (!test_done(TEST_SPELL)) {
         create(1, $item[sugar chapeau]);
     }
 
+    /* // Get flimsy hardwood scraps.
+    visit_url('shop.php?whichshop=lathe');
+    if (available_amount($item[flimsy hardwood scraps]) > 0) {
+        visit_url('shop.php?whichshop=lathe&action=buyitem&quantity=1&whichrow=1162');
+    }
+
+    retrieve_item(1, $item[weeping willow wand]); */
+
     if (have_effect($effect[Meteor Showered]) == 0) {
+        equip($item[Fourth of May Cosplay Saber]);
         adventure_macro($location[The Neverending Party],
             m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));
     }
@@ -1580,15 +1636,22 @@ if (!test_done(TEST_SPELL)) {
         ensure_effect($effect[Sigils of Yeg]);
     }
 
+    if (round(numeric_modifier('spell damage percent')) % 50 >= 40) {
+        ensure_item(1, $item[soda water]);
+        ensure_potion_effect($effect[Concentration], $item[cordial of concentration]);
+    }
+
+    use_familiar($familiar[Left-Hand Man]);
+
+    maximize('spell damage', false);
+
     int spell_turns() {
-        return 60 - floor(numeric_modifier('spell damage') / 25 + 0.001) - floor(numeric_modifier('spell damage percent') / 25 + 0.001);
+        return 60 - floor(numeric_modifier('spell damage') / 50 + 0.001) - floor(numeric_modifier('spell damage percent') / 50 + 0.001);
     }
 
     while (spell_turns() > my_adventures()) {
         eat(1, $item[magical sausage]);
     }
-
-    maximize('spell damage', false);
 
     do_test(TEST_SPELL);
 }

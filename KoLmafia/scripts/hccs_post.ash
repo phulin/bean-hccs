@@ -26,6 +26,7 @@ if (!can_interact()) abort('Break prism first.');
 
 // cli_execute('pull all');
 cli_execute('pull * meat');
+cli_execute('pull mime army shotglass');
 
 set_property('autoSatisfyWithNPCs', 'true');
 set_property('autoSatisfyWithCoinmasters', 'true');
