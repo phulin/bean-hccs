@@ -627,6 +627,8 @@ if (!test_done(TEST_HP)) {
     // Depends on Ez's Bastille script.
     cli_execute('bastille myst brutalist');
 
+    if (get_property('_horsery') != 'crazy horse') cli_execute('horsery crazy');
+
     // Tune moon sign to Blender. Have to do this now to get chewing gum.
     if (!get_property_boolean('moonTuned')) {
         if (get_property_int('_campAwaySmileBuffs') == 0) {
@@ -988,6 +990,9 @@ if (!test_done(TEST_HP)) {
         }
     } */
 
+    // Reset location so maximizer doesn't get confused.
+    set_location($location[none]);
+
     if (my_class() == $class[Pastamancer]) use_skill(1, $skill[Bind Undead Elbow Macaroni]);
     else ensure_potion_effect($effect[Expert Oiliness], $item[oil of expertise]);
 
@@ -1170,7 +1175,7 @@ if (!test_done(TEST_ITEM)) {
 
     use_familiar($familiar[Left-Hand Man]);
 
-    maximize('item, 2 booze drop, -equip broken champagne bottle', false);
+    maximize('item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag', false);
 
     wish_effect($effect[Infernal Thirst]);
 
@@ -1548,10 +1553,8 @@ if (!test_done(TEST_WEAPON)) {
     // Get flimsy hardwood scraps.
     visit_url('shop.php?whichshop=lathe');
     if (available_amount($item[flimsy hardwood scraps]) > 0) {
-        visit_url('shop.php?whichshop=lathe&action=buyitem&quantity=1&whichrow=1162');
+        retrieve_item(1, $item[ebony epee]);
     }
-
-    retrieve_item(1, $item[ebony epee]);
 
     maximize('weapon damage', false);
 

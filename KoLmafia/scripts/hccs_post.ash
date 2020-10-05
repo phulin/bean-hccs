@@ -24,9 +24,7 @@ void get(int qty, item it, int max_price) {
 
 if (!can_interact()) abort('Break prism first.');
 
-// cli_execute('pull all');
-cli_execute('pull * meat');
-cli_execute('pull mime army shotglass');
+cli_execute('pull all');
 
 set_property('autoSatisfyWithNPCs', 'true');
 set_property('autoSatisfyWithCoinmasters', 'true');
@@ -127,6 +125,3 @@ if (inebriety_limit() - my_inebriety() == 3) {
     drink(1, $item[Frosty's frosty mug]);
     drink(1, $item[perfect negroni]);
 }
-
-retrieve_item(1, $item[skeletal skiff]);
-print('Time to do EL VIBRATO!', 'red');
