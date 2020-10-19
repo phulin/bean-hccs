@@ -425,11 +425,11 @@ if (!test_done(TEST_COIL_WIRE)) {
     ensure_item(1, $item[toy accordion]);
 
     ensure_song($effect[The Magical Mojomuscular Melody]);
-    ensure_mp_tonic(2 * max(0, 2 - get_property_int('tomeSummons')));
-    use_skill(max(0, 2 - get_property_int('tomeSummons')), $skill[Summon Smithsness]);
+    ensure_mp_tonic(2 * max(0, 1 - get_property_int('tomeSummons')));
+    use_skill(max(0, 1 - get_property_int('tomeSummons')), $skill[Summon Smithsness]);
 
     // In case the script screws up.
-    if (available_amount($item[Louder Than Bomb]) == 0) {
+    if (available_amount($item[Louder Than Bomb]) == 0 && available_amount($item[handful of smithereens]) > 0) {
         ensure_item(1, $item[Ben-Gal&trade; balm]);
         ensure_create_item(1, $item[Louder Than Bomb]);
     }
@@ -508,7 +508,7 @@ if (!test_done(TEST_COIL_WIRE)) {
     equip($slot[acc2], $item[Powerful Glove]);
     equip($slot[acc3], $item[Retrospecs]);
 
-    pull_if_possible(1, $item[borrowed time], 30000);
+    ensure_create_item(1, $item[borrowed time]);
     use(1, $item[borrowed time]);
 
     // NOTE: No turn 0 sausage fight!
@@ -1093,19 +1093,6 @@ if (!test_done(TEST_ITEM)) {
 
     fight_sausage_if_guaranteed();
 
-    /* // Get cyclops eyedrops for later.
-    if (available_amount($item[cyclops eyedrops]) == 0) {
-        cli_execute('pillkeeper semirare');
-        if (get_property_int('semirareCounter') != 0) {
-            error('Semirare should be now. Something went wrong.');
-        }
-        cli_execute('mood apathetic');
-        cli_execute('counters nowarn Fortune Cookie');
-        adv1($location[The Limerick Dungeon], -1, '');
-    } */
-
-    fight_sausage_if_guaranteed();
-
     if (have_effect($effect[Bat-Adjacent Form]) == 0) {
         if (get_property_int('_reflexHammerUsed') >= 3) error('Out of reflex hammers!');
         equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
@@ -1122,13 +1109,13 @@ if (!test_done(TEST_ITEM)) {
     drink(5 - my_inebriety(), $item[astral pilsner]);
 
     // Make A Light that Never Goes Out
-    if (available_amount($item[A Light That Never Goes Out]) == 0) {
+    /* if (available_amount($item[A Light That Never Goes Out]) == 0) {
         // int count = 2 - available_amount($item[A Light That Never Goes Out]);
         ensure_item(1, $item[lump of Brituminous coal]);
         ensure_item(1, $item[third-hand lantern]);
         ensure_item(1, $item[tenderizing hammer]);
         create(1, $item[A Light That Never Goes Out]);
-    }
+    } */
 
     if (!get_property_boolean('_clanFortuneBuffUsed')) {
         ensure_effect($effect[There's No N In Love]);
@@ -1137,12 +1124,18 @@ if (!test_done(TEST_ITEM)) {
     ensure_effect($effect[Fat Leon's Phat Loot Lyric]);
     ensure_effect($effect[Singer's Faithful Ocelot]);
     ensure_effect($effect[The Spirit of Taking]);
+    ensure_effect($effect[items.enh]);
 
     effect[int] subsequent;
     synthesis_plan($effect[Synthesis: Collection], subsequent);
 
-    // Use cyclops eyedrops.
-    ensure_pull_effect($effect[One Very Clear Eye], $item[cyclops eyedrops]);
+    if (get_campground() contains $item[Asdon Martin keyfob]) {
+        ensure_asdon_effect($effect[Driving Observantly]);
+    } else {
+        // Use cyclops eyedrops.
+        ensure_pull_effect($effect[One Very Clear Eye], $item[cyclops eyedrops]);
+    }
+
     // Use bag of grain.
     ensure_effect($effect[Nearly All-Natural]);
     ensure_effect($effect[Steely-Eyed Squint]);
@@ -1151,27 +1144,6 @@ if (!test_done(TEST_ITEM)) {
         // See if we can get Big Smile of the Blender.
         visit_url('place.php?whichplace=campaway&action=campaway_sky');
     }
-
-    /* if (have_effect($effect[Certainty]) == 0) {
-        use_familiar($familiar[Rock Lobster]);
-        if (available_amount($item[ectoplasm <i>au jus</i>]) + available_amount($item[eyedrops of the ermine]) == 0) {
-            // should have strawberry already.
-            create(1, $item[eyedrops of the ermine]);
-        }
-        if (available_amount($item[blood-faced volleyball]) == 0) {
-            ensure_hermit_item(1, $item[volleyball]);
-            ensure_hermit_item(1, $item[seal tooth]);
-            use(1, $item[seal tooth]);
-            use(1, $item[volleyball]);
-        }
-        pizza_effect(
-            $effect[Certainty],
-            $item[cog and sprocket assembly],
-            item_priority($item[ectoplasm <i>au jus</i>], $item[eyedrops of the ermine]),
-            item_priority($item[ravioli hat], $item[red pixel], $item[ratty knitted cap]),
-            $item[blood-faced volleyball] // get extra-strength rubber bands
-        );
-    } */
 
     use_familiar($familiar[Left-Hand Man]);
 
@@ -1236,8 +1208,6 @@ if (!test_done(TEST_HOT_RES)) {
         sweet_synthesis($item[jaba&ntilde;ero-flavored chewing gum], $item[jaba&ntilde;ero-flavored chewing gum]);
     }
 
-    use_familiar($familiar[Exotic Parrot]);
-    try_equip($item[cracker]);
     ensure_effect($effect[Blood Bond]);
     ensure_effect($effect[Leash of Linguini]);
     ensure_effect($effect[Empathy]);
@@ -1300,7 +1270,14 @@ if (!test_done(TEST_HOT_RES)) {
 
     if (get_property('_horsery') != 'pale horse') cli_execute('horsery pale');
 
-    pull_if_possible(1, $item[cracker], 20000);
+    ensure_asdon_effect($effect[Driving Safely]);
+
+    use_familiar($familiar[Exotic Parrot]);
+    if (available_amount($item[cracker]) == 0) {
+        retrieve_item(1, $item[box of Familiar jacks]);
+        use(1, $item[box of Familiar Jacks]);
+    }
+    equip($item[cracker]);
 
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     maximize('hot res, 0.01 familiar weight', false);
@@ -1353,6 +1330,8 @@ if (!test_done(TEST_FAMILIAR)) {
             m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));
     }
 
+    pull_if_possible(1, $item[Great Wolf's beastly trousers], 0);
+
     maximize('familiar weight', false);
 
     do_test(TEST_FAMILIAR);
@@ -1392,41 +1371,11 @@ if (!test_done(TEST_NONCOMBAT)) {
     ensure_effect($effect[Throwing Some Shade]);
     ensure_effect($effect[A Rose by Any Other Material]);
 
-    /* if (have_effect($effect[Disquiet Riot]) == 0) {
-        // For aftercore.
-        use_familiar($familiar[Cornbeefadon]);
-        if (available_amount($item[dripping meat crossbow]) == 0) {
-            ensure_item(1, $item[crossbow string]);
-            if (available_amount($item[meat stack]) == 0) {
-                create(1, $item[meat stack]);
-            }
-            ensure_hermit_item(1, $item[catsup]);
-            create(1, $item[dripping meat crossbow]);
-        }
-        if (available_amount($item[Irish Coffee, English Heart]) == 0) {
-            if (available_amount($item[handful of Smithereens]) == 0) {
-                cli_execute('smash 1 A Light That Never Goes Out');
-            }
-            ensure_item(1, $item[cup of lukewarm tea]);
-            create(1, $item[Irish Coffee, English Heart]);
-        }
-        // Should have a spare orange from fruit skeleton.
-        if (available_amount($item[shot of orange schnapps]) == 0) {
-            ensure_item(1, $item[fermenting powder]);
-            create(1, $item[shot of orange schnapps]);
-        }
-        // sometimes the qaudroculars end up equipped...
-        retrieve_item(1, $item[quadroculars]);
-        pizza_effect(
-            $effect[Disquiet Riot],
-            $item[dripping meat crossbow],
-            $item[Irish Coffee, English Heart],
-            $item[shot of orange schnapps],
-            $item[quadroculars]
-        );
-    } */
-
-    wish_effect($effect[Disquiet Riot]);
+    if (get_campground() contains $item[Asdon Martin keyfob]) {
+        ensure_asdon_effect($effect[Driving Stealthily]);
+    } else {
+        wish_effect($effect[Disquiet Riot]);
+    }
 
     use_familiar($familiar[Disgeist]);
 
@@ -1436,6 +1385,11 @@ if (!test_done(TEST_NONCOMBAT)) {
     ensure_effect($effect[Blessing of the Bird]);
 
     maximize('-combat, 0.01 familiar weight', false);
+
+    if (have_effect($effect[Meteor Showered]) == 0) {
+        adventure_macro($location[Noob Cave],
+            m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));
+    }
 
     if (round(numeric_modifier('combat rate')) > -40) {
         error('Not enough -combat to cap.');
@@ -1496,8 +1450,8 @@ if (!test_done(TEST_WEAPON)) {
     }
 
     // Hatter buff
-    ensure_item(1, $item[goofily-plumed helmet]);
-    ensure_effect($effect[Weapon of Mass Destruction]);
+    /* ensure_item(1, $item[goofily-plumed helmet]);
+    ensure_effect($effect[Weapon of Mass Destruction]); */
 
     // Beach Comb
     if (!get_property('_beachHeadsUsed').contains_text('6')) {
@@ -1520,27 +1474,7 @@ if (!test_done(TEST_WEAPON)) {
 
     ensure_npc_effect($effect[Engorged Weapon], 1, $item[Meleegra&trade; pills]);
 
-    /* if (have_effect($effect[Outer Wolf&trade;]) == 0) {
-        use(available_amount($item[van key]), $item[van key]);
-        if (available_amount($item[ointment of the occult]) == 0) {
-            // Should have a second grapefruit from Scurvy.
-            create(1, $item[ointment of the occult]);
-        }
-        if (available_amount($item[unremarkable duffel bag]) == 0) {
-            // get useless powder.
-            ensure_item(1, $item[cool whip]);
-            cli_execute('smash 1 cool whip');
-        }
-        pizza_effect(
-            $effect[Outer Wolf&trade;],
-            $item[ointment of the occult],
-            item_priority($item[unremarkable duffel bag], $item[useless powder]),
-            item_priority($item[Middle of the Road&trade; brand whiskey], $item[cog and sprocket assembly]),
-            item_priority($item[surprisingly capacious handbag], $item[cog and sprocket assembly])
-        );
-    } */
-
-    wish_effect($effect[Outer Wolf&trade;]);
+    // wish_effect($effect[Outer Wolf&trade;]);
 
     // this is just an assert, effectively.
     ensure_effect($effect[Meteor Showered]);
@@ -1595,6 +1529,10 @@ if (!test_done(TEST_SPELL)) {
     // Beach Comb
     ensure_effect($effect[We're All Made of Starfish]);
 
+    // Tea party
+    ensure_sewer_item(1, $item[mariachi hat]);
+    ensure_effect($effect[Full Bottle in front of Me]);
+
     use_skill(1, $skill[Spirit of Cayenne]);
 
     if (available_amount($item[flask of baconstone juice]) > 0) {
@@ -1605,7 +1543,6 @@ if (!test_done(TEST_SPELL)) {
 
     // Make Staff of the Headmaster's Victuals
     if (available_amount($item[Staff of the Headmaster's Victuals]) == 0) {
-        // int count = 2 - available_amount($item[A Light That Never Goes Out]);
         ensure_item(1, $item[lump of Brituminous coal]);
         ensure_item(1, $item[big stick]);
         ensure_item(1, $item[tenderizing hammer]);
@@ -1619,17 +1556,9 @@ if (!test_done(TEST_SPELL)) {
         create(1, $item[sugar chapeau]);
     }
 
-    /* // Get flimsy hardwood scraps.
-    visit_url('shop.php?whichshop=lathe');
-    if (available_amount($item[flimsy hardwood scraps]) > 0) {
-        visit_url('shop.php?whichshop=lathe&action=buyitem&quantity=1&whichrow=1162');
-    }
-
-    retrieve_item(1, $item[weeping willow wand]); */
-
     if (have_effect($effect[Meteor Showered]) == 0) {
         equip($item[Fourth of May Cosplay Saber]);
-        adventure_macro($location[The Neverending Party],
+        adventure_macro($location[Noob Cave],
             m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));
     }
 

@@ -40,6 +40,9 @@ cli_execute('ccs default');
 if (get_property('boomBoxSong') != 'Food Vibrations') {
     cli_execute('boombox food');
 }
+cli_execute('terminal educate extract.edu');
+cli_execute('terminal educate digitize.edu');
+cli_execute('terminal enquiry familiar.enq');
 
 if (my_adventures() == 0) {
     eat(1, $item[magical sausage]);

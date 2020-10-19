@@ -175,3 +175,37 @@ boolean set_clan(string target)
 	}
 	return true;
 }
+
+void ensure_dough(int goal) {
+    while (available_amount($item[wad of dough]) < goal) {
+        buy(1, $item[all-purpose flower]);
+        use(1, $item[all-purpose flower]);
+    }
+}
+
+int fuel_asdon(int goal) {
+    int starting_fuel = get_fuel();
+    print(`Fueling asdon. Currently {starting_fuel} litres.`);
+    int estimated = (goal - starting_fuel) / 5;
+    int bread = available_amount($item[loaf of soda bread]);
+    ensure_dough(estimated - bread);
+    ensure_item(estimated - bread, $item[soda water]);
+    ensure_create_item(estimated, $item[loaf of soda bread]);
+    cli_execute(`asdonmartin fuel {estimated} loaf of soda bread`);
+    while (get_fuel() < goal) {
+        ensure_dough(1);
+        ensure_item(1, $item[soda water]);
+        ensure_create_item(1, $item[loaf of soda bread]);
+        cli_execute("asdonmartin fuel 1 loaf of soda bread");
+    }
+    int ending_fuel = get_fuel();
+    print(`Done fueling. Now {ending_fuel} litres.`);
+    return ending_fuel;
+}
+
+void ensure_asdon_effect(effect ef) {
+    if (have_effect(ef) == 0) {
+        fuel_asdon(37);
+    }
+    ensure_effect(ef);
+}
