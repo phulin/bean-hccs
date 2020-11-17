@@ -16,6 +16,7 @@ int TEST_NONCOMBAT = 8;
 int TEST_ITEM = 9;
 int TEST_HOT_RES = 10;
 int TEST_COIL_WIRE = 11;
+int TEST_DONATE = 30;
 
 familiar default_familiar = $familiar[Hovering Sombrero];
 item default_familiar_equipment = $item[none];
@@ -1095,6 +1096,7 @@ if (!test_done(TEST_ITEM)) {
 
     if (have_effect($effect[Bat-Adjacent Form]) == 0) {
         if (get_property_int('_reflexHammerUsed') >= 3) error('Out of reflex hammers!');
+        equip($item[vampyric cloake]);
         equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
         adventure_macro($location[The Neverending Party],
             m_new().m_skill($skill[Become a Bat]).m_skill($skill[Reflex Hammer]));
@@ -1270,7 +1272,9 @@ if (!test_done(TEST_HOT_RES)) {
 
     if (get_property('_horsery') != 'pale horse') cli_execute('horsery pale');
 
-    ensure_asdon_effect($effect[Driving Safely]);
+    if (get_campground() contains $item[Asdon Martin keyfob]) {
+        ensure_asdon_effect($effect[Driving Safely]);
+    }
 
     use_familiar($familiar[Exotic Parrot]);
     if (available_amount($item[cracker]) == 0) {
@@ -1530,8 +1534,10 @@ if (!test_done(TEST_SPELL)) {
     ensure_effect($effect[We're All Made of Starfish]);
 
     // Tea party
-    ensure_sewer_item(1, $item[mariachi hat]);
-    ensure_effect($effect[Full Bottle in front of Me]);
+    if (!get_property_boolean('_madTeaParty')) {
+        ensure_sewer_item(1, $item[mariachi hat]);
+        ensure_effect($effect[Full Bottle in front of Me]);
+    }
 
     use_skill(1, $skill[Spirit of Cayenne]);
 
@@ -1586,6 +1592,10 @@ if (!test_done(TEST_SPELL)) {
     }
 
     do_test(TEST_SPELL);
+}
+
+if (!test_done(TEST_DONATE)) {
+    do_test(TEST_DONATE);
 }
 
 set_property('autoSatisfyWithNPCs', get_property('_saved_autoSatisfyWithNPCs'));

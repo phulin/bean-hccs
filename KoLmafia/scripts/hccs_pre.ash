@@ -11,10 +11,10 @@ use(3, $item[meteorite-ade]);
 use(1, $item[School of Hard Knocks Diploma]);
 
 if (pvp_attacks_left() > 0) {
-    while (have_effect($effect[Song of Sauce]) < pvp_attacks_left()) {
+    /* while (have_effect($effect[Song of Sauce]) < pvp_attacks_left()) {
         use_skill(1, $skill[Song of Sauce]);
-    }
+    } */
 
     // replace with whatever this season's karma game is
-    cli_execute('pvp fame freshest');
+    cli_execute('pvp fame noel');
 }
