@@ -159,7 +159,8 @@ record candy_pair {
 boolean[item] npc_candies = $items[jaba&ntilde;ero-flavored chewing gum, lime-and-chile-flavored chewing gum, pickle-flavored chewing gum, tamarind-flavored chewing gum];
 
 boolean[item] candy_forms(item candy) {
-    boolean[item] result = { candy: true };
+    boolean[item] result;
+    result[candy] = true;
     if (candy == $item[peppermint sprout]) {
         result[$item[peppermint twist]] = true;
     }
@@ -728,6 +729,8 @@ if (!test_done(TEST_HP)) {
 
     // Should be 200% myst for now.
     ensure_effect($effect[Blessing of your favorite Bird]);
+    // ensure_pull_effect($effect[On The Shoulders Of Giants], $item[Hawking's Elixir of Brilliance]);
+    ensure_pull_effect($effect[Perspicacious Pressure], $item[pressurized potion of perspicacity]);
 
     if (available_amount($item[flask of baconstone juice]) > 0) {
         ensure_effect($effect[Baconstoned]);
@@ -788,6 +791,9 @@ if (!test_done(TEST_HP)) {
     equip($item[makeshift garbage shirt]);
 
     cli_execute('mood hccs');
+
+    if (!get_property_boolean('_loveTunnelUsed')) abort('Go do LOV.');
+    equip($item[LOV Epaulettes]);
 
     // Professor 9x free sausage fight @ NEP
     if (get_property_int('_sausageFights') == 0) {
@@ -1099,7 +1105,7 @@ if (!test_done(TEST_ITEM)) {
         equip($item[vampyric cloake]);
         equip($slot[acc3], $item[Lil' Doctor&trade; Bag]);
         adventure_macro($location[The Neverending Party],
-            m_new().m_skill($skill[Become a Bat]).m_skill($skill[Reflex Hammer]));
+            m_new().m_step('skill Become a Bat').m_skill($skill[Reflex Hammer]));
     }
 
     try_use(1, $item[astral six-pack]);
@@ -1371,10 +1377,6 @@ if (!test_done(TEST_NONCOMBAT)) {
 
     ensure_effect($effect[Silent Running]);
 
-    // Rewards
-    ensure_effect($effect[Throwing Some Shade]);
-    ensure_effect($effect[A Rose by Any Other Material]);
-
     if (get_campground() contains $item[Asdon Martin keyfob]) {
         ensure_asdon_effect($effect[Driving Stealthily]);
     } else {
@@ -1394,6 +1396,10 @@ if (!test_done(TEST_NONCOMBAT)) {
         adventure_macro($location[Noob Cave],
             m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));
     }
+
+    // Rewards
+    ensure_effect($effect[Throwing Some Shade]);
+    ensure_effect($effect[A Rose by Any Other Material]);
 
     if (round(numeric_modifier('combat rate')) > -40) {
         error('Not enough -combat to cap.');
@@ -1472,6 +1478,8 @@ if (!test_done(TEST_WEAPON)) {
 
     // Corrupted marrow
     ensure_effect($effect[Cowrruption]);
+
+    ensure_effect($effect[The Power of LOV]);
 
     // Pastamancer d1 is weapon damage.
     ensure_effect($effect[Blessing of the Bird]);
@@ -1562,7 +1570,7 @@ if (!test_done(TEST_SPELL)) {
         create(1, $item[sugar chapeau]);
     }
 
-    if (have_effect($effect[Meteor Showered]) == 0) {
+    if (have_effect($effect[Meteor Showered]) == 0 && get_property_int('_meteorShowerUses') < 5) {
         equip($item[Fourth of May Cosplay Saber]);
         adventure_macro($location[Noob Cave],
             m_new().m_skill($skill[Meteor Shower]).m_skill($skill[Use the Force]));

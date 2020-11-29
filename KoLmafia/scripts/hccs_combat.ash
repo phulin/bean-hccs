@@ -236,9 +236,11 @@ void main(int initround, monster foe, string page) {
         /* } else if (have_skill($skill[Reflex Hammer]) && get_property_int("_reflexHammerUsed") < 3 && !used_banisher_in_zone(banished, "Reflex Hammer", loc)) {
             use_skill(1, $skill[Reflex Hammer]); */
         } else if (have_skill($skill[Macrometeorite]) && get_property_int("_macrometeoriteUses") < 10) {
+            use_skill(1, $skill[CLEESH]);
             use_skill(1, $skill[Macrometeorite]);
         } else if (have_skill($skill[CHEAT CODE: Replace Enemy]) && get_property_int("_powerfulGloveBatteryPowerUsed") <= 80) {
             int original_battery = get_property_int("_powerfulGloveBatteryPowerUsed");
+            use_skill(1, $skill[CLEESH]);
             use_skill(1, $skill[CHEAT CODE: Replace Enemy]);
             int new_battery = get_property_int("_powerfulGloveBatteryPowerUsed");
             if (new_battery == original_battery) {
