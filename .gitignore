@@ -1,0 +1,6 @@
+/node_modules
+/build
+/build-types
+/.vscode
+.DS_Store
+/profile.json

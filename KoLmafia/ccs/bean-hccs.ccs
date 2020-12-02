@@ -1,2 +1,3 @@
 [ default ]
-consult hccs_combat.ash
+consult hccs_combat.js
+
