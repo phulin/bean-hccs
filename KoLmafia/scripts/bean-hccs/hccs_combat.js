@@ -699,8 +699,11 @@ var Macro = /*#__PURE__*/function () {
   }, {
     key: "skill",
     value: function skill(sk) {
-      var name = sk.name.replace('%fn, ', '');
-      return this.mIf("hasskill ".concat(name), Macro.step("skill ".concat(name)));
+      if (sk.name.match(/^[A-Za-z ]+$/)) {
+        return this.mIf("hasskill ".concat(sk.name), Macro.step("skill ".concat(sk.name)));
+      } else {
+        return this.mIf("hasskill ".concat((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.toInt)(sk)), Macro.step("skill ".concat((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.toInt)(sk))));
+      }
     }
   }, {
     key: "skills",
@@ -960,8 +963,9 @@ function main(initround, foe) {
         (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.print)('WARNING: Mafia is not tracking bander runaways correctly.');
         (0,_lib__WEBPACK_IMPORTED_MODULE_2__.setPropertyInt)('_banderRunaways', banderRunaways + 1);
       }
-    } else if ((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.haveSkill)(Skill.get('Reflex Hammer')) && (0,_lib__WEBPACK_IMPORTED_MODULE_2__.getPropertyInt)('_reflexHammerUsed') < 3) {
-      (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.useSkill)(1, Skill.get('Reflex Hammer'));
+      /* } else if (haveSkill(Skill.get('Reflex Hammer')) && getPropertyInt('_reflexHammerUsed') < 3) {
+      useSkill(1, Skill.get('Reflex Hammer')); */
+
     } else if ((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.myMp)() >= 50 && (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.haveSkill)(Skill.get('Snokebomb')) && (0,_lib__WEBPACK_IMPORTED_MODULE_2__.getPropertyInt)('_snokebombUsed') < 3) {
       (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.useSkill)(1, Skill.get('Snokebomb'));
     } else if (freeRunItems.some(function (it) {
@@ -1057,6 +1061,7 @@ function adventureIfFree(loc, macroIfFree, macroIfNotFree) {
 /*! export fuelAsdon [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getPropertyBoolean [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getPropertyInt [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export incrementProperty [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export itemPriority [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export myFamiliarWeight [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export sausageFightGuaranteed [provided] [no usage info] [missing usage info prevents renaming] */
@@ -1071,6 +1076,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "getPropertyInt": () => /* binding */ getPropertyInt,
 /* harmony export */   "setPropertyInt": () => /* binding */ setPropertyInt,
+/* harmony export */   "incrementProperty": () => /* binding */ incrementProperty,
 /* harmony export */   "getPropertyBoolean": () => /* binding */ getPropertyBoolean,
 /* harmony export */   "setChoice": () => /* binding */ setChoice,
 /* harmony export */   "myFamiliarWeight": () => /* binding */ myFamiliarWeight,
@@ -1309,6 +1315,9 @@ function getPropertyInt(name) {
 function setPropertyInt(name, value) {
   (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.setProperty)(name, "".concat(value));
 }
+function incrementProperty(name) {
+  setPropertyInt(name, getPropertyInt(name) + 1);
+}
 function getPropertyBoolean(name) {
   var str = (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.getProperty)(name);
 
@@ -1368,7 +1377,7 @@ function ensureNpcEffect(ef, quantity, potion) {
     ensureItem(quantity, potion);
 
     if (!(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.cliExecute)(ef["default"]) || (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.haveEffect)(ef) === 0) {
-      throw 'Failed to get effect " + ef.name + ".';
+      throw "Failed to get effect ".concat(ef.name);
     }
   } else {
     (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.print)("Already have effect ".concat(ef.name, "."));

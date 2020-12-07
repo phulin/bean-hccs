@@ -27,6 +27,7 @@ import {
   getAutoAttack,
   haveFamiliar,
   myClass,
+  toInt,
 } from 'kolmafia';
 import { $class, $effect, $familiar, $items, $skill, $skills } from 'libram/src';
 import { getPropertyInt, myFamiliarWeight, setPropertyInt } from './lib';
@@ -160,8 +161,11 @@ export class Macro {
   }
 
   skill(sk: Skill) {
-    const name = sk.name.replace('%fn, ', '');
-    return this.mIf(`hasskill ${name}`, Macro.step(`skill ${name}`));
+    if (sk.name.match(/^[A-Za-z ]+$/)) {
+      return this.mIf(`hasskill ${sk.name}`, Macro.step(`skill ${sk.name}`));
+    } else {
+      return this.mIf(`hasskill ${toInt(sk)}`, Macro.step(`skill ${toInt(sk)}`));
+    }
   }
 
   static skill(sk: Skill) {
@@ -350,8 +354,8 @@ export function main(initround: number, foe: Monster) {
         print('WARNING: Mafia is not tracking bander runaways correctly.');
         setPropertyInt('_banderRunaways', banderRunaways + 1);
       }
-    } else if (haveSkill(Skill.get('Reflex Hammer')) && getPropertyInt('_reflexHammerUsed') < 3) {
-      useSkill(1, Skill.get('Reflex Hammer'));
+      /* } else if (haveSkill(Skill.get('Reflex Hammer')) && getPropertyInt('_reflexHammerUsed') < 3) {
+      useSkill(1, Skill.get('Reflex Hammer')); */
     } else if (myMp() >= 50 && haveSkill(Skill.get('Snokebomb')) && getPropertyInt('_snokebombUsed') < 3) {
       useSkill(1, Skill.get('Snokebomb'));
     } else if (freeRunItems.some(it => itemAmount(it) > 0)) {

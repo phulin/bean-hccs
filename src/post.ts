@@ -32,7 +32,7 @@ import {
   create,
 } from 'kolmafia';
 import { $skill, $item, $slot, $class, $familiar, $effect, $stat, $location } from 'libram/src';
-import { getPropertyBoolean, ensureMpSausage, ensureEffect, itemPriority } from './lib';
+import { getPropertyBoolean, ensureMpSausage, ensureEffect, itemPriority, getPropertyInt } from './lib';
 
 function get(qty: number, item: Item, maxPrice: number) {
   if (qty > 15) throw 'Bad get!';
@@ -127,7 +127,7 @@ if (!getPropertyBoolean('_thesisDelivered')) {
   if (myBuffedstat($stat`muscle`) < 1739) {
     cliExecute('ballpit');
   }
-  if (myBuffedstat($stat`muscle`) < 1739) {
+  if (myBuffedstat($stat`muscle`) < 1739 && getPropertyInt('_powerfulGloveBatteryPowerUsed') <= 95) {
     equip($slot`acc1`, $item`Powerful Glove`);
     ensureEffect($effect`Triple-Sized`);
     maximize('muscle, equip Kramco', false);
@@ -144,6 +144,7 @@ if (!getPropertyBoolean('_thesisDelivered')) {
 
   cliExecute('ccs thesis');
   adv1($location`The Neverending Party`, -1, '');
+  cliExecute('ccs abort');
 }
 
 if (haveEffect($effect`Jingle Jangle Jingle`) < 1500) cliExecute('send to buffy || 1800 jingle');

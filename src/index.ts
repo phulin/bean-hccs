@@ -53,6 +53,8 @@ import {
   myAdventures,
   mySign,
   create,
+  toString as toStringAsh,
+  toEffect,
 } from 'kolmafia';
 import {
   $familiar,
@@ -78,7 +80,6 @@ import {
   Macro,
   setMode as setCombatMode,
   MODE_MACRO,
-  findMonsterThen,
   adventureIfFree,
 } from './combat';
 import {
@@ -97,6 +98,7 @@ import {
   ensureMpSausage,
   myFamiliarWeight,
   ensureAsdonEffect,
+  incrementProperty,
 } from './lib';
 
 const TEST_HP = 1;
@@ -112,12 +114,12 @@ const TEST_HOT_RES = 10;
 const TEST_COIL_WIRE = 11;
 const TEST_DONATE = 30;
 
-const defaultFamiliar = $familiar`Hovering Sombrero`;
-const defaultFamiliarEquipment = $item`none`;
+const defaultFamiliar = $familiar`Melodramedary`;
+const defaultFamiliarEquipment = $item`dromedary drinking helmet`;
 
 function useDefaultFamiliar() {
   useFamiliar(defaultFamiliar);
-  if (defaultFamiliarEquipment !== $item`none`) {
+  if (defaultFamiliarEquipment !== $item`none` && availableAmount(defaultFamiliarEquipment) > 0) {
     equip(defaultFamiliarEquipment);
   }
 }
@@ -220,8 +222,9 @@ class SynthesisPlanner {
     }
 
     const startIndex = index !== null ? index : this.plan.indexOf(effect);
-    if (startIndex === null) throw 'No such effect in plan!';
+    if (startIndex === -1) throw 'No such effect in plan!';
     const remainingPlan = this.plan.slice(startIndex);
+    print(`${effect} remaining plan: ${remainingPlan}`);
 
     const firstStep = this.synthesizeInternal(remainingPlan, new Map<Item, number>());
     if (firstStep !== null) {
@@ -302,14 +305,28 @@ function shrug(ef: Effect) {
 }
 
 // We have Stevedave's, Ur-Kel's on at all times during leveling (managed via mood); third and fourth slots are variable.
-const songSlot_3 = $effects`Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction`;
-const songSlot_4 = $effects`Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Fat Leon's Phat Loot Lyric, Polka of Plenty`;
+const songSlots = [
+  $effects`Stevedave's Shanty of Superiority`,
+  $effects`Ur-Kel's Aria of Annoyance`,
+  $effects`Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction`,
+  $effects`Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Fat Leon's Phat Loot Lyric, Polka of Plenty`,
+];
+const allKnownSongs = ([] as Effect[]).concat(...songSlots);
+const allSongs = Skill.all()
+  .filter(skill => toStringAsh((skill.class as unknown) as string) === 'Accordion Thief' && skill.buff)
+  .map(skill => toEffect(skill));
 function openSongSlot(song: Effect) {
-  let songSlot: Effect[] = [];
-  if (songSlot_3.includes(song)) songSlot = songSlot_3;
-  else if (songSlot_4.includes(song)) songSlot = songSlot_4;
-  for (const shruggable of songSlot) {
-    shrug(shruggable);
+  for (const songSlot of songSlots) {
+    if (songSlot.includes(song)) {
+      for (const shruggable of songSlot) {
+        shrug(shruggable);
+      }
+    }
+  }
+  for (const badSong of allSongs) {
+    if (!allKnownSongs.includes(badSong)) {
+      shrug(badSong);
+    }
   }
 }
 
@@ -317,7 +334,7 @@ function ensureSong(ef: Effect) {
   if (haveEffect(ef) === 0) {
     openSongSlot(ef);
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
-      throw 'Failed to get effect " + ef.name + ".';
+      throw `Failed to get effect ${ef.name}`;
     }
   } else {
     print(`Already have effect ${ef.name}.`);
@@ -381,7 +398,7 @@ function doTest(testNum: number) {
 // Sweet Synthesis plan.
 // This is the sequence of synthesis effects; we will, if possible, come up with a plan for allocating candy to each of these.
 const synthesisPlanner = new SynthesisPlanner(
-  $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Strong, Synthesis: Cool` //, Synthesis: Collection`
+  $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Strong, Synthesis: Cool, Synthesis: Collection`
 );
 
 // Don't buy stuff from NPC stores.
@@ -443,7 +460,7 @@ if (!testDone(TEST_COIL_WIRE)) {
   // Buy toy accordion
   ensureItem(1, $item`toy accordion`);
 
-  ensureSong($effect`The Magical Mojomuscular Melody`);
+  /* ensureSong($effect`The Magical Mojomuscular Melody`);
   ensureMpTonic(2 * Math.max(0, 1 - getPropertyInt('tomeSummons')));
   useSkill(Math.max(0, 1 - getPropertyInt('tomeSummons')), $skill`Summon Smithsness`);
 
@@ -451,7 +468,7 @@ if (!testDone(TEST_COIL_WIRE)) {
   if (availableAmount($item`Louder Than Bomb`) === 0 && availableAmount($item`handful of smithereens`) > 0) {
     ensureItem(1, $item`Ben-Gal&trade; balm`);
     ensureCreateItem(1, $item`Louder Than Bomb`);
-  }
+  } */
 
   // Upgrade saber for fam wt
   visitUrl('main.php?action=may4');
@@ -473,10 +490,17 @@ if (!testDone(TEST_COIL_WIRE)) {
   equip($slot`acc2`, $item`Powerful Glove`);
   equip($slot`acc3`, $item`Retrospecs`);
 
+  if (defaultFamiliar === $familiar`Melodramedary`) {
+    useDefaultFamiliar();
+    retrieveItem(1, $item`box of Familiar Jacks`);
+    use(1, $item`box of Familiar Jacks`);
+    equip($item`dromedary drinking helmet`);
+    ensureMpTonic(30);
+    adventureKill($location`Noob Cave`);
+  }
+
   ensureCreateItem(1, $item`borrowed time`);
   use(1, $item`borrowed time`);
-
-  // NOTE: No turn 0 sausage fight!
 
   // QUEST - Coil Wire
   doTest(TEST_COIL_WIRE);
@@ -613,6 +637,7 @@ if (!testDone(TEST_HP)) {
   ensureEffect($effect`Favored by Lyle`);
   ensureEffect($effect`Starry-Eyed`);
   ensureEffect($effect`Triple-Sized`);
+  ensureEffect($effect`We're All Made of Starfish`); // Beach Comb - should bridge all the way to spell dmg.
   ensureSong($effect`The Magical Mojomuscular Melody`);
   ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
 
@@ -644,7 +669,7 @@ if (!testDone(TEST_HP)) {
 
   ensureEffect($effect`Song of Bravado`);
 
-  // Should be 200% myst for now.
+  // Should be 50% myst for now.
   ensureEffect($effect`Blessing of your favorite Bird`);
   // ensure_pull_effect($effect[On The Shoulders Of Giants], $item[Hawking's Elixir of Brilliance]);
   ensurePullEffect($effect`Perspicacious Pressure`, $item`pressurized potion of perspicacity`);
@@ -665,7 +690,7 @@ if (!testDone(TEST_HP)) {
   equip($slot`off-hand`, $item`none`);
 
   // Tomato in pantry (Saber YR)
-  if (
+  /*if (
     availableAmount($item`tomato juice of powerful power`) === 0 &&
     availableAmount($item`tomato`) === 0 &&
     haveEffect($effect`Tomato Power`) === 0
@@ -685,7 +710,7 @@ if (!testDone(TEST_HP)) {
       Macro.skill($skill`Shattering Punch`)
     );
     if (availableAmount($item`tomato`) === 0) throw 'No tomato!';
-  }
+  }*/
 
   // Fruits in skeleton store (Saber YR)
   const missingOintment =
@@ -716,6 +741,28 @@ if (!testDone(TEST_HP)) {
   equip($item`makeshift garbage shirt`);
 
   cliExecute('mood hccs');
+
+  // LOV Tunnel
+  if (!getPropertyBoolean('_loveTunnelUsed')) {
+    useDefaultFamiliar();
+    const macro = Macro.mIf(Macro.monster($monster`LOV Enforcer`), Macro.attack())
+      .mIf(Macro.monster($monster`LOV Engineer`), Macro.skillRepeat($skill`Saucegeyser`))
+      .mIf(Macro.monster($monster`LOV Equivocator`), Macro.kill());
+    setChoice(1222, 1); // Entrance
+    setChoice(1223, 1); // Fight LOV Enforcer
+    setChoice(1224, 2); // LOV Epaulettes
+    setChoice(1225, 1); // Fight LOV Engineer
+    setChoice(1226, 2); // Open Heart Surgery
+    setChoice(1227, 1); // Fight LOV Equivocator
+    setChoice(1228, 3); // Take chocolate
+
+    adventureMacro($location`The Tunnel of L.O.V.E.`, macro);
+    if (handlingChoice()) throw 'Did not get all the way through LOV.';
+    visitUrl('choice.php');
+    if (handlingChoice()) throw 'Did not get all the way through LOV.';
+  }
+
+  equip($item`LOV Epaulettes`);
 
   // Professor 9x free sausage fight @ NEP
   if (getPropertyInt('_sausageFights') === 0) {
@@ -776,11 +823,12 @@ if (!testDone(TEST_HP)) {
   }
 
   // Make oil of expertise, philter of phorce, tomato juice
-  ensurePotionEffect($effect`Tomato Power`, $item`tomato juice of powerful power`);
+  // ensurePotionEffect($effect`Tomato Power`, $item`tomato juice of powerful power`);
   ensurePotionEffect($effect`Mystically Oiled`, $item`ointment of the occult`);
 
   // Maximize familiar weight
   equip($item`makeshift garbage shirt`);
+  equip($item`LOV Epaulettes`);
   equip($item`Fourth of May Cosplay Saber`);
   equip($item`Kramco Sausage-o-Matic&trade;`);
   equip($slot`acc1`, $item`Eight Days a Week Pill Keeper`);
@@ -915,7 +963,7 @@ if (!testDone(TEST_HP)) {
   synthesisPlanner.synthesize($effect`Synthesis: Strong`);
 
   // ensure_effect($effect[Gr8ness]);
-  ensureEffect($effect`Tomato Power`);
+  // ensureEffect($effect`Tomato Power`);
   ensureEffect($effect`Song of Starch`);
   ensureEffect($effect`Big`);
   ensureSong($effect`Power Ballad of the Arrowsmith`);
@@ -947,7 +995,7 @@ if (!testDone(TEST_MUS)) {
   ensureEffect($effect`Rage of the Reindeer`);
   ensureEffect($effect`Quiet Determination`);
   ensureEffect($effect`Disdain of the War Snapper`);
-  ensureEffect($effect`Tomato Power`);
+  // ensureEffect($effect`Tomato Power`);
   ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal&trade; balm`);
   ensureEffect($effect`Ham-Fisted`);
   maximize('muscle', false);
@@ -963,7 +1011,7 @@ if (!testDone(TEST_MYS)) {
   ensureSong($effect`Stevedave's Shanty of Superiority`);
   ensureSong($effect`The Magical Mojomuscular Melody`);
   ensureEffect($effect`Quiet Judgement`);
-  ensureEffect($effect`Tomato Power`);
+  // ensureEffect($effect`Tomato Power`);
   ensureEffect($effect`Mystically Oiled`);
   ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
   maximize('mysticality', false);
@@ -990,7 +1038,7 @@ if (!testDone(TEST_MOX)) {
   ensureSong($effect`Stevedave's Shanty of Superiority`);
   ensureSong($effect`The Moxious Madrigal`);
   ensureEffect($effect`Quiet Desperation`);
-  ensureEffect($effect`Tomato Power`);
+  // ensureEffect($effect`Tomato Power`);
   ensureNpcEffect($effect`Butt-Rock Hair`, 5, $item`hair spray`);
   use(availableAmount($item`rhinestone`), $item`rhinestone`);
   if (haveEffect($effect`Unrunnable Face`) === 0) {
@@ -1012,7 +1060,7 @@ if (!testDone(TEST_ITEM)) {
     if (getPropertyInt('_reflexHammerUsed') >= 3) throw 'Out of reflex hammers!';
     equip($item`vampyric cloake`);
     equip($slot`acc3`, $item`Lil' Doctor&trade; Bag`);
-    adventureMacro($location`The Neverending Party`, Macro.skill($skill`Become a Bat`).skill($skill`Reflex Hammer`));
+    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Become a Bat`).skill($skill`Reflex Hammer`));
   }
 
   tryUse(1, $item`astral six-pack`);
@@ -1091,6 +1139,7 @@ if (!testDone(TEST_HOT_RES)) {
         .skill($skill`Use the Force`)
         .toString()
     );
+    if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
     setProperty('choiceAdventure1387', '3');
     use(1, $item`photocopied monster`);
     setCombatMode(MODE_NULL);
@@ -1188,40 +1237,6 @@ if (!testDone(TEST_HOT_RES)) {
   autosell(1, $item`heat-resistant gloves`);
 }
 
-if (!testDone(TEST_FAMILIAR)) {
-  fightSausageIfGuaranteed();
-
-  // These should have fallen through all the way from leveling.
-  ensureEffect($effect`Fidoxene`);
-  ensureEffect($effect`Do I Know You From Somewhere?`);
-
-  // Pool buff.
-  ensureEffect($effect`Billiards Belligerence`);
-
-  if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
-  ensureEffect($effect`Blood Bond`);
-  ensureEffect($effect`Leash of Linguini`);
-  ensureEffect($effect`Empathy`);
-
-  ensurePullEffect($effect`Robot Friends`, $item`silver face paint`);
-
-  if (availableAmount($item`cracker`) > 0) {
-    useFamiliar($familiar`Exotic Parrot`);
-    equip($item`cracker`);
-  }
-
-  if (haveEffect($effect`Meteor Showered`) === 0) {
-    equip($item`Fourth of May Cosplay Saber`);
-    adventureMacro($location`The Neverending Party`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
-  }
-
-  pullIfPossible(1, $item`Great Wolf's beastly trousers`, 0);
-
-  maximize('familiar weight', false);
-
-  doTest(TEST_FAMILIAR);
-}
-
 if (!testDone(TEST_NONCOMBAT)) {
   if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
   ensureEffect($effect`Blood Bond`);
@@ -1240,9 +1255,6 @@ if (!testDone(TEST_NONCOMBAT)) {
     if (handlingChoice()) runChoice(2);
     setCombatMode(MODE_NULL);
   }
-
-  // Pool buff. Should fall through to weapon damage.
-  ensureEffect($effect`Billiards Belligerence`);
 
   equip($slot`acc3`, $item`Powerful Glove`);
 
@@ -1264,16 +1276,16 @@ if (!testDone(TEST_NONCOMBAT)) {
 
   // Pastamancer d1 is -combat.
   ensureEffect($effect`Blessing of the Bird`);
+  ensureEffect($effect`Blessing of your favorite Bird`);
 
   maximize('-combat, 0.01 familiar weight', false);
 
-  if (haveEffect($effect`Meteor Showered`) === 0) {
-    adventureMacro($location`Noob Cave`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
-  }
-
   // Rewards
   ensureEffect($effect`Throwing Some Shade`);
-  ensureEffect($effect`A Rose by Any Other Material`);
+
+  if (round(numericModifier('combat rate')) >= -38) {
+    ensurePullEffect($effect`Predjudicetidigitation`, $item`worst candy`);
+  }
 
   if (round(numericModifier('combat rate')) > -40) {
     throw 'Not enough -combat to cap.';
@@ -1282,13 +1294,57 @@ if (!testDone(TEST_NONCOMBAT)) {
   doTest(TEST_NONCOMBAT);
 }
 
+if (!testDone(TEST_FAMILIAR)) {
+  fightSausageIfGuaranteed();
+
+  // These should have fallen through all the way from leveling.
+  ensureEffect($effect`Fidoxene`);
+  ensureEffect($effect`Do I Know You From Somewhere?`);
+
+  // Pool buff.
+  ensureEffect($effect`Billiards Belligerence`);
+
+  if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
+  ensureEffect($effect`Blood Bond`);
+  ensureEffect($effect`Leash of Linguini`);
+  ensureEffect($effect`Empathy`);
+
+  if (availableAmount($item`cracker`) > 0) {
+    useFamiliar($familiar`Exotic Parrot`);
+    equip($item`cracker`);
+  }
+
+  if (haveEffect($effect`Meteor Showered`) === 0) {
+    equip($item`Fourth of May Cosplay Saber`);
+    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
+    if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
+  }
+
+  // NC reward
+  ensureEffect($effect`Robot Friends`);
+
+  pullIfPossible(1, $item`Great Wolf's beastly trousers`, 0);
+
+  maximize('familiar weight', false);
+
+  doTest(TEST_FAMILIAR);
+}
+
 if (!testDone(TEST_WEAPON)) {
   fightSausageIfGuaranteed();
+
+  if (haveEffect($effect`Do You Crush What I Crush?`) === 0) {
+    if (getPropertyInt('_reflexHammerUsed') >= 3) throw 'Out of reflex hammers!';
+    useFamiliar($familiar`Ghost of Crimbo Carols`);
+    equip($slot`acc3`, $item`Lil' Doctor&trade; Bag`);
+    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Reflex Hammer`));
+  }
 
   // Paint ungulith (Saber YR)
   if (!getPropertyBoolean('_chateauMonsterFought')) {
     const chateauText = visitUrl('place.php?whichplace=chateau', false);
     const match = chateauText.match(/alt="Painting of an? ([^(]*) .1."/);
+    if (getPropertyInt('_camelSpit') === 100) useFamiliar($familiar`Melodramedary`);
     if (match && match[1] === 'ungulith') {
       cliExecute('mood apathetic');
       equip($item`Fourth of May Cosplay Saber`);
@@ -1373,11 +1429,17 @@ if (!testDone(TEST_WEAPON)) {
     Math.floor(numericModifier('weapon damage') / 25 + 0.001) -
     Math.floor(numericModifier('weapon damage percent') / 25 + 0.001);
 
+  if (weaponTurns() === 5) {
+    ensurePullEffect($effect`Seeing Red`, $item`red eye`);
+  }
   if (weaponTurns() >= 5) {
     ensurePullEffect($effect`Wasabi With You`, $item`wasabi marble soda`);
   }
   if (weaponTurns() >= 5) {
     ensurePullEffect($effect`Seeing Red`, $item`red eye`);
+  }
+  if (weaponTurns() >= 7) {
+    wishEffect($effect`Outer Wolf`);
   }
 
   if (weaponTurns() > 2) {
@@ -1399,7 +1461,7 @@ if (!testDone(TEST_SPELL)) {
   ensureEffect($effect`Mental A-cue-ity`);
 
   // Beach Comb
-  ensureEffect($effect`We're All Made of Starfish`);
+  // ensureEffect($effect`We're All Made of Starfish`);
 
   // Tea party
   if (!getPropertyBoolean('_madTeaParty')) {
@@ -1416,12 +1478,12 @@ if (!testDone(TEST_SPELL)) {
   ensurePullEffect($effect`Pisces in the Skyces`, $item`tobiko marble soda`);
 
   // Make Staff of the Headmaster's Victuals
-  if (availableAmount($item`Staff of the Headmaster's Victuals`) === 0) {
+  /* if (availableAmount($item`Staff of the Headmaster's Victuals`) === 0) {
     ensureItem(1, $item`lump of Brituminous coal`);
     ensureItem(1, $item`big stick`);
     ensureItem(1, $item`tenderizing hammer`);
     create(1, $item`Staff of the Headmaster's Victuals`);
-  }
+  } */
 
   ensureItem(1, $item`obsidian nutcracker`);
 
@@ -1432,7 +1494,8 @@ if (!testDone(TEST_SPELL)) {
 
   if (haveEffect($effect`Meteor Showered`) === 0 && getPropertyInt('_meteorShowerUses') < 5) {
     equip($item`Fourth of May Cosplay Saber`);
-    adventureMacro($location`Noob Cave`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
+    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
+    if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
   }
 
   // Sigils of Yeg = 200% SD
@@ -1440,6 +1503,8 @@ if (!testDone(TEST_SPELL)) {
     if (availableAmount($item`Yeg's Motel hand soap`) === 0) cliExecute('cargo 177');
     ensureEffect($effect`Sigils of Yeg`);
   }
+
+  if (availableAmount($item`LOV Elixir #6`) > 0) ensureEffect($effect`The Magic of LOV`);
 
   if (round(numericModifier('spell damage percent')) % 50 >= 40) {
     ensureItem(1, $item`soda water`);

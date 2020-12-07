@@ -35,6 +35,10 @@ export function setPropertyInt(name: string, value: number) {
   setProperty(name, `${value}`);
 }
 
+export function incrementProperty(name: string) {
+  setPropertyInt(name, getPropertyInt(name) + 1);
+}
+
 export function getPropertyBoolean(name: string) {
   const str = getProperty(name);
   if (str === '') {
@@ -98,7 +102,7 @@ export function ensureNpcEffect(ef: Effect, quantity: number, potion: Item) {
   if (haveEffect(ef) === 0) {
     ensureItem(quantity, potion);
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
-      throw 'Failed to get effect " + ef.name + ".';
+      throw `Failed to get effect ${ef.name}`;
     }
   } else {
     print(`Already have effect ${ef.name}.`);

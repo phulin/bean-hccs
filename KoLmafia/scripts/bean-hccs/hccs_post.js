@@ -376,6 +376,7 @@ var $thralls = createPluralConstant(Thrall);
 /*! export fuelAsdon [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getPropertyBoolean [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getPropertyInt [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export incrementProperty [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export itemPriority [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export myFamiliarWeight [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export sausageFightGuaranteed [provided] [no usage info] [missing usage info prevents renaming] */
@@ -390,6 +391,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "getPropertyInt": () => /* binding */ getPropertyInt,
 /* harmony export */   "setPropertyInt": () => /* binding */ setPropertyInt,
+/* harmony export */   "incrementProperty": () => /* binding */ incrementProperty,
 /* harmony export */   "getPropertyBoolean": () => /* binding */ getPropertyBoolean,
 /* harmony export */   "setChoice": () => /* binding */ setChoice,
 /* harmony export */   "myFamiliarWeight": () => /* binding */ myFamiliarWeight,
@@ -628,6 +630,9 @@ function getPropertyInt(name) {
 function setPropertyInt(name, value) {
   (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.setProperty)(name, "".concat(value));
 }
+function incrementProperty(name) {
+  setPropertyInt(name, getPropertyInt(name) + 1);
+}
 function getPropertyBoolean(name) {
   var str = (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.getProperty)(name);
 
@@ -687,7 +692,7 @@ function ensureNpcEffect(ef, quantity, potion) {
     ensureItem(quantity, potion);
 
     if (!(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.cliExecute)(ef["default"]) || (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.haveEffect)(ef) === 0) {
-      throw 'Failed to get effect " + ef.name + ".';
+      throw "Failed to get effect ".concat(ef.name);
     }
   } else {
     (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.print)("Already have effect ".concat(ef.name, "."));
@@ -1420,7 +1425,7 @@ if (!(0,_lib__WEBPACK_IMPORTED_MODULE_2__.getPropertyBoolean)('_thesisDelivered'
     (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.cliExecute)('ballpit');
   }
 
-  if ((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.myBuffedstat)((0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$stat)(_templateObject34())) < 1739) {
+  if ((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.myBuffedstat)((0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$stat)(_templateObject34())) < 1739 && (0,_lib__WEBPACK_IMPORTED_MODULE_2__.getPropertyInt)('_powerfulGloveBatteryPowerUsed') <= 95) {
     (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.equip)((0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$slot)(_templateObject35()), (0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$item)(_templateObject36()));
     (0,_lib__WEBPACK_IMPORTED_MODULE_2__.ensureEffect)((0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$effect)(_templateObject37()));
     (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.maximize)('muscle, equip Kramco', false);
@@ -1440,6 +1445,7 @@ if (!(0,_lib__WEBPACK_IMPORTED_MODULE_2__.getPropertyBoolean)('_thesisDelivered'
 
   (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.cliExecute)('ccs thesis');
   (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.adv1)((0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$location)(_templateObject43()), -1, '');
+  (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.cliExecute)('ccs abort');
 }
 
 if ((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.haveEffect)((0,libram_src__WEBPACK_IMPORTED_MODULE_1__.$effect)(_templateObject44())) < 1500) (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.cliExecute)('send to buffy || 1800 jingle');
