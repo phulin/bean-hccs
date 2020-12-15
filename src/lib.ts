@@ -20,13 +20,24 @@ import {
   visitUrl,
   getFuel,
   create,
+  haveSkill,
+  useSkill,
+  toUrl,
+  buyUsingStorage,
+  equip,
+  pullsRemaining,
+  shopAmount,
+  storageAmount,
+  takeShop,
+  toString as toStringAsh,
+  toEffect,
 } from 'kolmafia';
-import { $item } from 'libram/src';
+import { $effect, $effects, $item, $skill } from 'libram/src';
 
 export function getPropertyInt(name: string) {
   const str = getProperty(name);
   if (str === '') {
-    throw 'Unknown property " + name + ".';
+    throw `Unknown property ${name}.`;
   }
   return toInt(str);
 }
@@ -42,7 +53,7 @@ export function incrementProperty(name: string) {
 export function getPropertyBoolean(name: string) {
   const str = getProperty(name);
   if (str === '') {
-    throw 'Unknown property " + name + ".';
+    throw `Unknown property ${name}.`;
   }
   return str === 'true';
 }
@@ -150,7 +161,7 @@ export function sausageFightGuaranteed() {
   const goblinsFought = getPropertyInt('_sausageFights');
   const nextGuaranteed =
     getPropertyInt('_lastSausageMonsterTurn') + 4 + goblinsFought * 3 + Math.max(0, goblinsFought - 5) ** 3;
-  return totalTurnsPlayed() >= nextGuaranteed;
+  return goblinsFought === 0 || totalTurnsPlayed() >= nextGuaranteed;
 }
 
 export function itemPriority(...items: Item[]) {
@@ -187,6 +198,8 @@ export function ensureDough(goal: number) {
 
 export function fuelAsdon(goal: number) {
   const startingFuel = getFuel();
+  if (startingFuel > goal) return startingFuel;
+
   print(`Fueling asdon. Currently ${startingFuel} litres.`);
   const estimated = Math.floor((goal - startingFuel) / 5);
   const bread = availableAmount($item`loaf of soda bread`);
@@ -210,4 +223,117 @@ export function ensureAsdonEffect(ef: Effect) {
     fuelAsdon(37);
   }
   ensureEffect(ef);
+}
+
+export function mapMonster(location: Location, monster: Monster) {
+  if (
+    haveSkill($skill`Map the Monsters`) &&
+    !getPropertyBoolean('mappingMonsters') &&
+    getPropertyInt('_monstersMapped') < 3
+  ) {
+    useSkill($skill`Map the Monsters`);
+  }
+
+  if (!getPropertyBoolean('mappingMonsters')) throw 'Failed to setup Map the Monsters.';
+
+  const mapPage = visitUrl(toUrl(location), false, true);
+  if (!mapPage.includes('Leading Yourself Right to Them')) throw 'Something went wrong mapping.';
+
+  const fightPage = visitUrl(`choice.php?pwd&whichchoice=1435&option=1&heyscriptswhatsupwinkwink=${monster.id}`);
+  if (!fightPage.includes("You're fighting")) throw 'Something went wrong starting the fight.';
+}
+
+export function tryUse(quantity: number, it: Item) {
+  if (availableAmount(it) > 0) {
+    return use(quantity, it);
+  } else {
+    return false;
+  }
+}
+
+export function tryEquip(it: Item) {
+  if (availableAmount(it) > 0) {
+    return equip(it);
+  } else {
+    return false;
+  }
+}
+
+export function wishEffect(ef: Effect) {
+  if (haveEffect(ef) === 0) {
+    cliExecute(`genie effect ${ef.name}`);
+  } else {
+    print(`Already have effect ${ef.name}.`);
+  }
+}
+
+export function pullIfPossible(quantity: number, it: Item, maxPrice: number) {
+  if (pullsRemaining() > 0) {
+    const quantityPull = Math.max(0, quantity - availableAmount(it));
+    if (shopAmount(it) > 0) {
+      takeShop(Math.min(shopAmount(it), quantityPull), it);
+    }
+    if (storageAmount(it) < quantityPull) {
+      buyUsingStorage(quantityPull - storageAmount(it), it, maxPrice);
+    }
+    cliExecute(`pull ${quantityPull} ${it.name}`);
+    return true;
+  } else return false;
+}
+
+export function ensurePullEffect(ef: Effect, it: Item) {
+  if (haveEffect(ef) === 0) {
+    if (availableAmount(it) > 0 || pullIfPossible(1, it, 50000)) ensureEffect(ef);
+  }
+}
+
+export function shrug(ef: Effect) {
+  if (haveEffect(ef) > 0) {
+    cliExecute(`shrug ${ef.name}`);
+  }
+}
+
+// We have Stevedave's, Ur-Kel's on at all times during leveling (managed via mood); third and fourth slots are variable.
+const songSlots = [
+  $effects`Stevedave's Shanty of Superiority`,
+  $effects`Ur-Kel's Aria of Annoyance`,
+  $effects`Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction`,
+  $effects`Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Fat Leon's Phat Loot Lyric, Polka of Plenty`,
+];
+const allKnownSongs = ([] as Effect[]).concat(...songSlots);
+const allSongs = Skill.all()
+  .filter(skill => toStringAsh((skill.class as unknown) as string) === 'Accordion Thief' && skill.buff)
+  .map(skill => toEffect(skill));
+export function openSongSlot(song: Effect) {
+  for (const songSlot of songSlots) {
+    if (songSlot.includes(song)) {
+      for (const shruggable of songSlot) {
+        shrug(shruggable);
+      }
+    }
+  }
+  for (const badSong of allSongs) {
+    if (!allKnownSongs.includes(badSong)) {
+      shrug(badSong);
+    }
+  }
+}
+
+export function ensureSong(ef: Effect) {
+  if (haveEffect(ef) === 0) {
+    openSongSlot(ef);
+    if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
+      throw `Failed to get effect ${ef.name}`;
+    }
+  } else {
+    print(`Already have effect ${ef.name}.`);
+  }
+}
+
+export function ensureOde(turns: number) {
+  while (haveEffect($effect`Ode to Booze`) < turns) {
+    ensureMpTonic(50);
+    openSongSlot($effect`Ode to Booze`);
+    useSkill(1, $skill`The Ode to Booze`);
+  }
 }

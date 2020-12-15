@@ -96,7 +96,7 @@ equip($item`Iunion Crown`);
 equip($slot`shirt`, $item`none`);
 equip($item`Fourth of May Cosplay Saber`);
 equip($item`Kramco Sausage-o-Matic&trade;`);
-equip($item`Great Wolf's beastly trousers`);
+// equip($item`Great Wolf's beastly trousers`);
 equip($slot`acc1`, $item`Eight Days a Week Pill Keeper`);
 equip($slot`acc2`, $item`Powerful Glove`);
 equip($slot`acc3`, $item`Lil' Doctor&trade; Bag`);

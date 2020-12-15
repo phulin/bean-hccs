@@ -113,7 +113,7 @@ export class Macro {
   }
 
   static monster(foe: Monster) {
-    return `monsterid ${foe.id}`;
+    return `monstername "${foe}"`;
   }
 
   static and(left: string, right: string) {
@@ -217,6 +217,14 @@ export class Macro {
     return new Macro().attack();
   }
 
+  pickpocket() {
+    return this.step('pickpocket');
+  }
+
+  static pickpocket() {
+    return new Macro().pickpocket();
+  }
+
   kill() {
     return this.externalIf(myClass() === $class`Sauceror`, 'skill Curse of Weaksauce')
       .skill($skill`Sing Along`)
@@ -234,7 +242,8 @@ export class Macro {
     return Macro.skill($skill`Sing Along`)
       .skill($skill`Shattering Punch`)
       .skill($skill`Gingerbread Mob Hit`)
-      .skill($skill`Chest X-Ray`);
+      .skill($skill`Chest X-Ray`)
+      .skill($skill`Asdon Martin: Missile Launcher`);
   }
 
   static freeKill() {
