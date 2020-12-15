@@ -103,10 +103,8 @@ enum Test {
   DONATE = 30,
 }
 
-const defaultFamiliar = $familiar`Hovering Sombrero`;
-const defaultFamiliarEquipment = $item`none`;
-// const defaultFamiliar = $familiar`Melodramedary`;
-// const defaultFamiliarEquipment = $item`dromedary drinking helmet`;
+const defaultFamiliar = $familiar`Melodramedary`;
+const defaultFamiliarEquipment = $item`dromedary drinking helmet`;
 
 function useDefaultFamiliar() {
   useFamiliar(defaultFamiliar);

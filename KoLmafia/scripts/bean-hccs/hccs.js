@@ -6181,7 +6181,7 @@ function _templateObject3() {
 }
 
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["none"]);
+  var data = _taggedTemplateLiteral(["dromedary drinking helmet"]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -6191,7 +6191,7 @@ function _templateObject2() {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["Hovering Sombrero"]);
+  var data = _taggedTemplateLiteral(["Melodramedary"]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -6226,8 +6226,7 @@ var Test;
 })(Test || (Test = {}));
 
 var defaultFamiliar = (0,libram_src__WEBPACK_IMPORTED_MODULE_2__.$familiar)(_templateObject());
-var defaultFamiliarEquipment = (0,libram_src__WEBPACK_IMPORTED_MODULE_2__.$item)(_templateObject2()); // const defaultFamiliar = $familiar`Melodramedary`;
-// const defaultFamiliarEquipment = $item`dromedary drinking helmet`;
+var defaultFamiliarEquipment = (0,libram_src__WEBPACK_IMPORTED_MODULE_2__.$item)(_templateObject2());
 
 function useDefaultFamiliar() {
   (0,kolmafia__WEBPACK_IMPORTED_MODULE_1__.useFamiliar)(defaultFamiliar);
