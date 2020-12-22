@@ -36,13 +36,14 @@ import {
   myInebriety,
   drink,
   getCampground,
-  chatPrivate,
-  wait,
   myMp,
   myAdventures,
   create,
   floor,
   myMeat,
+  npcPrice,
+  sweetSynthesis,
+  itemAmount,
 } from 'kolmafia';
 import { $familiar, $item, $effect, $effects, $skill, $slot, $location, $stat, $monster, $class } from 'libram/src';
 import {
@@ -348,6 +349,8 @@ if (!testDone(Test.HP)) {
       visitUrl('place.php?whichplace=campaway&action=campaway_sky');
     }
 
+    ensureItem(7, $item`wad of dough`);
+
     // Unequip spoon.
     equip($slot`acc1`, $item`Retrospecs`);
     equip($slot`acc2`, $item`Powerful Glove`);
@@ -424,9 +427,10 @@ if (!testDone(Test.HP)) {
   ensureSong($effect`The Magical Mojomuscular Melody`);
   ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
 
-  // Plan is for Beach Comb + PK buffs to fall all the way through to item -> hot res -> fam weight.
+  // Plan is for these buffs to fall all the way through to item -> hot res -> fam weight.
   ensureEffect($effect`Fidoxene`);
   ensureEffect($effect`Do I Know You From Somewhere?`);
+  ensureEffect($effect`Billiards Belligerence`);
 
   // Chateau rest
   while (getPropertyInt('timesRested') < 3) {
@@ -438,7 +442,9 @@ if (!testDone(Test.HP)) {
     if (myHp() < 0.8 * myMaxhp()) {
       visitUrl('clan_viplounge.php?where=hottub');
     }
-    if (myMeat() > 2000) ensureAsdonEffect($effect`Driving Recklessly`);
+    if (myMeat() > npcPrice($item`all-purpose flower`) + 7 * npcPrice($item`soda water`)) {
+      ensureAsdonEffect($effect`Driving Recklessly`);
+    }
     ensureMpTonic(32);
     setCombatMode(
       MODE_MACRO,
@@ -460,8 +466,8 @@ if (!testDone(Test.HP)) {
 
   // Should be 50% myst for now.
   ensureEffect($effect`Blessing of your favorite Bird`);
-  // ensurePullEffect($effect`On The Shoulders Of Giants`, $item`Hawking's Elixir of Brilliance`);
-  ensurePullEffect($effect`Perspicacious Pressure`, $item`pressurized potion of perspicacity`);
+  ensurePullEffect($effect`On The Shoulders Of Giants`, $item`Hawking's Elixir of Brilliance`);
+  // ensurePullEffect($effect`Perspicacious Pressure`, $item`pressurized potion of perspicacity`);
 
   /* if (availableAmount($item`flask of baconstone juice`) > 0) {
     ensureEffect($effect`Baconstoned`);
@@ -607,6 +613,10 @@ if (!testDone(Test.HP)) {
     if (handlingChoice()) throw 'Did not get all the way through LOV.';
   }
 
+  if (itemAmount($item`LOV Extraterrestrial Chocolate`) > 0) {
+    use($item`LOV Extraterrestrial Chocolate`);
+  }
+
   equip($item`LOV Epaulettes`);
 
   // Professor 9x free sausage fight @ NEP
@@ -679,12 +689,12 @@ if (!testDone(Test.HP)) {
     setChoice(1324, 5);
 
     ensureMpSausage(100);
-    if (!getPropertyBoolean('_missileLauncherUsed')) {
-      fuelAsdon(100);
-    }
     if (getPropertyInt('_neverendingPartyFreeTurns') < 10) {
       adventureKill($location`The Neverending Party`);
     } else {
+      if (!getPropertyBoolean('_missileLauncherUsed')) {
+        fuelAsdon(100);
+      }
       adventureIfFree($location`The Neverending Party`, Macro.kill(), Macro.freeKill());
     }
   }
@@ -921,7 +931,7 @@ if (!testDone(Test.HOT_RES)) {
   equip($slot`acc2`, $item`Powerful Glove`);
   equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
 
-  if (availableAmount($item`heat-resistant gloves`) === 0) {
+  /* if (availableAmount($item`heat-resistant gloves`) === 0) {
     if (availableAmount($item`photocopied monster`) === 0) {
       if (getPropertyBoolean('_photocopyUsed')) throw 'Already used fax for the day.';
       chatPrivate('cheesefax', 'factory worker');
@@ -948,12 +958,27 @@ if (!testDone(Test.HOT_RES)) {
     use(1, $item`photocopied monster`);
     setCombatMode(MODE_NULL);
   }
-  autosell(1, $item`very hot lunch`);
+  autosell(1, $item`very hot lunch`); */
 
-  /* if (haveEffect($effect`Synthesis: Hot`) === 0) {
+  if (haveEffect($effect`Meteor Showered`) === 0) {
+    cliExecute('mood apathetic');
+    equip($item`Fourth of May Cosplay Saber`);
+    adventureMacro(
+      $location`The Dire Warren`,
+      Macro.skill($skill`Become a Cloud of Mist`)
+        .skill($skill`Meteor Shower`)
+        .skill($skill`Use the Force`)
+    );
+    if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
+    setProperty('choiceAdventure1387', '3');
+    use(1, $item`photocopied monster`);
+    setCombatMode(MODE_NULL);
+  }
+
+  if (haveEffect($effect`Synthesis: Hot`) === 0) {
     ensureItem(2, $item`jaba&ntilde;ero-flavored chewing gum`);
     sweetSynthesis($item`jaba&ntilde;ero-flavored chewing gum`, $item`jaba&ntilde;ero-flavored chewing gum`);
-  } */
+  }
 
   ensureEffect($effect`Blood Bond`);
   ensureEffect($effect`Leash of Linguini`);

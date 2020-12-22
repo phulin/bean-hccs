@@ -5,7 +5,6 @@ module.exports = {
     hccs: './src/index.ts',
     hccs_combat: './src/combat.ts',
     hccs_pre: './src/pre.ts',
-    hccs_post: './src/post.ts',
     hccs_ascend: './src/ascend.ts',
   },
   mode: 'development',
