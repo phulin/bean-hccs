@@ -1,6 +1,6 @@
 # bean-hccs
 
-This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Hardcore Community Service runs as a Pastamancer. I use it daily for ~1/120 softcore CS runs (yes, the name is a misnomer). Expect to need to make some changes, unless your set of IotMs is a strict superset of mine. For most folks, this will be an outline that can get you to daycount with some customization work.
+This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Softcore or Hardcore Community Service runs as a Pastamancer. I use it daily for ~1/120 softcore CS runs (yes, the name is a misnomer). Expect to need to make some changes, unless your set of IotMs is a strict superset of mine. For most folks, this will be an outline that can get you to daycount with some customization work.
 
 You'll have to build this yourself to make modifications. This use a typical node.js / babel / webpack setup. To install:
 - Install node.js.
