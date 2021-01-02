@@ -2,12 +2,11 @@
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "build-types"
+    "noEmit": true                            /* Do not emit outputs. */
   },
   "include": [
     "src/**/*.ts",
     "test/**/*.ts"
   ], 
-  "isolatedModules": true,                  /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
-  "noEmit": true                            /* Do not emit outputs. */
+  "isolatedModules": true                 /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
 }
