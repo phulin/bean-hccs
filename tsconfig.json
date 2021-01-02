@@ -2,7 +2,8 @@
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "rootDir": "src",
-    "noEmit": true                            /* Do not emit outputs. */
+    "noEmit": true,                            /* Do not emit outputs. */
+    "experimentalDecorators": true
   },
   "include": [
     "src/**/*.ts",
