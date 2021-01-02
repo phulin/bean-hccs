@@ -226,8 +226,11 @@ export class Macro {
   }
 
   kill() {
-    return this.externalIf(myClass() === $class`Sauceror`, 'skill Curse of Weaksauce')
+    return this.skill($skill`Curse of Weaksauce`)
+      .skill($skill`Micrometeorite`)
       .skill($skill`Sing Along`)
+      .skill($skill`Detect Weakness`)
+      .mWhile('!match "some of it is even intact" && !mpbelow 50 && !hpbelow 100', Macro.skill($skill`Candyblast`))
       .skill($skill`Stuffed Mortar Shell`)
       .skill($skill`Saucestorm`)
       .skillRepeat($skill`Saucegeyser`)
@@ -425,13 +428,6 @@ export function findMonsterThen(loc: Location, foe: Monster, macro: Macro) {
 export function findMonsterSaberYr(loc: Location, foe: Monster) {
   setProperty('choiceAdventure1387', '3');
   findMonsterThen(loc, foe, Macro.skill(Skill.get('Use the Force')));
-}
-
-export function adventureCopy(loc: Location, foe: Monster) {
-  adventureMacro(
-    loc,
-    Macro.mIf(`!monstername "${foe.name}"`, new Macro().step('abort')).skill(Skill.get('Lecture on Relativity')).kill()
-  );
 }
 
 export function adventureRunUnlessFree(loc: Location) {

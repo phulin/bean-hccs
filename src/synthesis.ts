@@ -51,7 +51,7 @@ export class SynthesisPlanner {
     for (const itemName of Object.keys(inventory)) {
       const item = Item.get(itemName);
       const count = inventory[itemName];
-      if (item.candyType === 'simple') this.simple.set(item, count);
+      if (item.candyType === 'simple' || item === $item`Chubby and Plump bar`) this.simple.set(item, count);
       if (item.candyType === 'complex') this.complex.set(item, count);
     }
 

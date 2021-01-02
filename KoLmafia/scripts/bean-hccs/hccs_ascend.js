@@ -19,8 +19,9 @@ __webpack_require__.r(__webpack_exports__);
 if (!(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.containsText)((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('charpane.php'), 'Astral Spirit')) (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('ascend.php?action=ascend&confirm=on&confirm2=on');
 if (!(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.containsText)((0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('charpane.php'), 'Astral Spirit')) throw 'Failed to ascend.';
 (0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('afterlife.php?action=pearlygates');
-(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('afterlife.php?action=buydeli&whichitem=5046');
-(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('afterlife.php?action=ascend&confirmascend=1&whichsign=2&gender=1&whichclass=3&whichpath=25&asctype=2&nopetok=1&noskillsok=1&pwd', true);
+(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('afterlife.php?action=buydeli&whichitem=5046'); // Pastamancer, Blender, Male, CS
+
+(0,kolmafia__WEBPACK_IMPORTED_MODULE_0__.visitUrl)('afterlife.php?action=ascend&confirmascend=1&whichsign=8&gender=1&whichclass=3&whichpath=25&asctype=2&nopetok=1&noskillsok=1&pwd', true);
 
 /***/ }),
 

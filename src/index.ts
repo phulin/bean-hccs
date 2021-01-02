@@ -42,7 +42,6 @@ import {
   floor,
   myMeat,
   npcPrice,
-  sweetSynthesis,
   itemAmount,
 } from 'kolmafia';
 import { $familiar, $item, $effect, $effects, $skill, $slot, $location, $stat, $monster, $class } from 'libram/src';
@@ -50,7 +49,6 @@ import {
   adventureKill,
   MODE_NULL,
   findMonsterSaberYr,
-  adventureCopy,
   adventureRunUnlessFree,
   adventureMacro,
   saberYr,
@@ -163,7 +161,7 @@ function doTest(testNum: number) {
 // Sweet Synthesis plan.
 // This is the sequence of synthesis effects; we will, if possible, come up with a plan for allocating candy to each of these.
 const synthesisPlanner = new SynthesisPlanner(
-  $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Strong, Synthesis: Cool, Synthesis: Collection`
+  $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Strong, Synthesis: Cool, Synthesis: Collection, Synthesis: Hot`
 );
 
 // Don't buy stuff from NPC stores.
@@ -247,7 +245,9 @@ if (!testDone(Test.COIL_WIRE)) {
 
   // Pantogram.
   // Hilarity is better for later farming than NC
-  cliExecute('pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent');
+  if (availableAmount($item`pantogram pants`) === 0) {
+    cliExecute('pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent');
+  }
 
   // Put on some regen gear
   equip($item`Iunion Crown`);
@@ -259,13 +259,13 @@ if (!testDone(Test.COIL_WIRE)) {
   equip($slot`acc2`, $item`Powerful Glove`);
   equip($slot`acc3`, $item`Retrospecs`);
 
-  if (defaultFamiliar === $familiar`Melodramedary`) {
+  if (defaultFamiliar === $familiar`Melodramedary` && getPropertyInt('_sausageFights') === 0) {
     useDefaultFamiliar();
     retrieveItem(1, $item`box of Familiar Jacks`);
     use(1, $item`box of Familiar Jacks`);
     equip($item`dromedary drinking helmet`);
     ensureMpTonic(30);
-    adventureKill($location`Noob Cave`);
+    adventureMacro($location`Noob Cave`, Macro.kill());
   }
 
   ensureCreateItem(1, $item`borrowed time`);
@@ -281,12 +281,6 @@ if (!testDone(Test.HP)) {
   if (haveEffect($effect`That's Just Cloud-Talk, Man`) === 0) {
     visitUrl('place.php?whichplace=campaway&action=campaway_sky');
   }
-
-  // Get infernal thirst now to generate advs and so we can chain fam equip correctly.
-
-  // Get a full meat tank for later
-
-  // get camel equip
 
   const lovePotion = $item`Love Potion #0`;
   const loveEffect = $effect`Tainted Love Potion`;
@@ -327,38 +321,10 @@ if (!testDone(Test.HP)) {
     cliExecute('briefcase buff random');
   }
 
-  // Get beach access.
-  if (availableAmount($item`bitchin' meatcar`) === 0) {
-    ensureItem(1, $item`cog`);
-    ensureItem(1, $item`sprocket`);
-    ensureItem(1, $item`spring`);
-    ensureItem(1, $item`empty meat tank`);
-    ensureItem(1, $item`sweet rims`);
-    ensureItem(1, $item`tires`);
-    create(1, $item`bitchin' meatcar`);
-  }
-
   // Depends on Ez's Bastille script.
   cliExecute('bastille myst brutalist');
 
   if (getProperty('_horsery') !== 'crazy horse') cliExecute('horsery crazy');
-
-  // Tune moon sign to Blender. Have to do this now to get chewing gum.
-  if (!getPropertyBoolean('moonTuned')) {
-    if (getPropertyInt('_campAwaySmileBuffs') === 0) {
-      visitUrl('place.php?whichplace=campaway&action=campaway_sky');
-    }
-
-    ensureItem(7, $item`wad of dough`);
-
-    // Unequip spoon.
-    equip($slot`acc1`, $item`Retrospecs`);
-    equip($slot`acc2`, $item`Powerful Glove`);
-    equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
-
-    // Actually tune the moon.
-    visitUrl('inv_use.php?whichitem=10254&doit=96&whichsign=8');
-  }
 
   equip($item`Iunion Crown`);
   equip($slot`shirt`, $item`none`);
@@ -410,6 +376,8 @@ if (!testDone(Test.HP)) {
     useSkill(1, $skill`Summon Crimbo Candy`);
   }
 
+  useSkill(1, $skill`Chubby and Plump`);
+
   synthesisPlanner.synthesize($effect`Synthesis: Learning`);
   synthesisPlanner.synthesize($effect`Synthesis: Smart`);
 
@@ -441,9 +409,6 @@ if (!testDone(Test.HP)) {
     useDefaultFamiliar();
     if (myHp() < 0.8 * myMaxhp()) {
       visitUrl('clan_viplounge.php?where=hottub');
-    }
-    if (myMeat() > npcPrice($item`all-purpose flower`) + 7 * npcPrice($item`soda water`)) {
-      ensureAsdonEffect($effect`Driving Recklessly`);
     }
     ensureMpTonic(32);
     setCombatMode(
@@ -481,7 +446,7 @@ if (!testDone(Test.HP)) {
   ensureSewerItem(1, $item`turtle totem`);
   ensureSewerItem(1, $item`saucepan`);
 
-  // Breakfast
+  // Breakfast:
 
   // Visiting Looking Glass in clan VIP lounge
   visitUrl('clan_viplounge.php?action=lookingglass&whichfloor=2');
@@ -489,9 +454,6 @@ if (!testDone(Test.HP)) {
   while (getPropertyInt('_genieWishesUsed') < 3) {
     cliExecute('genie wish for more wishes');
   }
-
-  // Visiting the Ruined House
-  visitUrl('place.php?whichplace=desertbeach&action=db_nukehouse');
 
   useSkill(1, $skill`Advanced Cocktailcrafting`);
   useSkill(1, $skill`Advanced Saucecrafting`);
@@ -636,8 +598,17 @@ if (!testDone(Test.HP)) {
 
       // Just here to party.
       setChoice(1322, 2);
-      adventureCopy($location`The Neverending Party`, $monster`sausage goblin`);
+      adventureMacro(
+        $location`The Neverending Party`,
+        Macro.mIf('!monstername "sausage goblin"', new Macro().step('abort'))
+          .skill(Skill.get('Lecture on Relativity'))
+          .kill()
+      );
     }
+  }
+
+  if (myMeat() > npcPrice($item`all-purpose flower`) + 7 * npcPrice($item`soda water`)) {
+    ensureAsdonEffect($effect`Driving Recklessly`);
   }
 
   equip($item`makeshift garbage shirt`);
@@ -765,8 +736,6 @@ if (!testDone(Test.HP)) {
   if (myClass() === $class`Pastamancer`) useSkill(1, $skill`Bind Undead Elbow Macaroni`);
   else ensurePotionEffect($effect`Expert Oiliness`, $item`oil of expertise`);
 
-  synthesisPlanner.synthesize($effect`Synthesis: Strong`);
-
   // ensure_effect($effect[Gr8ness]);
   // ensureEffect($effect`Tomato Power`);
   ensureEffect($effect`Song of Starch`);
@@ -783,7 +752,11 @@ if (!testDone(Test.HP)) {
 
   // QUEST - Donate Blood (HP)
   if (myMaxhp() - myBuffedstat($stat`muscle`) - 3 < 1770) {
-    throw 'Not enough HP to cap.';
+    synthesisPlanner.synthesize($effect`Synthesis: Strong`);
+
+    if (myMaxhp() - myBuffedstat($stat`muscle`) - 3 < 1770) {
+      throw 'Not enough HP to cap.';
+    }
   }
 
   doTest(Test.HP);
@@ -802,11 +775,16 @@ if (!testDone(Test.MUS)) {
   ensureEffect($effect`Disdain of the War Snapper`);
   ensureEffect($effect`Tomato Power`);
   ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ balm`);
-  ensureEffect($effect`Ham-Fisted`);
   cliExecute('retrocape muscle');
   maximize('muscle', false);
   if (myBuffedstat($stat`muscle`) - myBasestat($stat`mysticality`) < 1770) {
-    throw 'Not enough muscle to cap.';
+    ensureEffect($effect`Lack of Body-Building`); // will stay on all the way to weapon damage.
+    if (myBuffedstat($stat`muscle`) - myBasestat($stat`mysticality`) < 1770) {
+      ensureEffect($effect`Ham-Fisted`);
+      if (myBuffedstat($stat`muscle`) - myBasestat($stat`mysticality`) < 1770) {
+        throw 'Not enough muscle to cap.';
+      }
+    }
   }
   doTest(Test.MUS);
 }
@@ -832,8 +810,6 @@ if (!testDone(Test.MOX)) {
   if (myClass() === $class`Pastamancer`) useSkill(1, $skill`Bind Penne Dreadful`);
   else ensurePotionEffect($effect`Expert Oiliness`, $item`oil of expertise`);
 
-  synthesisPlanner.synthesize($effect`Synthesis: Cool`);
-
   // Beach Comb
   ensureEffect($effect`Pomp & Circumsands`);
 
@@ -854,7 +830,11 @@ if (!testDone(Test.MOX)) {
   cliExecute('retrocape moxie');
   maximize('moxie', false);
   if (myBuffedstat($stat`moxie`) - myBasestat($stat`mysticality`) < 1770) {
-    throw 'Not enough moxie to cap.';
+    synthesisPlanner.synthesize($effect`Synthesis: Cool`);
+
+    if (myBuffedstat($stat`moxie`) - myBasestat($stat`mysticality`) < 1770) {
+      throw 'Not enough moxie to cap.';
+    }
   }
   doTest(Test.MOX);
 }
@@ -879,6 +859,21 @@ if (!testDone(Test.ITEM)) {
   ensureOde(5 - myInebriety());
   drink(5 - myInebriety(), $item`astral pilsner`);
 
+  // Tune moon sign to Opossum.
+  if (!getPropertyBoolean('moonTuned')) {
+    if (getPropertyInt('_campAwaySmileBuffs') === 0) {
+      visitUrl('place.php?whichplace=campaway&action=campaway_sky');
+    }
+
+    // Unequip spoon.
+    equip($slot`acc1`, $item`Retrospecs`);
+    equip($slot`acc2`, $item`Powerful Glove`);
+    equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
+
+    // Actually tune the moon. To Opossum.
+    visitUrl('inv_use.php?whichitem=10254&doit=96&whichsign=5');
+  }
+
   ensureEffect($effect`Fat Leon's Phat Loot Lyric`);
   ensureEffect($effect`Singer's Faithful Ocelot`);
   ensureEffect($effect`The Spirit of Taking`);
@@ -893,6 +888,11 @@ if (!testDone(Test.ITEM)) {
   }
 
   ensureEffect($effect`Nearly All-Natural`); // bag of grain
+
+  // Visiting the Ruined House
+  ensureItem(1, $item`Desert Bus pass`);
+  visitUrl('place.php?whichplace=desertbeach&action=db_nukehouse');
+
   ensureEffect($effect`I See Everything Thrice`); // government
 
   ensureEffect($effect`Steely-Eyed Squint`);
@@ -963,6 +963,8 @@ if (!testDone(Test.HOT_RES)) {
   if (haveEffect($effect`Meteor Showered`) === 0) {
     cliExecute('mood apathetic');
     equip($item`Fourth of May Cosplay Saber`);
+    setProperty('choiceAdventure1387', '3');
+    useFamiliar($familiar`none`);
     adventureMacro(
       $location`The Dire Warren`,
       Macro.skill($skill`Become a Cloud of Mist`)
@@ -970,14 +972,10 @@ if (!testDone(Test.HOT_RES)) {
         .skill($skill`Use the Force`)
     );
     if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
-    setProperty('choiceAdventure1387', '3');
-    use(1, $item`photocopied monster`);
-    setCombatMode(MODE_NULL);
   }
 
   if (haveEffect($effect`Synthesis: Hot`) === 0) {
-    ensureItem(2, $item`jaba&ntilde;ero-flavored chewing gum`);
-    sweetSynthesis($item`jaba&ntilde;ero-flavored chewing gum`, $item`jaba&ntilde;ero-flavored chewing gum`);
+    synthesisPlanner.synthesize($effect`Synthesis: Hot`);
   }
 
   ensureEffect($effect`Blood Bond`);
@@ -1143,6 +1141,7 @@ if (!testDone(Test.FAMILIAR)) {
 
   if (haveEffect($effect`Meteor Showered`) === 0) {
     equip($item`Fourth of May Cosplay Saber`);
+    useFamiliar($familiar`none`);
     adventureMacro($location`The Dire Warren`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
     if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
   }
@@ -1217,7 +1216,7 @@ if (!testDone(Test.WEAPON)) {
   // Pastamancer d1 is weapon damage.
   ensureEffect($effect`Blessing of the Bird`);
 
-  ensureNpcEffect($effect`Engorged Weapon`, 1, $item`Meleegra™ pills`);
+  // ensureNpcEffect($effect`Engorged Weapon`, 1, $item`Meleegra™ pills`);
 
   // Get flimsy hardwood scraps.
   /* visitUrl('shop.php?whichshop=lathe');
