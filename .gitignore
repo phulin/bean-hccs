@@ -1,6 +1,4 @@
 /node_modules
-/build
-/build-types
+/KoLmafia
 /.vscode
 .DS_Store
-/profile.json
