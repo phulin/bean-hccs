@@ -11,5 +11,5 @@ use(3, $item`meteorite-ade`);
 use(1, $item`School of Hard Knocks Diploma`);
 if (pvpAttacksLeft() > 0) {
   cliExecute('uberpvpoptimizer');
-  cliExecute('pvp fame noel');
+  cliExecute('pvp fame maul');
 }
