@@ -1,8 +1,22 @@
 {
-  "extends": "./node_modules/gts/",
+  "extends": ["eslint:recommended"],
   "rules": {
-    "node/no-unpublished-import": "off",
-    "prefer-template": "error"
+    "block-scoped-var": "error",
+    "eqeqeq": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "eol-last": "error",
+    "prefer-arrow-callback": "error",
+    "no-trailing-spaces": "error",
+    "prefer-template": "error",
+    "sort-imports": [
+      "error",
+      {
+        "ignoreCase": true,
+        "ignoreDeclarationSort": true
+      }
+    ],
+    "node/no-unpublished-import": "off"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

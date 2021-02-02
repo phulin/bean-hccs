@@ -1,5 +1,7 @@
+// eslint-disable-next-line no-undef
 const path = require('path');
 
+// eslint-disable-next-line no-undef
 module.exports = {
   entry: {
     hccs: './src/index.ts',
@@ -10,6 +12,7 @@ module.exports = {
   mode: 'development',
   devtool: false,
   output: {
+    // eslint-disable-next-line no-undef
     path: path.resolve(__dirname, 'KoLmafia', 'scripts', 'bean-hccs'),
     filename: '[name].js',
     libraryTarget: 'commonjs',

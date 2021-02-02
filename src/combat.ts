@@ -3,7 +3,6 @@ import {
   choiceFollowsFight,
   print,
   visitUrl,
-  availableAmount,
   setProperty,
   getProperty,
   getLocationMonsters,
@@ -22,19 +21,15 @@ import {
   adv1,
   availableChoiceOptions,
   runCombat,
-  urlEncode,
   xpath,
-  getAutoAttack,
   haveFamiliar,
-  myClass,
-  toInt,
 } from 'kolmafia';
-import { $class, $effect, $familiar, $items, $skill, $skills } from 'libram/src';
+import { $effect, $familiar, $items, $skill, Macro as LibramMacro } from 'libram';
 import { getPropertyInt, myFamiliarWeight, setPropertyInt } from './lib';
 
 // multiFight() stolen from Aenimus: https://github.com/Aenimus/aen_cocoabo_farm/blob/master/scripts/aen_combat.ash.
 // Thanks! Licensed under MIT license.
-function multiFight() {
+export function multiFight() {
   while (inMultiFight()) runCombat();
   if (choiceFollowsFight()) visitUrl('choice.php');
 }
@@ -54,169 +49,7 @@ export function getMacroId() {
   }
 }
 
-export class Macro {
-  static cachedMacroId: number | null = null;
-  static cachedAutoAttack: Macro | null = null;
-
-  components: string[] = [];
-
-  toString() {
-    return this.components.join(';');
-  }
-
-  step(...nextSteps: string[]) {
-    this.components = [...this.components, ...nextSteps.filter(s => s.length > 0)];
-    return this;
-  }
-
-  static step(...nextSteps: string[]) {
-    return new Macro().step(...nextSteps);
-  }
-
-  submit() {
-    const final = this.toString();
-    print(`Submitting macro: ${final}`);
-    return visitUrl(`fight.php?action=macro&macrotext=${urlEncode(final)}`, true, true);
-  }
-
-  setAutoAttack() {
-    if (
-      Macro.cachedMacroId !== null &&
-      getAutoAttack() === 99000000 + Macro.cachedMacroId &&
-      Macro.cachedAutoAttack !== null &&
-      this.toString() === Macro.cachedAutoAttack.toString()
-    ) {
-      // This macro is already set. Don't make the server request.
-      return;
-    }
-    if (Macro.cachedMacroId === null) Macro.cachedMacroId = getMacroId();
-    visitUrl(
-      `account_combatmacros.php?macroid=${Macro.cachedMacroId}&name=${urlEncode(MACRO_NAME)}&macrotext=${urlEncode(
-        this.toString()
-      )}&action=save`,
-      true,
-      true
-    );
-    visitUrl(`account.php?am=1&action=autoattack&value=99${Macro.cachedMacroId}&ajax=1`);
-  }
-
-  abort() {
-    return this.step('abort');
-  }
-
-  static abort() {
-    return new Macro().abort();
-  }
-
-  static hpbelow(threshold: number) {
-    return `hpbelow ${threshold}`;
-  }
-
-  static monster(foe: Monster) {
-    return `monstername "${foe}"`;
-  }
-
-  static and(left: string, right: string) {
-    return `(${left}) && (${right})`;
-  }
-
-  static not(condition: string) {
-    return `!${condition}`;
-  }
-
-  mIf(condition: string, ifTrue: Macro) {
-    return this.step(`if ${condition}`)
-      .step(...ifTrue.components)
-      .step('endif');
-  }
-
-  static mIf(condition: string, ifTrue: Macro) {
-    return new Macro().mIf(condition, ifTrue);
-  }
-
-  mWhile(condition: string, contents: Macro) {
-    return this.step(`while ${condition}`)
-      .step(...contents.components)
-      .step('endwhile');
-  }
-
-  static mWhile(condition: string, contents: Macro) {
-    return new Macro().mWhile(condition, contents);
-  }
-
-  externalIf(condition: boolean, ...next: string[]) {
-    return condition ? this.step(...next) : this;
-  }
-
-  static externalIf(condition: boolean, ...next: string[]) {
-    return new Macro().externalIf(condition, ...next);
-  }
-
-  repeat() {
-    return this.step('repeat');
-  }
-
-  repeatSubmit() {
-    return this.step('repeat').submit();
-  }
-
-  skill(sk: Skill) {
-    if (sk.name.match(/^[A-Za-z ]+$/)) {
-      return this.mIf(`hasskill ${sk.name}`, Macro.step(`skill ${sk.name}`));
-    } else {
-      return this.mIf(`hasskill ${toInt(sk)}`, Macro.step(`skill ${toInt(sk)}`));
-    }
-  }
-
-  static skill(sk: Skill) {
-    return new Macro().skill(sk);
-  }
-
-  skills(skills: Skill[]) {
-    for (const skill of skills) {
-      this.skill(skill);
-    }
-    return this;
-  }
-
-  skillRepeat(sk: Skill) {
-    const name = sk.name.replace('%fn, ', '');
-    return this.mIf(`hasskill ${name}`, Macro.step(`skill ${name}`, 'repeat'));
-  }
-
-  static skillRepeat(sk: Skill) {
-    return new Macro().skillRepeat(sk);
-  }
-
-  item(it: Item) {
-    if (availableAmount(it) > 0) {
-      return this.step(`use ${it.name}`);
-    } else return this;
-  }
-
-  static item(it: Item) {
-    return new Macro().item(it);
-  }
-
-  items(items: Item[]) {
-    for (const item of items) {
-      this.item(item);
-    }
-    return this;
-  }
-
-  static items(items: Item[]) {
-    return new Macro().items(items);
-  }
-
-  attack() {
-    return this.step('attack');
-  }
-
-  static attack() {
-    return new Macro().attack();
-  }
-
+export class Macro extends LibramMacro {
   pickpocket() {
     return this.step('pickpocket');
   }
@@ -230,11 +63,11 @@ export class Macro {
       .skill($skill`Micrometeorite`)
       .skill($skill`Sing Along`)
       .skill($skill`Detect Weakness`)
-      .mWhile('!match "some of it is even intact" && !mpbelow 50 && !hpbelow 100', Macro.skill($skill`Candyblast`))
+      .while_('!match "some of it is even intact" && !mpbelow 50 && !hpbelow 100', Macro.skill($skill`Candyblast`))
       .skill($skill`Stuffed Mortar Shell`)
       .skill($skill`Saucestorm`)
-      .skillRepeat($skill`Saucegeyser`)
-      .attack();
+      .skill($skill`Saucegeyser`)
+      .repeat();
   }
 
   static kill() {
@@ -260,10 +93,8 @@ export class Macro {
           haveFamiliar($familiar`Pair of Stomping Boots`),
         'runaway'
       )
-      .skills(
-        $skills`Spring-Loaded Front Bumper, Reflex Hammer, KGB tranquilizer dart, Throw Latte on Opponent, Snokebomb`
-      )
-      .items($items`Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb`)
+      .trySkill('Spring-Loaded Front Bumper, Reflex Hammer, KGB tranquilizer dart, Throw Latte on Opponent, Snokebomb')
+      .tryItem('Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb')
       .abort();
   }
 }
@@ -314,12 +145,11 @@ function usedBanisherInZone(banished: { [index: string]: Monster }, banisher: st
 }
 
 const freeRunItems = $items`Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb`;
-export function main(initround: number, foe: Monster) {
+export function main(foe: Monster) {
   const mode = getMode();
   const loc = myLocation();
-  print(`foe: ${foe}`);
   if (mode === MODE_MACRO) {
-    Macro.step(getArg1()).repeatSubmit();
+    Macro.step(getArg1()).submit();
   } else if (mode === MODE_FIND_MONSTER_THEN) {
     const monsterId = parseInt(getArg1(), 10);
     const desired = toMonster(monsterId);
@@ -327,7 +157,7 @@ export function main(initround: number, foe: Monster) {
     print(`current: ${foe}, desired: ${desired}`);
     if (foe === desired) {
       setProperty('hccs_combatFound', 'true');
-      new Macro().step(getArg2()).repeatSubmit();
+      Macro.step(getArg2()).submit();
     } else if (
       myMp() >= 50 &&
       haveSkill(Skill.get('Snokebomb')) &&
@@ -354,7 +184,7 @@ export function main(initround: number, foe: Monster) {
     }
   } else if (mode === MODE_RUN_UNLESS_FREE) {
     if (foe.attributes.includes('FREE')) {
-      new Macro().skill(Skill.get('Curse of Weaksauce')).skill(Skill.get('Saucegeyser')).repeatSubmit();
+      Macro.kill().submit();
     } else if (
       myFamiliar() === Familiar.get('Frumious Bandersnatch') &&
       haveEffect(Effect.get('Ode to Booze')) > 0 &&
@@ -371,7 +201,7 @@ export function main(initround: number, foe: Monster) {
     } else if (myMp() >= 50 && haveSkill(Skill.get('Snokebomb')) && getPropertyInt('_snokebombUsed') < 3) {
       useSkill(1, Skill.get('Snokebomb'));
     } else if (freeRunItems.some(it => itemAmount(it) > 0)) {
-      Macro.item(freeRunItems.find(it => itemAmount(it) > 0) as Item).repeatSubmit();
+      Macro.item(freeRunItems.find(it => itemAmount(it) > 0) as Item).submit();
     } else {
       // non-free, whatever
       throw "Couldn't find a way to run away for free!";

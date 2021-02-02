@@ -126,7 +126,7 @@ export function ensurePotionEffect(ef: Effect, potion: Item) {
       create(1, potion);
     }
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
-      throw 'Failed to get effect " + ef.name + ".';
+      throw `Failed to get effect ${ef.name}.`;
     }
   } else {
     print(`Already have effect ${ef.name}.`);
@@ -136,7 +136,7 @@ export function ensurePotionEffect(ef: Effect, potion: Item) {
 export function ensureEffect(ef: Effect, turns = 1) {
   if (haveEffect(ef) < turns) {
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
-      throw 'Failed to get effect " + ef.name + ".';
+      throw `Failed to get effect ${ef.name}.`;
     }
   } else {
     print(`Already have effect ${ef.name}.`);
@@ -240,7 +240,7 @@ export function mapMonster(location: Location, monster: Monster) {
   if (!mapPage.includes('Leading Yourself Right to Them')) throw 'Something went wrong mapping.';
 
   const fightPage = visitUrl(`choice.php?pwd&whichchoice=1435&option=1&heyscriptswhatsupwinkwink=${monster.id}`);
-  if (!fightPage.includes("You're fighting")) throw 'Something went wrong starting the fight.';
+  if (!fightPage.includes(monster.name)) throw 'Something went wrong starting the fight.';
 }
 
 export function tryUse(quantity: number, it: Item) {

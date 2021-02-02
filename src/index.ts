@@ -39,13 +39,11 @@ import {
   myMp,
   myAdventures,
   create,
-  floor,
   myMeat,
   itemAmount,
   mpCost,
   myMaxmp,
-  toInt,
-  myHash,
+  choiceFollowsFight,
 } from 'kolmafia';
 import {
   $familiar,
@@ -59,7 +57,9 @@ import {
   $monster,
   $class,
   get,
-} from 'libram/src';
+  TunnelOfLove,
+  Witchess,
+} from 'libram';
 import {
   adventureKill,
   MODE_NULL,
@@ -198,16 +198,16 @@ function ensureHeartOfGreen() {
 }
 
 function fightWitchessPiece(piece: Monster, macro: Macro) {
-  if (!visitUrl('campground.php?action=witchess').includes('whichchoice value=1181')) throw 'Failed to open Witchess.';
-  if (!runChoice(1).includes('whichchoice=1182')) throw 'Failed to visit shrink ray.';
-  if (
-    !visitUrl(`choice.php?option=1&pwd=${myHash()}&whichchoice=1182&piece=${toInt(piece)}`, false).includes(piece.name)
-  ) {
-    throw 'Failed to start fight.';
-  }
+  useDefaultFamiliar();
   setCombatMode(MODE_MACRO, macro.toString());
   try {
-    runCombat();
+    Witchess.fightPiece(piece);
+    if (choiceFollowsFight()) {
+      visitUrl('choice.php');
+    }
+    while (handlingChoice()) {
+      runChoice(-1);
+    }
   } finally {
     setCombatMode(MODE_NULL);
   }
@@ -376,20 +376,15 @@ if (!testDone(Test.HP)) {
   // Boxing Daycare
   ensureEffect($effect`Uncucumbered`);
 
-  // Cast inscrutable gaze
   ensureEffect($effect`Inscrutable Gaze`);
-
-  // Shower lukewarm
   ensureEffect($effect`Thaumodynamic`);
-
-  // Beach Comb
   ensureEffect($effect`You Learned Something Maybe!`);
 
   // Configure briefcase
   cliExecute('briefcase enchantment weapon hot -combat');
-  while (getPropertyInt('_kgbClicksUsed') < 20) {
+  /* while (getPropertyInt('_kgbClicksUsed') < 20) {
     cliExecute('briefcase buff random');
-  }
+  } */
 
   // Depends on Ez's Bastille script.
   cliExecute('bastille myst brutalist');
@@ -541,6 +536,18 @@ if (!testDone(Test.HP)) {
   // Don't use Kramco here.
   equip($slot`off-hand`, $item`none`);
 
+  if (availableAmount($item`li'l ninja costume`) === 0) {
+    try {
+      setMode(MODE_MACRO, Macro.skill($skill`Shattering Punch`).toString());
+      ensureMpTonic(50);
+      useFamiliar($familiar`Trick-or-Treating Tot`);
+      mapMonster($location`The Haiku Dungeon`, $monster`amateur ninja`);
+      runCombat();
+    } finally {
+      setMode(MODE_NULL);
+    }
+  }
+
   // Tomato in pantry (Saber YR)
   if (
     availableAmount($item`tomato juice of powerful power`) === 0 &&
@@ -628,21 +635,20 @@ if (!testDone(Test.HP)) {
   cliExecute('mood hccs');
 
   // LOV Tunnel
-  if (!getPropertyBoolean('_loveTunnelUsed')) {
+  if (!TunnelOfLove.isUsed()) {
     while (myMp() - mpCost($skill`Summon Candy Heart`) > 200) useSkill(1, $skill`Summon Candy Heart`);
     useDefaultFamiliar();
-    const macro = Macro.mIf(Macro.monster($monster`LOV Enforcer`), Macro.attack().repeat())
-      .mIf(Macro.monster($monster`LOV Engineer`), Macro.skillRepeat($skill`Saucegeyser`))
-      .mIf(Macro.monster($monster`LOV Equivocator`), Macro.pickpocket().kill());
-    setChoice(1222, 1); // Entrance
-    setChoice(1223, 1); // Fight LOV Enforcer
-    setChoice(1224, 2); // LOV Epaulettes
-    setChoice(1225, 1); // Fight LOV Engineer
-    setChoice(1226, 2); // Open Heart Surgery
-    setChoice(1227, 1); // Fight LOV Equivocator
-    setChoice(1228, 3); // Take chocolate
+    const macro = Macro.if_('monstername LOV Enforcer', Macro.attack().repeat())
+      .if_('monstername LOV Engineer', Macro.skill($skill`Saucegeyser`).repeat())
+      .if_('monstername LOV Equivocator', Macro.pickpocket().kill());
 
-    adventureMacro($location`The Tunnel of L.O.V.E.`, macro);
+    setMode(MODE_MACRO, macro.toString());
+    try {
+      TunnelOfLove.fightAll('LOV Epaulettes', 'Open Heart Surgery', 'LOV Extraterrestrial Chocolate');
+    } finally {
+      setMode(MODE_NULL);
+    }
+
     if (handlingChoice()) throw 'Did not get all the way through LOV.';
     visitUrl('choice.php');
     if (handlingChoice()) throw 'Did not get all the way through LOV.';
@@ -686,8 +692,8 @@ if (!testDone(Test.HP)) {
       setChoice(1322, 2);
       adventureMacro(
         $location`The Neverending Party`,
-        Macro.mIf('!monstername "sausage goblin"', new Macro().step('abort'))
-          .skill(Skill.get('Lecture on Relativity'))
+        Macro.if_('!monstername "sausage goblin"', new Macro().step('abort'))
+          .trySkill(Skill.get('Lecture on Relativity'))
           .kill()
       );
     }
@@ -740,7 +746,7 @@ if (!testDone(Test.HP)) {
 
     ensureMpSausage(100);
     if (getPropertyInt('_neverendingPartyFreeTurns') < 10) {
-      adventureKill($location`The Neverending Party`);
+      adventureMacro($location`The Neverending Party`, Macro.kill());
     } else {
       if (!getPropertyBoolean('_missileLauncherUsed')) {
         fuelAsdon(100);
@@ -972,18 +978,22 @@ if (!testDone(Test.ITEM)) {
     visitUrl('place.php?whichplace=campaway&action=campaway_sky');
   }
 
-  useFamiliar($familiar`Left-Hand Man`);
+  useFamiliar($familiar`Trick-or-Treating Tot`);
 
   maximize('item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag', false);
 
-  wishEffect($effect`Infernal Thirst`);
-
   const itemTurns = () =>
-    60 - floor(numericModifier('item drop') / 30 + 0.001) - floor(numericModifier('booze drop') / 15 + 0.001);
+    60 - Math.floor(numericModifier('item drop') / 30) - Math.floor(numericModifier('booze drop') / 15);
 
   if (itemTurns() > 1 && !getPropertyBoolean('_clanFortuneBuffUsed')) {
     print('Not enough item drop, using fortune buff.');
     ensureEffect($effect`There's No N In Love`);
+  }
+
+  if (itemTurns() > 1) throw 'Not enough item drop! Figure out why.';
+  if (itemTurns() > 1) {
+    print('Not enough item drop, using Infernal Thirst.');
+    wishEffect($effect`Infernal Thirst`);
   }
 
   print(`Estimated item turns: ${itemTurns()}`);
@@ -1282,9 +1292,6 @@ if (!testDone(Test.WEAPON)) {
   if (!containsText(getProperty('_beachHeadsUsed'), '6')) {
     ensureEffect($effect`Lack of Body-Building`);
   }
-
-  // Pool buff. Should have fallen through.
-  ensureEffect($effect`Billiards Belligerence`);
 
   if (availableAmount($item`LOV Elixir #3`) > 0) ensureEffect($effect`The Power of LOV`);
 
