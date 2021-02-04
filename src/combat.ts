@@ -23,6 +23,7 @@ import {
   runCombat,
   xpath,
   haveFamiliar,
+  dump,
 } from 'kolmafia';
 import { $effect, $familiar, $items, $skill, Macro as LibramMacro } from 'libram';
 import { getPropertyInt, myFamiliarWeight, setPropertyInt } from './lib';
@@ -61,8 +62,8 @@ export class Macro extends LibramMacro {
   kill() {
     return this.skill($skill`Curse of Weaksauce`)
       .skill($skill`Micrometeorite`)
-      .skill($skill`Sing Along`)
-      .skill($skill`Detect Weakness`)
+      .trySkill($skill`Sing Along`)
+      .trySkill($skill`Detect Weakness`)
       .while_('!match "some of it is even intact" && !mpbelow 50 && !hpbelow 100', Macro.skill($skill`Candyblast`))
       .skill($skill`Stuffed Mortar Shell`)
       .skill($skill`Saucestorm`)
@@ -76,9 +77,9 @@ export class Macro extends LibramMacro {
 
   freeKill() {
     return Macro.skill($skill`Sing Along`)
-      .skill($skill`Shattering Punch`)
-      .skill($skill`Gingerbread Mob Hit`)
-      .skill($skill`Chest X-Ray`)
+      .trySkill($skill`Shattering Punch`)
+      .trySkill($skill`Gingerbread Mob Hit`)
+      .trySkill($skill`Chest X-Ray`)
       .skill($skill`Asdon Martin: Missile Launcher`);
   }
 
@@ -145,7 +146,7 @@ function usedBanisherInZone(banished: { [index: string]: Monster }, banisher: st
 }
 
 const freeRunItems = $items`Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb`;
-export function main(foe: Monster) {
+export function main(initround: number, foe: Monster) {
   const mode = getMode();
   const loc = myLocation();
   if (mode === MODE_MACRO) {

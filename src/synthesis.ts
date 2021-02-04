@@ -8,7 +8,7 @@ import {
   sweetSynthesis,
   sweetSynthesisResult,
 } from 'kolmafia';
-import { $items, $item, $effects } from 'libram/src';
+import { $items, $item, $effects } from 'libram';
 import { ensureItem } from './lib';
 
 const npcCandies = $items`jaba&ntilde;ero-flavored chewing gum, lime-and-chile-flavored chewing gum, pickle-flavored chewing gum, tamarind-flavored chewing gum`;

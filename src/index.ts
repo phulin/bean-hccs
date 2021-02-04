@@ -44,6 +44,7 @@ import {
   mpCost,
   myMaxmp,
   choiceFollowsFight,
+  effectModifier,
 } from 'kolmafia';
 import {
   $familiar,
@@ -171,8 +172,9 @@ function ensureInnerElf() {
   }
 }
 
-function ensureHeartOfGreen() {
-  if (haveEffect($effect`Heart of Green`) === 0) {
+function ensureCandyHeartEffect(candyHeart: Item) {
+  const effect = effectModifier(candyHeart, 'Effect');
+  if (haveEffect(effect) === 0) {
     while (
       myMeat() >= (get('_sausagesMade') + 1) * 111 &&
       myMp() + 999 < myMaxmp() &&
@@ -181,7 +183,7 @@ function ensureHeartOfGreen() {
       eat(1, $item`magical sausage`);
     }
 
-    while (mpCost($skill`Summon Candy Heart`) < myMp() && itemAmount($item`green candy heart`) === 0) {
+    while (mpCost($skill`Summon Candy Heart`) < myMp() && itemAmount(candyHeart) === 0) {
       useSkill(1, $skill`Summon Candy Heart`);
 
       while (
@@ -193,7 +195,7 @@ function ensureHeartOfGreen() {
       }
     }
 
-    if (itemAmount($item`green candy heart`) > 0) use(1, $item`green candy heart`);
+    if (itemAmount(candyHeart) > 0) use(1, candyHeart);
   }
 }
 
@@ -832,7 +834,6 @@ if (!testDone(Test.HP)) {
   ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ balm`);
 
   useFamiliar($familiar`Left-Hand Man`);
-
   maximize('hp', false);
 
   // QUEST - Donate Blood (HP)
@@ -856,6 +857,8 @@ if (!testDone(Test.MUS)) {
   ensureEffect($effect`Disdain of the War Snapper`);
   ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ balm`);
   cliExecute('retrocape muscle');
+
+  useFamiliar($familiar`Left-Hand Man`);
   maximize('muscle', false);
 
   for (const increaser of [
@@ -881,6 +884,8 @@ if (!testDone(Test.MYS)) {
   ensureEffect($effect`Mystically Oiled`);
   ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
   cliExecute('retrocape mysticality');
+
+  useFamiliar($familiar`Left-Hand Man`);
   maximize('mysticality', false);
   if (myBuffedstat($stat`mysticality`) - myBasestat($stat`mysticality`) < 1770) {
     throw 'Not enough mysticality to cap.';
@@ -909,6 +914,8 @@ if (!testDone(Test.MOX)) {
     tryUse(1, $item`runproof mascara`);
   }
   cliExecute('retrocape moxie');
+
+  useFamiliar($familiar`Left-Hand Man`);
   maximize('moxie', false);
   if (myBuffedstat($stat`moxie`) - myBasestat($stat`mysticality`) < 1770) {
     throw 'Not enough moxie to cap.';
@@ -920,6 +927,8 @@ if (!testDone(Test.ITEM)) {
   ensureMpSausage(500);
 
   fightSausageIfGuaranteed();
+
+  useFamiliar($familiar`none`);
 
   if (haveEffect($effect`Bat-Adjacent Form`) === 0) {
     if (getPropertyInt('_reflexHammerUsed') >= 3) throw 'Out of reflex hammers!';
@@ -977,6 +986,8 @@ if (!testDone(Test.ITEM)) {
   if (getPropertyInt('_campAwaySmileBuffs') === 1) {
     visitUrl('place.php?whichplace=campaway&action=campaway_sky');
   }
+
+  ensureCandyHeartEffect($item`lavender candy heart`);
 
   useFamiliar($familiar`Trick-or-Treating Tot`);
 
@@ -1086,8 +1097,8 @@ if (!testDone(Test.HOT_RES)) {
   ensureEffect($effect`Elemental Saucesphere`);
   ensureEffect($effect`Astral Shell`);
 
-  // Build up 100 turns of Deep Dark Visions for spell damage later.
-  while (haveSkill($skill`Deep Dark Visions`) && haveEffect($effect`Visions of the Deep Dark Deeps`) < 80) {
+  // Build up 50 turns of Deep Dark Visions for spell damage later.
+  while (haveSkill($skill`Deep Dark Visions`) && haveEffect($effect`Visions of the Deep Dark Deeps`) < 50) {
     if (myMp() < 20) {
       ensureCreateItem(1, $item`magical sausage`);
       eat(1, $item`magical sausage`);
@@ -1166,7 +1177,7 @@ if (!testDone(Test.NONCOMBAT)) {
   ensureEffect($effect`Puzzle Champ`);
   ensureEffect($effect`Billiards Belligerence`);
 
-  ensureHeartOfGreen();
+  ensureCandyHeartEffect($item`green candy heart`);
 
   if (getPropertyInt('_godLobsterFights') < 3) {
     if (myHp() < 0.8 * myMaxhp()) useSkill(1, $skill`Cannelloni Cocoon`);
@@ -1227,7 +1238,7 @@ if (!testDone(Test.FAMILIAR)) {
   ensureEffect($effect`Puzzle Champ`);
   ensureEffect($effect`Billiards Belligerence`);
 
-  ensureHeartOfGreen();
+  ensureCandyHeartEffect($item`green candy heart`);
 
   if (haveEffect($effect`Meteor Showered`) === 0) {
     equip($item`Fourth of May Cosplay Saber`);

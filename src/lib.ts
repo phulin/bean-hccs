@@ -32,7 +32,7 @@ import {
   toString as toStringAsh,
   toEffect,
 } from 'kolmafia';
-import { $effect, $effects, $item, $skill } from 'libram/src';
+import { $effect, $effects, $item, $skill } from 'libram';
 
 export function getPropertyInt(name: string) {
   const str = getProperty(name);

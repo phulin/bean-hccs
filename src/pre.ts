@@ -1,5 +1,5 @@
 import { buy, cliExecute, visitUrl, print, use, pvpAttacksLeft } from 'kolmafia';
-import { $item } from 'libram/src';
+import { $item } from 'libram';
 
 buy(1, $item`foreign language tapes`);
 buy(1, $item`continental juice bar`);
