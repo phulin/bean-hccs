@@ -60,6 +60,7 @@ import {
   get,
   TunnelOfLove,
   Witchess,
+  Mood,
 } from 'libram';
 import {
   adventureKill,
@@ -137,7 +138,7 @@ function summonBrickoOyster(maxSummons: number) {
   ) {
     useSkill(1, $skill`Summon BRICKOs`);
   }
-  return use(8, $item`BRICKO brick`);
+  return availableAmount($item`BRICKO brick`) >= 8 ? use(8, $item`BRICKO brick`) : false;
 }
 
 function fightSausageIfGuaranteed() {
@@ -234,7 +235,19 @@ function doTest(testNum: number) {
 
 // Sweet Synthesis plan.
 // This is the sequence of synthesis effects; we will, if possible, come up with a plan for allocating candy to each of these.
-const synthesisPlanner = new SynthesisPlanner($effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Collection`);
+const synthesisPlanner = new SynthesisPlanner(
+  $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Collection`
+);
+
+Mood.setOptions({
+  // mpSources: [],
+  songSlots: [
+    $effects`Stevedave's Shanty of Superiority`,
+    $effects`Ur-Kel's Aria of Annoyance`,
+    $effects`Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction`,
+    $effects`Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Fat Leon's Phat Loot Lyric, Polka of Plenty`,
+  ],
+});
 
 // Don't buy stuff from NPC stores.
 setProperty('_saved_autoSatisfyWithNPCs', getProperty('autoSatisfyWithNPCs'));
@@ -246,6 +259,8 @@ setProperty('autoSatisfyWithCoinmasters', 'true');
 
 // Initialize council.
 visitUrl('council.php');
+
+cliExecute('mood apathetic');
 
 // All combat handled by our consult script (hccs_combat.ash).
 cliExecute('ccs bean-hccs');
@@ -336,7 +351,7 @@ if (!testDone(Test.COIL_WIRE)) {
     retrieveItem(1, $item`box of Familiar Jacks`);
     use(1, $item`box of Familiar Jacks`);
     equip($item`dromedary drinking helmet`);
-    ensureMpTonic(30);
+    ensureMpTonic(50);
     adventureMacro($location`Noob Cave`, Macro.kill());
   }
 
@@ -404,7 +419,11 @@ if (!testDone(Test.HP)) {
 
   cliExecute('terminal educate portscan');
 
-  if (getPropertyInt('_brickoFights') === 0 && summonBrickoOyster(10) && availableAmount($item`BRICKO oyster`) > 0) {
+  if (
+    getPropertyInt('_brickoFights') === 0 &&
+    summonBrickoOyster(10) &&
+    availableAmount($item`BRICKO oyster`) > 0
+  ) {
     if (availableAmount($item`bag of many confections`) > 0) throw 'We should not have a bag yet.';
     useFamiliar($familiar`Stocking Mimic`);
     equip($slot`familiar`, $item`none`);
@@ -436,7 +455,10 @@ if (!testDone(Test.HP)) {
   if (myGardenType() === 'peppermint') {
     cliExecute('garden pick');
   } else {
-    print('WARNING: This script is built for peppermint garden. Switch gardens or find other candy.');
+    print(
+      'WARNING: This script is built for peppermint garden. Switch gardens or find other candy.',
+      'red'
+    );
   }
 
   if (getPropertyInt('_candySummons') === 0) {
@@ -558,7 +580,6 @@ if (!testDone(Test.HP)) {
     getPropertyInt('_monstersMapped') < 3 &&
     getPropertyInt('_snokebombUsed') < 3
   ) {
-    cliExecute('mood apathetic');
     ensureEffect($effect`Springy Fusilli`);
     ensureEffect($effect`Resting Beach Face`);
     equip($slot`off-hand`, $item`tiny black hole`);
@@ -634,11 +655,28 @@ if (!testDone(Test.HP)) {
   cliExecute('fold makeshift garbage shirt');
   equip($item`makeshift garbage shirt`);
 
-  cliExecute('mood hccs');
+  const mood = new Mood();
+  mood.skill($skill`Astral Shell`);
+  mood.skill($skill`Get Big`);
+  mood.skill($skill`Blood Bond`);
+  mood.skill($skill`Blood Bubble`);
+  mood.skill($skill`Carol of the Hells`);
+  mood.skill($skill`Drescher's Annoying Noise`);
+  mood.skill($skill`Elemental Saucesphere`);
+  mood.skill($skill`Empathy`);
+  mood.skill($skill`Inscrutable Gaze`);
+  mood.skill($skill`Leash of Linguini`);
+  mood.skill($skill`Pride of the Puffin`);
+  mood.skill($skill`Singer's Faithful Ocelot`);
+  mood.skill($skill`Stevedave's Shanty of Superiority`);
+  mood.skill($skill`Ur-Kel's Aria of Annoyance`);
+  mood.execute();
 
   // LOV Tunnel
   if (!TunnelOfLove.isUsed()) {
-    while (myMp() - mpCost($skill`Summon Candy Heart`) > 200) useSkill(1, $skill`Summon Candy Heart`);
+    while (myMp() - mpCost($skill`Summon Candy Heart`) > 200) {
+      useSkill(1, $skill`Summon Candy Heart`);
+    }
     useDefaultFamiliar();
     const macro = Macro.if_('monstername LOV Enforcer', Macro.attack().repeat())
       .if_('monstername LOV Engineer', Macro.skill($skill`Saucegeyser`).repeat())
@@ -646,7 +684,11 @@ if (!testDone(Test.HP)) {
 
     setMode(MODE_MACRO, macro.toString());
     try {
-      TunnelOfLove.fightAll('LOV Epaulettes', 'Open Heart Surgery', 'LOV Extraterrestrial Chocolate');
+      TunnelOfLove.fightAll(
+        'LOV Epaulettes',
+        'Open Heart Surgery',
+        'LOV Extraterrestrial Chocolate'
+      );
     } finally {
       setMode(MODE_NULL);
     }
@@ -662,16 +704,14 @@ if (!testDone(Test.HP)) {
 
   equip($item`LOV Epaulettes`);
 
-  cliExecute('mood hccs');
-
   // Fight King, Queen, Witch
-  if (availableAmount($item`very pointy crown`) === 0) {
+  if (availableAmount($item`very pointy crown`) === 0 && get('_witchessFights') < 5) {
     fightWitchessPiece($monster`Witchess Queen`, Macro.attack().repeat());
   }
-  if (availableAmount($item`dented scepter`) === 0) {
+  if (availableAmount($item`dented scepter`) === 0 && get('_witchessFights') < 5) {
     fightWitchessPiece($monster`Witchess King`, Macro.attack().repeat());
   }
-  if (availableAmount($item`battle broom`) === 0) {
+  if (availableAmount($item`battle broom`) === 0 && get('_witchessFights') < 5) {
     fightWitchessPiece($monster`Witchess Witch`, Macro.attack().repeat());
   }
 
@@ -736,7 +776,8 @@ if (!testDone(Test.HP)) {
     (haveSkill($skill`Chest X-Ray`) && getPropertyInt('_chestXRayUsed') < 3) ||
     (haveSkill($skill`Shattering Punch`) && getPropertyInt('_shatteringPunchUsed') < 3) ||
     (haveSkill($skill`Gingerbread Mob Hit`) && !getPropertyBoolean('_gingerbreadMobHitUsed')) ||
-    (getCampground()['Asdon Martin keyfob'] !== undefined && !getPropertyBoolean('_missileLauncherUsed'))
+    (getCampground()['Asdon Martin keyfob'] !== undefined &&
+      !getPropertyBoolean('_missileLauncherUsed'))
   ) {
     ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
     ensureSong($effect`The Magical Mojomuscular Melody`);
@@ -748,7 +789,7 @@ if (!testDone(Test.HP)) {
 
     ensureMpSausage(100);
     if (getPropertyInt('_neverendingPartyFreeTurns') < 10) {
-      adventureMacro($location`The Neverending Party`, Macro.kill());
+      adventureMacro($location`The Neverending Party`, Macro.trySkill('Feel Pride').kill());
     } else {
       if (!getPropertyBoolean('_missileLauncherUsed')) {
         fuelAsdon(100);
@@ -768,7 +809,10 @@ if (!testDone(Test.HP)) {
   equip($slot`acc2`, $item`Brutal brogues`);
   equip($slot`acc3`, $item`Beach Comb`);
 
-  while (getPropertyInt('_banderRunaways') < myFamiliarWeight() / 5 && !getProperty('latteUnlocks').includes('chili')) {
+  while (
+    getPropertyInt('_banderRunaways') < myFamiliarWeight() / 5 &&
+    !getProperty('latteUnlocks').includes('chili')
+  ) {
     ensureOde(1);
     adventureRunUnlessFree($location`The Haunted Kitchen`);
   }
@@ -788,34 +832,6 @@ if (!testDone(Test.HP)) {
   ) {
     cliExecute('latte refill pumpkin chili carrot');
   }
-
-  /* // Fish for extra kramco goblins.
-  equip($item`Kramco Sausage-o-Matic™`);
-  equip($slot`acc1`, $item`Lil' Doctor™ Bag`);
-
-  while (
-    getPropertyInt('_banderRunaways') < (familiarWeight($familiar`Frumious Bandersnatch`) + weightAdjustment()) / 5 ||
-    (haveSkill($skill`Snokebomb`) && getPropertyInt('_snokebombUsed') < 3)
-  ) {
-    ensureSong($effect`The Sonata of Sneakiness`);
-    ensureEffect($effect`Smooth Movements`);
-    if (getPropertyInt('_powerfulGloveBatteryPowerUsed') <= 90) {
-      ensureEffect($effect`Invisible Avatar`);
-    }
-    if (getPropertyInt('garbageShirtCharge') <= 8) {
-      equip($slot`shirt`, $item`none`);
-    }
-    if (getPropertyInt('_banderRunaways') < myFamiliarWeight() / 5) {
-      ensureOde(1);
-    } else {
-      useDefaultFamiliar();
-    }
-
-    // Skip fairy gravy NC
-    setChoice(297, 3);
-    ensureMpSausage(100);
-    adventureRunUnlessFree($location`The Haiku Dungeon`);
-  } */
 
   // Reset location so maximizer doesn't get confused.
   setLocation($location`none`);
@@ -908,6 +924,9 @@ if (!testDone(Test.MOX)) {
   ensureSong($effect`Stevedave's Shanty of Superiority`);
   ensureSong($effect`The Moxious Madrigal`);
   ensureEffect($effect`Quiet Desperation`);
+  ensureEffect($effect`Disco Fever`);
+  ensureEffect($effect`Blubbered Up`);
+  ensureEffect($effect`Mariachi Mood`);
   ensureNpcEffect($effect`Butt-Rock Hair`, 5, $item`hair spray`);
   use(availableAmount($item`rhinestone`), $item`rhinestone`);
   if (haveEffect($effect`Unrunnable Face`) === 0) {
@@ -934,7 +953,10 @@ if (!testDone(Test.ITEM)) {
     if (getPropertyInt('_reflexHammerUsed') >= 3) throw 'Out of reflex hammers!';
     equip($item`vampyric cloake`);
     equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
-    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Become a Bat`).skill($skill`Reflex Hammer`));
+    adventureMacro(
+      $location`The Dire Warren`,
+      Macro.skill($skill`Become a Bat`).skill($skill`Reflex Hammer`)
+    );
   }
 
   tryUse(1, $item`astral six-pack`);
@@ -991,10 +1013,15 @@ if (!testDone(Test.ITEM)) {
 
   useFamiliar($familiar`Trick-or-Treating Tot`);
 
-  maximize('item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag', false);
+  maximize(
+    'item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag',
+    false
+  );
 
   const itemTurns = () =>
-    60 - Math.floor(numericModifier('item drop') / 30) - Math.floor(numericModifier('booze drop') / 15);
+    60 -
+    Math.floor(numericModifier('item drop') / 30) -
+    Math.floor(numericModifier('booze drop') / 15);
 
   if (itemTurns() > 1 && !getPropertyBoolean('_clanFortuneBuffUsed')) {
     print('Not enough item drop, using fortune buff.');
@@ -1073,9 +1100,13 @@ if (!testDone(Test.HOT_RES)) {
   // Don't use planner; we'll have enough stuff.
   ensureEffect($effect`Synthesis: Hot`);
 
-  ensureEffect($effect`Blood Bond`);
-  ensureEffect($effect`Leash of Linguini`);
-  ensureEffect($effect`Empathy`);
+  // These should have fallen through all the way from leveling.
+  ensureEffect($effect`Fidoxene`);
+  ensureEffect($effect`Do I Know You From Somewhere?`);
+  ensureEffect($effect`Puzzle Champ`);
+  ensureEffect($effect`Billiards Belligerence`);
+
+  ensureCandyHeartEffect($item`green candy heart`);
 
   // Pool buff. This will fall through to fam weight.
   ensureEffect($effect`Billiards Belligerence`);
@@ -1090,15 +1121,22 @@ if (!testDone(Test.HOT_RES)) {
     ensureEffect($effect`Flame-Retardant Trousers`);
   }
 
-  if (availableAmount($item`sleaze powder`) > 0 || availableAmount($item`lotion of sleaziness`) > 0) {
+  if (
+    availableAmount($item`sleaze powder`) > 0 ||
+    availableAmount($item`lotion of sleaziness`) > 0
+  ) {
     ensurePotionEffect($effect`Sleazy Hands`, $item`lotion of sleaziness`);
   }
 
   ensureEffect($effect`Elemental Saucesphere`);
   ensureEffect($effect`Astral Shell`);
+  if (haveEffect($effect`Feeling Peaceful`) === 0) useSkill($skill`Feel Peaceful`);
 
   // Build up 50 turns of Deep Dark Visions for spell damage later.
-  while (haveSkill($skill`Deep Dark Visions`) && haveEffect($effect`Visions of the Deep Dark Deeps`) < 50) {
+  while (
+    haveSkill($skill`Deep Dark Visions`) &&
+    haveEffect($effect`Visions of the Deep Dark Deeps`) < 50
+  ) {
     if (myMp() < 20) {
       ensureCreateItem(1, $item`magical sausage`);
       eat(1, $item`magical sausage`);
@@ -1144,11 +1182,8 @@ if (!testDone(Test.HOT_RES)) {
   maximize('hot res, 0.01 familiar weight', false);
 
   // OK to waste a couple turns here
-  if (Math.round(numericModifier('hot resistance')) + 9 <= 63) {
+  if (Math.round(numericModifier('hot resistance')) < 59) {
     ensurePullEffect($effect`Fireproof Lips`, $item`SPF 451 lip balm`);
-  }
-  if (Math.round(numericModifier('hot resistance')) + 5 <= 60) {
-    ensurePullEffect($effect`Good Chance of Surviving Hell`, $item`infernal snowball`);
   }
 
   if (Math.round(numericModifier('hot resistance')) < 59) {
@@ -1240,10 +1275,15 @@ if (!testDone(Test.FAMILIAR)) {
 
   ensureCandyHeartEffect($item`green candy heart`);
 
+  if (availableAmount($item`rope`) === 0) cliExecute('play rope');
+
   if (haveEffect($effect`Meteor Showered`) === 0) {
     equip($item`Fourth of May Cosplay Saber`);
     useFamiliar($familiar`none`);
-    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
+    adventureMacro(
+      $location`The Dire Warren`,
+      Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`)
+    );
     if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
   }
 
@@ -1403,7 +1443,10 @@ if (!testDone(Test.SPELL)) {
 
   if (haveEffect($effect`Meteor Showered`) === 0 && getPropertyInt('_meteorShowerUses') < 5) {
     equip($item`Fourth of May Cosplay Saber`);
-    adventureMacro($location`The Dire Warren`, Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`));
+    adventureMacro(
+      $location`The Dire Warren`,
+      Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`)
+    );
     if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty('_meteorShowerUses');
   }
 

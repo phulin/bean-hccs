@@ -16,6 +16,7 @@
         "ignoreDeclarationSort": true
       }
     ],
+    "curly": ["error", "multi-line"],
     "node/no-unpublished-import": "off"
   },
   "parserOptions": {
