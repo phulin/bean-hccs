@@ -34,6 +34,15 @@ import {
 } from 'kolmafia';
 import { $effect, $effects, $item, $skill } from 'libram';
 
+export function entries<V>(obj: { [index: string]: V }): [string, V][] {
+  var ownProps = Object.keys(obj),
+    i = ownProps.length,
+    resArray = new Array(i); // preallocate the Array
+  while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+  return resArray;
+}
+
 export function getPropertyInt(name: string) {
   const str = getProperty(name);
   if (str === '') {
@@ -160,7 +169,10 @@ export function ensureMpSausage(mp: number) {
 export function sausageFightGuaranteed() {
   const goblinsFought = getPropertyInt('_sausageFights');
   const nextGuaranteed =
-    getPropertyInt('_lastSausageMonsterTurn') + 4 + goblinsFought * 3 + Math.max(0, goblinsFought - 5) ** 3;
+    getPropertyInt('_lastSausageMonsterTurn') +
+    4 +
+    goblinsFought * 3 +
+    Math.max(0, goblinsFought - 5) ** 3;
   return goblinsFought === 0 || totalTurnsPlayed() >= nextGuaranteed;
 }
 
@@ -239,7 +251,9 @@ export function mapMonster(location: Location, monster: Monster) {
   const mapPage = visitUrl(toUrl(location), false, true);
   if (!mapPage.includes('Leading Yourself Right to Them')) throw 'Something went wrong mapping.';
 
-  const fightPage = visitUrl(`choice.php?pwd&whichchoice=1435&option=1&heyscriptswhatsupwinkwink=${monster.id}`);
+  const fightPage = visitUrl(
+    `choice.php?pwd&whichchoice=1435&option=1&heyscriptswhatsupwinkwink=${monster.id}`
+  );
   if (!fightPage.includes(monster.name)) throw 'Something went wrong starting the fight.';
 }
 
@@ -302,8 +316,10 @@ const songSlots = [
 ];
 const allKnownSongs = ([] as Effect[]).concat(...songSlots);
 const allSongs = Skill.all()
-  .filter(skill => toStringAsh((skill.class as unknown) as string) === 'Accordion Thief' && skill.buff)
-  .map(skill => toEffect(skill));
+  .filter(
+    (skill) => toStringAsh(skill.class as unknown as string) === 'Accordion Thief' && skill.buff
+  )
+  .map((skill) => toEffect(skill));
 export function openSongSlot(song: Effect) {
   for (const songSlot of songSlots) {
     if (songSlot.includes(song)) {

@@ -45,6 +45,7 @@ import {
   myMaxmp,
   choiceFollowsFight,
   effectModifier,
+  getInventory,
 } from 'kolmafia';
 import {
   $familiar,
@@ -101,6 +102,8 @@ import {
   wishEffect,
   ensureOde,
   ensureSong,
+  shrug,
+  entries,
 } from './lib';
 import { SynthesisPlanner } from './synthesis';
 
@@ -282,13 +285,6 @@ equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
 if (!testDone(Test.COIL_WIRE)) {
   setClan('Bonus Adventures from Hell');
 
-  if (getPropertyInt('_clanFortuneConsultUses') < 3) {
-    while (getPropertyInt('_clanFortuneConsultUses') < 3) {
-      cliExecute('fortune cheesefax');
-      cliExecute('wait 5');
-    }
-  }
-
   if (myLevel() === 1 && mySpleenUse() === 0) {
     while (getPropertyInt('_universeCalculated') < getPropertyInt('skillLevel144')) {
       cliExecute('numberology 69');
@@ -467,6 +463,20 @@ if (!testDone(Test.HP)) {
 
   useSkill(1, $skill`Chubby and Plump`);
 
+  const candyHearts = entries(getInventory()).filter(([name]) => name.includes('candy heart'));
+  const candyHeartCount = candyHearts.reduce((sum, [, count]) => sum + count, 0);
+  if (candyHeartCount < 8) {
+    if (myMp() < 100) eat(1, $item`magical sausage`);
+    while (myMp() - mpCost($skill`Summon Candy Heart`) > 100) {
+      useSkill(1, $skill`Summon Candy Heart`);
+    }
+  }
+
+  if (availableAmount($item`Crimbo candied pecan`) === 3) {
+    // Yahtzee!
+    pullIfPossible(1, $item`Crimbo fudge`, 4000);
+  }
+
   synthesisPlanner.synthesize($effect`Synthesis: Learning`);
   synthesisPlanner.synthesize($effect`Synthesis: Smart`);
 
@@ -518,7 +528,7 @@ if (!testDone(Test.HP)) {
   }
 
   ensureEffect($effect`Song of Bravado`);
-  ensureEffect($effect`meat.enh`);
+  // ensureEffect($effect`meat.enh`);
   ensureSong($effect`Polka of Plenty`);
 
   // Should be 50% myst for now.
@@ -995,7 +1005,8 @@ if (!testDone(Test.ITEM)) {
     ensurePullEffect($effect`One Very Clear Eye`, $item`cyclops eyedrops`);
   }
 
-  ensureEffect($effect`Nearly All-Natural`); // bag of grain
+  // ensureEffect($effect`Nearly All-Natural`); // bag of grain
+  ensureEffect($effect`Fortune of the Wheel`);
 
   // Visiting the Ruined House
   ensureItem(1, $item`Desert Bus pass`);
@@ -1165,9 +1176,9 @@ if (!testDone(Test.HOT_RES)) {
 
   if (getProperty('_horsery') !== 'pale horse') cliExecute('horsery pale');
 
-  if (getCampground()['Asdon Martin keyfob']) {
-    ensureAsdonEffect($effect`Driving Safely`);
-  }
+  // if (getCampground()['Asdon Martin keyfob']) {
+  //   ensureAsdonEffect($effect`Driving Safely`);
+  // }
 
   useFamiliar($familiar`Exotic Parrot`);
   if (availableAmount($item`cracker`) === 0) {
@@ -1234,12 +1245,13 @@ if (!testDone(Test.NONCOMBAT)) {
   ensureEffect($effect`Invisible Avatar`);
   ensureEffect($effect`Silent Running`);
   ensureEffect($effect`Become Superficially Interested`);
+  ensureEffect($effect`Feeling Lonely`);
 
-  if (getCampground()['Asdon Martin keyfob']) {
-    ensureAsdonEffect($effect`Driving Stealthily`);
-  } else {
-    wishEffect($effect`Disquiet Riot`);
-  }
+  // if (getCampground()['Asdon Martin keyfob']) {
+  //   ensureAsdonEffect($effect`Driving Stealthily`);
+  // } else {
+  //   wishEffect($effect`Disquiet Riot`);
+  // }
 
   useFamiliar($familiar`Disgeist`);
 
@@ -1251,6 +1263,7 @@ if (!testDone(Test.NONCOMBAT)) {
 
   // Rewards
   ensureEffect($effect`Throwing Some Shade`);
+  // wishEffect($effect`Disquiet Riot`);
 
   if (Math.round(numericModifier('combat rate')) > -40) {
     throw 'Not enough -combat to cap.';
@@ -1484,6 +1497,10 @@ if (!testDone(Test.SPELL)) {
     eat(1, $item`magical sausage`);
   }
 
+  if (spellTurns() > 22) {
+    throw 'Something went wrong with spell damage.';
+  }
+
   doTest(Test.SPELL);
 }
 
@@ -1498,3 +1515,4 @@ setProperty('hpAutoRecovery', '0.8');
 cliExecute('mood default');
 cliExecute('ccs default');
 cliExecute('boombox food');
+shrug($effect`Cowrruption`);
