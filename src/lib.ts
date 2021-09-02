@@ -153,10 +153,8 @@ export function ensureEffect(ef: Effect, turns = 1) {
 }
 
 export function ensureMpTonic(mp: number) {
-  while (myMp() < mp) {
-    ensureItem(1, $item`Doc Galaktik's Invigorating Tonic`);
-    use(1, $item`Doc Galaktik's Invigorating Tonic`);
-  }
+  const count = Math.max(mp - myMp(), 0) / 8;
+  use(count, $item`Doc Galaktik's Invigorating Tonic`);
 }
 
 export function ensureMpSausage(mp: number) {
