@@ -1,80 +1,62 @@
 import {
-  inMultiFight,
-  choiceFollowsFight,
-  print,
-  visitUrl,
-  setProperty,
-  getProperty,
-  getLocationMonsters,
-  myLocation,
-  toMonster,
-  myMp,
-  haveSkill,
-  useSkill,
-  myFamiliar,
-  haveEffect,
-  runaway,
-  itemAmount,
-  handlingChoice,
-  lastChoice,
-  runChoice,
   adv1,
   availableChoiceOptions,
-  runCombat,
-  xpath,
-  haveFamiliar,
-  dump,
+  choiceFollowsFight,
   getAutoAttack,
-  printHtml,
+  handlingChoice,
+  inMultiFight,
+  lastChoice,
+  myFamiliar,
+  runChoice,
+  runCombat,
   setAutoAttack,
-} from 'kolmafia';
-import { $effect, $familiar, $items, $skill, get, Macro as LibramMacro, set } from 'libram';
-import { getPropertyInt, myFamiliarWeight, setPropertyInt } from './lib';
+  visitUrl,
+  xpath,
+} from "kolmafia";
+import { $effect, $familiar, $skill, get, have, Macro as LibramMacro } from "libram";
 
 // multiFight() stolen from Aenimus: https://github.com/Aenimus/aen_cocoabo_farm/blob/master/scripts/aen_combat.ash.
 // Thanks! Licensed under MIT license.
-export function multiFight() {
+export function multiFight(): void {
   while (inMultiFight()) runCombat();
-  if (choiceFollowsFight()) visitUrl('choice.php');
+  if (choiceFollowsFight()) visitUrl("choice.php");
 }
 
-const MACRO_NAME = 'Bean Scripts Macro';
-export function getMacroId() {
+const MACRO_NAME = "Bean Scripts Macro";
+export function getMacroId(): number {
   const macroMatches = xpath(
-    visitUrl('account_combatmacros.php'),
+    visitUrl("account_combatmacros.php"),
     `//select[@name="macroid"]/option[text()="${MACRO_NAME}"]/@value`
   );
   if (macroMatches.length === 0) {
-    visitUrl('account_combatmacros.php?action=new');
+    visitUrl("account_combatmacros.php?action=new");
     const newMacroText = visitUrl(
       `account_combatmacros.php?macroid=0&name=${MACRO_NAME}&macrotext=abort&action=save`
     );
-    return parseInt(xpath(newMacroText, '//input[@name=macroid]/@value')[0], 10);
+    return parseInt(xpath(newMacroText, "//input[@name=macroid]/@value")[0], 10);
   } else {
     return parseInt(macroMatches[0], 10);
   }
 }
 
 export class Macro extends LibramMacro {
-  pickpocket() {
-    return this.step('pickpocket');
+  pickpocket(): Macro {
+    return this.step("pickpocket");
   }
 
-  static pickpocket() {
+  static pickpocket(): Macro {
     return new Macro().pickpocket();
   }
 
-  kill() {
-    return this.skill($skill`Curse of Weaksauce`)
-      .skill($skill`Saucegeyser`)
-      .repeat();
+  kill(): Macro {
+    return this.skill($skill`Saucegeyser`).repeat();
   }
 
-  static kill() {
+  static kill(): Macro {
     return new Macro().kill();
   }
 
-  freeKill() {
+  freeKill(): Macro {
     return Macro.skill($skill`Sing Along`)
       .trySkill($skill`Shattering Punch`)
       .trySkill($skill`Gingerbread Mob Hit`)
@@ -82,28 +64,26 @@ export class Macro extends LibramMacro {
       .skill($skill`Asdon Martin: Missile Launcher`);
   }
 
-  static freeKill() {
+  static freeKill(): Macro {
     return new Macro().freeKill();
   }
 
-  static freeRun() {
+  static freeRun(): Macro {
     return new Macro()
       .externalIf(
-        (haveFamiliar($familiar`Frumious Bandersnatch`) &&
-          haveEffect($effect`The Ode to Booze`) > 0) ||
-          haveFamiliar($familiar`Pair of Stomping Boots`),
-        'runaway'
+        (myFamiliar() === $familiar`Frumious Bandersnatch` && have($effect`Ode to Booze`)) ||
+          myFamiliar() === $familiar`Pair of Stomping Boots`,
+        "runaway"
       )
       .trySkill(
-        'Spring-Loaded Front Bumper, Reflex Hammer, KGB tranquilizer dart, Throw Latte on Opponent, Snokebomb'
+        "Spring-Loaded Front Bumper, Reflex Hammer, KGB tranquilizer dart, Throw Latte on Opponent, Snokebomb"
       )
-      .tryItem('Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb')
+      .tryItem("Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb")
       .abort();
   }
 }
 
-const freeRunItems = $items`Louder Than Bomb, tattered scrap of paper, GOTO, green smoke bomb`;
-export function main() {
+export function main(): void {
   Macro.load().submit();
   multiFight();
 }
@@ -121,11 +101,11 @@ export function adventureMacro(loc: Location, macro: Macro): void {
   if (getAutoAttack() !== 0) setAutoAttack(0);
   macro.save();
   try {
-    adv1(loc, 0, '');
+    adv1(loc, 0, "");
     while (inMultiFight()) runCombat();
-    if (choiceFollowsFight()) visitUrl('choice.php');
+    if (choiceFollowsFight()) visitUrl("choice.php");
   } catch (e) {
-    throw `Combat exception! Last macro error: ${get('lastMacroError')}`;
+    throw `Combat exception! Last macro error: ${get("lastMacroError")}`;
   } finally {
     Macro.clearSaved();
   }
@@ -149,17 +129,17 @@ export function adventureMacroAuto(
   autoMacro.setAutoAttack();
   nextMacro.save();
   try {
-    adv1(loc, 0, '');
+    adv1(loc, 0, "");
     while (inMultiFight()) runCombat();
-    if (choiceFollowsFight()) visitUrl('choice.php');
+    if (choiceFollowsFight()) visitUrl("choice.php");
   } catch (e) {
-    throw `Combat exception! Last macro error: ${get('lastMacroError')}`;
+    throw `Combat exception! Last macro error: ${get("lastMacroError")}`;
   } finally {
     Macro.clearSaved();
   }
 }
 
-export function withMacro<T>(macro: Macro, action: () => T) {
+export function withMacro<T>(macro: Macro, action: () => T): T {
   macro.save();
   try {
     return action();
@@ -168,8 +148,8 @@ export function withMacro<T>(macro: Macro, action: () => T) {
   }
 }
 
-export function saberYr() {
-  if (!handlingChoice()) throw 'No saber choice?';
+export function saberYr(): void {
+  if (!handlingChoice()) throw "No saber choice?";
   if (lastChoice() === 1387 && Object.keys(availableChoiceOptions()).length > 0) {
     runChoice(3);
   }

@@ -1,81 +1,60 @@
 import {
-  getProperty,
-  toInt,
-  setProperty,
-  familiarWeight,
-  myFamiliar,
-  weightAdjustment,
   availableAmount,
   buy,
-  use,
-  retrieveItem,
-  haveEffect,
-  cliExecute,
-  print,
-  myMp,
-  myMaxmp,
-  eat,
-  totalTurnsPlayed,
-  getClanName,
-  visitUrl,
-  getFuel,
-  create,
-  haveSkill,
-  useSkill,
-  toUrl,
   buyUsingStorage,
+  cliExecute,
+  create,
+  eat,
   equip,
+  familiarWeight,
+  getClanName,
+  getFuel,
+  getProperty,
+  haveEffect,
+  haveSkill,
+  myFamiliar,
+  myMaxmp,
+  myMp,
+  print,
   pullsRemaining,
+  retrieveItem,
+  setProperty,
   shopAmount,
   storageAmount,
   takeShop,
-  toString as toStringAsh,
   toEffect,
-} from 'kolmafia';
-import { $effect, $effects, $item, $skill } from 'libram';
+  toString as toStringAsh,
+  totalTurnsPlayed,
+  toUrl,
+  use,
+  useSkill,
+  visitUrl,
+  weightAdjustment,
+} from "kolmafia";
+import { $effect, $effects, $item, $skill, get, set } from "libram";
 
 export function entries<V>(obj: { [index: string]: V }): [string, V][] {
-  var ownProps = Object.keys(obj),
-    i = ownProps.length,
-    resArray = new Array(i); // preallocate the Array
+  const ownProps = Object.keys(obj);
+  let i = ownProps.length;
+  const resArray = new Array(i); // preallocate the Array
   while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]];
 
   return resArray;
 }
 
-export function getPropertyInt(name: string) {
-  const str = getProperty(name);
-  if (str === '') {
-    throw `Unknown property ${name}.`;
-  }
-  return toInt(str);
+export function incrementProperty(name: string): void {
+  set(name, get<number>(name) + 1);
 }
 
-export function setPropertyInt(name: string, value: number) {
-  setProperty(name, `${value}`);
+export function setChoice(adv: number, choice: number): void {
+  set(`choiceAdventure${adv}`, `${choice}`);
 }
 
-export function incrementProperty(name: string) {
-  setPropertyInt(name, getPropertyInt(name) + 1);
-}
-
-export function getPropertyBoolean(name: string) {
-  const str = getProperty(name);
-  if (str === '') {
-    throw `Unknown property ${name}.`;
-  }
-  return str === 'true';
-}
-
-export function setChoice(adv: number, choice: number) {
-  setProperty(`choiceAdventure${adv}`, `${choice}`);
-}
-
-export function myFamiliarWeight() {
+export function myFamiliarWeight(): number {
   return familiarWeight(myFamiliar()) + weightAdjustment();
 }
 
-export function ensureItem(quantity: number, it: Item) {
+export function ensureItem(quantity: number, it: Item): void {
   if (availableAmount(it) < quantity) {
     buy(quantity - availableAmount(it), it);
   }
@@ -84,23 +63,23 @@ export function ensureItem(quantity: number, it: Item) {
   }
 }
 
-export function ensureCreateItem(quantity: number, it: Item) {
+export function ensureCreateItem(quantity: number, it: Item): void {
   if (availableAmount(it) < quantity) {
     create(quantity - availableAmount(it), it);
   }
   if (availableAmount(it) < quantity) {
-    throw 'Could not create item.';
+    throw "Could not create item.";
   }
 }
 
-export function ensureSewerItem(quantity: number, it: Item) {
+export function ensureSewerItem(quantity: number, it: Item): void {
   while (availableAmount(it) < quantity) {
     ensureItem(1, $item`chewing gum on a string`);
     use(1, $item`chewing gum on a string`);
   }
 }
 
-export function ensureHermitItem(quantity: number, it: Item) {
+export function ensureHermitItem(quantity: number, it: Item): void {
   if (availableAmount(it) >= quantity) {
     return;
   }
@@ -118,7 +97,7 @@ export function ensureHermitItem(quantity: number, it: Item) {
   retrieveItem(count, it);
 }
 
-export function ensureNpcEffect(ef: Effect, quantity: number, potion: Item) {
+export function ensureNpcEffect(ef: Effect, quantity: number, potion: Item): void {
   if (haveEffect(ef) === 0) {
     ensureItem(quantity, potion);
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
@@ -129,7 +108,7 @@ export function ensureNpcEffect(ef: Effect, quantity: number, potion: Item) {
   }
 }
 
-export function ensurePotionEffect(ef: Effect, potion: Item) {
+export function ensurePotionEffect(ef: Effect, potion: Item): void {
   if (haveEffect(ef) === 0) {
     if (availableAmount(potion) === 0) {
       create(1, potion);
@@ -142,7 +121,7 @@ export function ensurePotionEffect(ef: Effect, potion: Item) {
   }
 }
 
-export function ensureEffect(ef: Effect, turns = 1) {
+export function ensureEffect(ef: Effect, turns = 1): void {
   if (haveEffect(ef) < turns) {
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
       throw `Failed to get effect ${ef.name}.`;
@@ -152,44 +131,41 @@ export function ensureEffect(ef: Effect, turns = 1) {
   }
 }
 
-export function ensureMpTonic(mp: number) {
+export function ensureMpTonic(mp: number): void {
   const count = Math.max(mp - myMp(), 0) / 8;
   use(count, $item`Doc Galaktik's Invigorating Tonic`);
 }
 
-export function ensureMpSausage(mp: number) {
+export function ensureMpSausage(mp: number): void {
   while (myMp() < Math.min(mp, myMaxmp())) {
     ensureCreateItem(1, $item`magical sausage`);
     eat(1, $item`magical sausage`);
   }
 }
 
-export function sausageFightGuaranteed() {
-  const goblinsFought = getPropertyInt('_sausageFights');
+export function sausageFightGuaranteed(): boolean {
+  const goblinsFought = get("_sausageFights");
   const nextGuaranteed =
-    getPropertyInt('_lastSausageMonsterTurn') +
-    4 +
-    goblinsFought * 3 +
-    Math.max(0, goblinsFought - 5) ** 3;
+    get("_lastSausageMonsterTurn") + 4 + goblinsFought * 3 + Math.max(0, goblinsFought - 5) ** 3;
   return goblinsFought === 0 || totalTurnsPlayed() >= nextGuaranteed;
 }
 
-export function itemPriority(...items: Item[]) {
+export function itemPriority(...items: Item[]): Item {
   return items.find((item: Item) => availableAmount(item) > 0) ?? items[items.length - 1];
 }
 
-export function setClan(target: string) {
+export function setClan(target: string): boolean {
   if (getClanName() !== target) {
-    const clanCache = JSON.parse(getProperty('hccs_clanCache') || '{}');
+    const clanCache = JSON.parse(getProperty("hccs_clanCache") || "{}");
     if (clanCache.target === undefined) {
-      const recruiter = visitUrl('clan_signup.php');
+      const recruiter = visitUrl("clan_signup.php");
       const clanRe = /<option value=([0-9]+)>([^<]+)<\/option>/g;
       let match;
       while ((match = clanRe.exec(recruiter)) !== null) {
         clanCache[match[2]] = match[1];
       }
     }
-    setProperty('hccs_clanCache', JSON.stringify(clanCache));
+    setProperty("hccs_clanCache", JSON.stringify(clanCache));
 
     visitUrl(`showclan.php?whichclan=${clanCache[target]}&action=joinclan&confirm=on&pwd`);
     if (getClanName() !== target) {
@@ -199,14 +175,14 @@ export function setClan(target: string) {
   return true;
 }
 
-export function ensureDough(goal: number) {
+export function ensureDough(goal: number): void {
   while (availableAmount($item`wad of dough`) < goal) {
     buy(1, $item`all-purpose flower`);
     use(1, $item`all-purpose flower`);
   }
 }
 
-export function fuelAsdon(goal: number) {
+export function fuelAsdon(goal: number): number {
   const startingFuel = getFuel();
   if (startingFuel > goal) return startingFuel;
 
@@ -221,41 +197,41 @@ export function fuelAsdon(goal: number) {
     ensureDough(1);
     ensureItem(1, $item`soda water`);
     ensureCreateItem(1, $item`loaf of soda bread`);
-    cliExecute('asdonmartin fuel 1 loaf of soda bread');
+    cliExecute("asdonmartin fuel 1 loaf of soda bread");
   }
   const endingFuel = getFuel();
   print(`Done fueling. Now ${endingFuel} litres.`);
   return endingFuel;
 }
 
-export function ensureAsdonEffect(ef: Effect) {
+export function ensureAsdonEffect(ef: Effect): void {
   if (haveEffect(ef) === 0) {
     fuelAsdon(37);
   }
   ensureEffect(ef);
 }
 
-export function mapMonster(location: Location, monster: Monster) {
+export function mapMonster(location: Location, monster: Monster): void {
   if (
     haveSkill($skill`Map the Monsters`) &&
-    !getPropertyBoolean('mappingMonsters') &&
-    getPropertyInt('_monstersMapped') < 3
+    !get("mappingMonsters") &&
+    get("_monstersMapped") < 3
   ) {
     useSkill($skill`Map the Monsters`);
   }
 
-  if (!getPropertyBoolean('mappingMonsters')) throw 'Failed to setup Map the Monsters.';
+  if (!get("mappingMonsters")) throw "Failed to setup Map the Monsters.";
 
   const mapPage = visitUrl(toUrl(location), false, true);
-  if (!mapPage.includes('Leading Yourself Right to Them')) throw 'Something went wrong mapping.';
+  if (!mapPage.includes("Leading Yourself Right to Them")) throw "Something went wrong mapping.";
 
   const fightPage = visitUrl(
     `choice.php?pwd&whichchoice=1435&option=1&heyscriptswhatsupwinkwink=${monster.id}`
   );
-  if (!fightPage.includes(monster.name)) throw 'Something went wrong starting the fight.';
+  if (!fightPage.includes(monster.name)) throw "Something went wrong starting the fight.";
 }
 
-export function tryUse(quantity: number, it: Item) {
+export function tryUse(quantity: number, it: Item): boolean {
   if (availableAmount(it) > 0) {
     return use(quantity, it);
   } else {
@@ -263,7 +239,7 @@ export function tryUse(quantity: number, it: Item) {
   }
 }
 
-export function tryEquip(it: Item) {
+export function tryEquip(it: Item): boolean {
   if (availableAmount(it) > 0) {
     return equip(it);
   } else {
@@ -271,15 +247,7 @@ export function tryEquip(it: Item) {
   }
 }
 
-export function wishEffect(ef: Effect) {
-  if (haveEffect(ef) === 0) {
-    cliExecute(`genie effect ${ef.name}`);
-  } else {
-    print(`Already have effect ${ef.name}.`);
-  }
-}
-
-export function pullIfPossible(quantity: number, it: Item, maxPrice: number) {
+export function pullIfPossible(quantity: number, it: Item, maxPrice: number): boolean {
   if (pullsRemaining() > 0) {
     const quantityPull = Math.max(0, quantity - availableAmount(it));
     if (shopAmount(it) > 0) {
@@ -293,13 +261,13 @@ export function pullIfPossible(quantity: number, it: Item, maxPrice: number) {
   } else return false;
 }
 
-export function ensurePullEffect(ef: Effect, it: Item) {
+export function ensurePullEffect(ef: Effect, it: Item): void {
   if (haveEffect(ef) === 0) {
     if (availableAmount(it) > 0 || pullIfPossible(1, it, 50000)) ensureEffect(ef);
   }
 }
 
-export function shrug(ef: Effect) {
+export function shrug(ef: Effect): void {
   if (haveEffect(ef) > 0) {
     cliExecute(`shrug ${ef.name}`);
   }
@@ -315,10 +283,10 @@ const songSlots = [
 const allKnownSongs = ([] as Effect[]).concat(...songSlots);
 const allSongs = Skill.all()
   .filter(
-    (skill) => toStringAsh(skill.class as unknown as string) === 'Accordion Thief' && skill.buff
+    (skill) => toStringAsh(skill.class as unknown as string) === "Accordion Thief" && skill.buff
   )
   .map((skill) => toEffect(skill));
-export function openSongSlot(song: Effect) {
+export function openSongSlot(song: Effect): void {
   for (const songSlot of songSlots) {
     if (songSlot.includes(song)) {
       for (const shruggable of songSlot) {
@@ -333,7 +301,7 @@ export function openSongSlot(song: Effect) {
   }
 }
 
-export function ensureSong(ef: Effect) {
+export function ensureSong(ef: Effect): void {
   if (haveEffect(ef) === 0) {
     openSongSlot(ef);
     if (!cliExecute(ef.default) || haveEffect(ef) === 0) {
@@ -344,7 +312,7 @@ export function ensureSong(ef: Effect) {
   }
 }
 
-export function ensureOde(turns: number) {
+export function ensureOde(turns: number): void {
   while (haveEffect($effect`Ode to Booze`) < turns) {
     ensureMpTonic(50);
     openSongSlot($effect`Ode to Booze`);
