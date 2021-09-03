@@ -1,24 +1,24 @@
-// eslint-disable-next-line no-undef
-const path = require('path');
+// eslint-env node
 
-// eslint-disable-next-line no-undef
+const path = require("path");
+
 module.exports = {
   entry: {
-    hccs: './src/index.ts',
-    hccs_combat: './src/combat.ts',
-    hccs_pre: './src/pre.ts',
-    hccs_ascend: './src/ascend.ts',
+    hccs: "./src/index.ts",
+    hccs_combat: "./src/combat.ts",
+    hccs_pre: "./src/pre.ts",
+    hccs_ascend: "./src/ascend.ts",
   },
-  mode: 'development',
+  mode: "development",
   devtool: false,
   output: {
     // eslint-disable-next-line no-undef
-    path: path.resolve(__dirname, 'KoLmafia', 'scripts', 'bean-hccs'),
-    filename: '[name].js',
-    libraryTarget: 'commonjs',
+    path: path.resolve(__dirname, "KoLmafia", "scripts", "bean-hccs"),
+    filename: "[name].js",
+    libraryTarget: "commonjs",
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.json'],
+    extensions: [".ts", ".tsx", ".js", ".json"],
   },
   module: {
     rules: [
@@ -26,13 +26,13 @@ module.exports = {
         // Include ts, tsx, js, and jsx files.
         test: /\.(ts|js)x?$/,
         // exclude: /node_modules/,
-        loader: 'babel-loader',
+        loader: "babel-loader",
       },
     ],
   },
   plugins: [],
   externals: {
-    kolmafia: 'commonjs kolmafia',
-    'canadv.ash': 'commonjs canadv.ash',
+    kolmafia: "commonjs kolmafia",
+    "canadv.ash": "commonjs canadv.ash",
   },
 };
