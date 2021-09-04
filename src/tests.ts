@@ -52,26 +52,24 @@ import {
   PropertiesManager,
   TunnelOfLove,
 } from "libram";
-import { withMacro, saberYr, Macro, adventureMacro } from "./combat";
+import { adventureMacro, Macro, saberYr, withMacro } from "./combat";
 import {
-  tryUse,
-  ensureItem,
-  ensureMpTonic,
   ensureCreateItem,
   ensureEffect,
-  setChoice,
-  pullIfPossible,
-  ensureSong,
-  ensureNpcEffect,
-  ensurePullEffect,
-  ensureSewerItem,
-  mapMonster,
-  getPropertyBoolean,
-  ensurePotionEffect,
-  sausageFightGuaranteed,
-  tryEquip,
+  ensureItem,
   ensureMpSausage,
+  ensureMpTonic,
+  ensureNpcEffect,
+  ensurePotionEffect,
+  ensurePullEffect,
+  ensureSong,
   incrementProperty,
+  mapMonster,
+  pullIfPossible,
+  sausageFightGuaranteed,
+  setChoice,
+  tryEquip,
+  tryUse,
 } from "./lib";
 import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
@@ -131,15 +129,15 @@ export abstract class Test {
 }
 
 export class CoilWireTest extends Test {
-  get id() {
+  get id(): number {
     return 11;
   }
 
-  get name() {
+  get name(): string {
     return "Coil Wire";
   }
 
-  prepare() {
+  prepare(): void {
     // FIXME: Outfit
     equip($item`Iunion Crown`);
     equip($slot`shirt`, $item`none`);
@@ -148,20 +146,20 @@ export class CoilWireTest extends Test {
     equip($item`Cargo Cultist Shorts`);
     equip($slot`acc1`, $item`Retrospecs`);
     equip($slot`acc2`, $item`Powerful Glove`);
-    equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
+    equip($slot`acc3`, $item`Lil' Doctor™ bag`);
   }
 }
 
 export class HpTest extends Test {
-  get id() {
+  get id(): number {
     return 1;
   }
 
-  get name() {
+  get name(): string {
     return "Donate Blood";
   }
 
-  prepare() {
+  prepare(): void {
     if (!have($effect`That's Just Cloud-Talk, Man`)) {
       visitUrl("place.php?whichplace=campaway&action=campaway_sky");
     }
@@ -170,7 +168,7 @@ export class HpTest extends Test {
     ensureEffect($effect`Uncucumbered`);
 
     this.context.resources.wish($effect`Different Way of Seeing Things`);
-    this.context.resources.wish($effect`New And Improved`);
+    this.context.resources.wish($effect`New and Improved`);
 
     this.context.resources.deck("rope");
 
@@ -231,7 +229,7 @@ export class HpTest extends Test {
     ensureEffect($effect`Triple-Sized`);
     ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
 
-    if (!have($effect`On The Shoulders of Giants`)) {
+    if (!have($effect`On the Shoulders of Giants`)) {
       buy($item`Dramatic™ range`);
       use($item`Dramatic™ range`);
       useSkill($skill`Advanced Saucecrafting`);
@@ -336,7 +334,7 @@ export class HpTest extends Test {
       get("_neverendingPartyFreeTurns") < 10 ||
       get("_chestXRayUsed") < 3 ||
       get("_shatteringPunchUsed") < 3 ||
-      !getPropertyBoolean("_gingerbreadMobHitUsed")
+      !get("_gingerbreadMobHitUsed")
     ) {
       useDefaultFamiliar();
 
@@ -362,7 +360,7 @@ export class HpTest extends Test {
     ensureEffect($effect`Rage of the Reindeer`);
     ensureEffect($effect`Quiet Determination`);
     ensureEffect($effect`Disdain of the War Snapper`);
-    ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ balm`);
+    ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
 
     useFamiliar($familiar`Left-Hand Man`);
 
@@ -372,15 +370,15 @@ export class HpTest extends Test {
 }
 
 export class MuscleTest extends Test {
-  get id() {
+  get id(): number {
     return 3;
   }
 
-  get name() {
+  get name(): string {
     return "Feed The Children";
   }
 
-  prepare() {
+  prepare(): void {
     if (myClass() === $class`Pastamancer`) useSkill(1, $skill`Bind Undead Elbow Macaroni`);
     else ensurePotionEffect($effect`Expert Oiliness`, $item`oil of expertise`);
 
@@ -390,7 +388,7 @@ export class MuscleTest extends Test {
     ensureEffect($effect`Rage of the Reindeer`);
     ensureEffect($effect`Quiet Determination`);
     ensureEffect($effect`Disdain of the War Snapper`);
-    ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ balm`);
+    ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
 
     useFamiliar($familiar`Left-Hand Man`);
     maximize("muscle", false);
@@ -408,15 +406,15 @@ export class MuscleTest extends Test {
 }
 
 export class MysticalityTest extends Test {
-  get id() {
+  get id(): number {
     return 3;
   }
 
-  get name() {
+  get name(): string {
     return "Build Playground Mazes";
   }
 
-  prepare() {
+  prepare(): void {
     ensureEffect($effect`Song of Bravado`);
     ensureSong($effect`Stevedave's Shanty of Superiority`);
     ensureEffect($effect`Quiet Judgement`);
@@ -432,22 +430,22 @@ export class MysticalityTest extends Test {
 }
 
 export class MoxieTest extends Test {
-  get id() {
+  get id(): number {
     return 4;
   }
 
-  get name() {
+  get name(): string {
     return "Feed Conspirators";
   }
 
-  prepare() {
+  prepare(): void {
     if (myClass() === $class`Pastamancer`) useSkill(1, $skill`Bind Penne Dreadful`);
     else ensurePotionEffect($effect`Expert Oiliness`, $item`oil of expertise`);
 
     // Beach Comb
     ensureEffect($effect`Pomp & Circumsands`);
 
-    use(1, $item`Bird-a-Day Calendar`);
+    use(1, $item`Bird-a-Day calendar`);
     ensureEffect($effect`Blessing of the Bird`);
 
     ensureEffect($effect`Song of Bravado`);
@@ -472,15 +470,15 @@ export class MoxieTest extends Test {
 }
 
 export class ItemTest extends Test {
-  get id() {
+  get id(): number {
     return 9;
   }
 
-  get name() {
+  get name(): string {
     return "Make Margaritas";
   }
 
-  prepare() {
+  prepare(): void {
     ensureMpSausage(500);
 
     useFamiliar($familiar`Trick-or-Treating Tot`);
@@ -488,7 +486,7 @@ export class ItemTest extends Test {
     if (haveEffect($effect`Bat-Adjacent Form`) === 0) {
       if (get("_reflexHammerUsed") >= 3) throw "Out of reflex hammers!";
       equip($item`vampyric cloake`);
-      equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
+      equip($slot`acc3`, $item`Lil' Doctor™ bag`);
       adventureMacro(
         $location`The Dire Warren`,
         Macro.skill($skill`Become a Bat`).skill($skill`Reflex Hammer`)
@@ -534,9 +532,9 @@ export class ItemTest extends Test {
       Math.floor(numericModifier("item drop") / 30) -
       Math.floor(numericModifier("booze drop") / 15);
 
-    if (itemTurns() > 1 && !getPropertyBoolean("_clanFortuneBuffUsed")) {
+    if (itemTurns() > 1 && !get("_clanFortuneBuffUsed")) {
       print("Not enough item drop, using fortune buff.");
-      ensureEffect($effect`There's No N In Love`);
+      ensureEffect($effect`There's No N in Love`);
     }
 
     if (itemTurns() > 1) throw "Not enough item drop! Figure out why.";
@@ -548,20 +546,22 @@ export class ItemTest extends Test {
 }
 
 export class HotTest extends Test {
-  get id() {
+  get id(): number {
     return 10;
   }
 
-  get name() {
+  get name(): string {
     return "Clean Steam Tunnels";
   }
 
-  prepare() {
+  prepare(): void {
     ensureMpTonic(500);
 
     useFamiliar($familiar`Exotic Parrot`);
 
+    // eslint-disable-next-line libram/verify-constants
     if (!have($effect`Fireproof Foam Suit`)) {
+      // eslint-disable-next-line libram/verify-constants
       equip($slot`weapon`, $item`industrial fire extinguisher`);
       equip($slot`off-hand`, $item`Fourth of May Cosplay Saber`);
       equip($item`vampyric cloake`);
@@ -569,6 +569,7 @@ export class HotTest extends Test {
       adventureMacro(
         $location`The Dire Warren`,
         Macro.skill($skill`Become a Cloud of Mist`)
+          // eslint-disable-next-line libram/verify-constants
           .skill($skill`Fire Extinguisher: Foam 'Em Up`)
           .skill($skill`Use the Force`)
       );
@@ -623,7 +624,7 @@ export class HotTest extends Test {
 
     useFamiliar($familiar`Exotic Parrot`);
     if (availableAmount($item`cracker`) === 0) {
-      retrieveItem(1, $item`box of Familiar jacks`);
+      retrieveItem(1, $item`box of Familiar Jacks`);
       use(1, $item`box of Familiar Jacks`);
     }
     equip($item`cracker`);
@@ -646,15 +647,15 @@ export class HotTest extends Test {
 }
 
 export class NoncombatTest extends Test {
-  get id() {
+  get id(): number {
     return 8;
   }
 
-  get name() {
+  get name(): string {
     return "Be a Living Statue";
   }
 
-  prepare() {
+  prepare(): void {
     if (getProperty("_horsery") !== "dark horse") cliExecute("horsery dark");
 
     if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
@@ -673,7 +674,7 @@ export class NoncombatTest extends Test {
     ensureEffect($effect`Smooth Movements`);
     ensureEffect($effect`Invisible Avatar`);
     ensureEffect($effect`Silent Running`);
-    ensureEffect($effect`Become Superficially Interested`);
+    ensureEffect($effect`Become Superficially interested`);
     ensureEffect($effect`Feeling Lonely`);
 
     useFamiliar($familiar`Disgeist`);
@@ -694,15 +695,15 @@ export class NoncombatTest extends Test {
 }
 
 export class FamiliarTest extends Test {
-  get id() {
+  get id(): number {
     return 5;
   }
 
-  get name() {
+  get name(): string {
     return "Breed More Collies";
   }
 
-  prepare() {
+  prepare(): void {
     if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
     ensureEffect($effect`Blood Bond`);
     ensureEffect($effect`Leash of Linguini`);
@@ -734,19 +735,19 @@ export class FamiliarTest extends Test {
 }
 
 export class WeaponTest extends Test {
-  get id() {
+  get id(): number {
     return 6;
   }
 
-  get name() {
+  get name(): string {
     return "Reduce Gazelle Population";
   }
 
-  prepare() {
+  prepare(): void {
     if (haveEffect($effect`Do You Crush What I Crush?`) === 0) {
       if (get("_reflexHammerUsed") >= 3) throw "Out of reflex hammers!";
       useFamiliar($familiar`Ghost of Crimbo Carols`);
-      equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
+      equip($slot`acc3`, $item`Lil' Doctor™ bag`);
       adventureMacro($location`The Dire Warren`, Macro.skill($skill`Reflex Hammer`));
     }
 
@@ -780,7 +781,7 @@ export class WeaponTest extends Test {
     }
 
     // Paint ungulith (Saber YR)
-    if (!getPropertyBoolean("_chateauMonsterFought")) {
+    if (!get("_chateauMonsterFought")) {
       equip($item`Fourth of May Cosplay Saber`);
       this.context.propertyManager.setChoices({ [1387]: 3 });
       Macro.skill($skill`Meteor Shower`)
@@ -811,15 +812,15 @@ export class WeaponTest extends Test {
 }
 
 export class SpellTest extends Test {
-  get id() {
+  get id(): number {
     return 7;
   }
 
-  get name() {
+  get name(): string {
     return "Make Sausage";
   }
 
-  prepare() {
+  prepare(): void {
     ensureEffect($effect`Simmering`);
 
     ensureEffect($effect`Song of Sauce`);
@@ -832,12 +833,6 @@ export class SpellTest extends Test {
 
     // Beach Comb
     ensureEffect($effect`We're All Made of Starfish`);
-
-    // Tea party
-    if (!getPropertyBoolean("_madTeaParty")) {
-      ensureSewerItem(1, $item`mariachi hat`);
-      ensureEffect($effect`Full Bottle in front of Me`);
-    }
 
     useSkill(1, $skill`Spirit of Cayenne`);
 

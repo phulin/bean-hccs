@@ -1,16 +1,16 @@
 import {
   autosell,
+  canInteract,
   cliExecute,
-  print,
-  visitUrl,
   myLevel,
   mySpleenUse,
+  print,
   runChoice,
-  canInteract,
+  visitUrl,
 } from "kolmafia";
-import { $item, $effect, $effects, get, Mood, PropertiesManager, set } from "libram";
+import { $effect, $effects, $item, get, Mood, PropertiesManager, set } from "libram";
 
-import { ensureItem, tryUse, shrug, ensureEffect } from "./lib";
+import { ensureEffect, ensureItem, shrug, tryUse } from "./lib";
 import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
 import {
