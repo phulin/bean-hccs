@@ -15,6 +15,7 @@ import {
   myFamiliar,
   myMaxmp,
   myMp,
+  outfit,
   print,
   pullsRemaining,
   retrieveItem,
@@ -318,4 +319,8 @@ export function ensureOde(turns: number): void {
     openSongSlot($effect`Ode to Booze`);
     useSkill(1, $skill`The Ode to Booze`);
   }
+}
+
+export function ensureOutfit(name: string): void {
+  if (!outfit(name)) throw `Couldn't put on outfit ${name}.`;
 }

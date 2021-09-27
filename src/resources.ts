@@ -1,7 +1,7 @@
 import {
   cliExecute,
-  drink,
   eat,
+  haveEffect,
   itemAmount,
   itemType,
   myFullness,
@@ -10,8 +10,7 @@ import {
   retrieveItem,
   useSkill,
 } from "kolmafia";
-import { $item, get, have } from "libram";
-import { ensureOde } from "./lib";
+import { $effect, $item, $skill, get, have } from "libram";
 
 export class ResourceTracker {
   deckCards: string[] = [];
@@ -63,12 +62,15 @@ export class ResourceTracker {
     if (typ === "booze") {
       const count = Math.floor((threshold - myInebriety()) / item.inebriety);
       if (count > 0) {
-        ensureOde(count * item.inebriety);
-        drink(count, item);
+        useSkill(
+          Math.ceil((count * item.inebriety - haveEffect($effect`Ode to Booze`)) / 5),
+          $skill`The Ode to Booze`
+        );
+        cliExecute(`drink ${count} ${item}`);
         this.consumedBooze.set(item, (this.consumedBooze.get(item) ?? 0) + count);
       }
     } else if (typ === "food") {
-      const count = Math.floor((threshold - myFullness()) / item.inebriety);
+      const count = Math.floor((threshold - myFullness()) / item.fullness);
       if (count > 0) {
         eat(count, item);
         this.consumedFood.set(item, (this.consumedFood.get(item) ?? 0) + count);
@@ -83,11 +85,11 @@ export class ResourceTracker {
     print(`Tomes: ${this.tomeSummons.map((skillOrItem) => skillOrItem.name).join(", ")}`);
     print("FOOD");
     for (const [food, count] of this.consumedFood) {
-      print(`${count} ${food.plural}`);
+      print(`${count} ${count > 1 ? food.plural : food.name}`);
     }
     print("BOOZE");
     for (const [booze, count] of this.consumedBooze) {
-      print(`${count} ${booze.plural}`);
+      print(`${count} ${count > 1 ? booze.plural : booze.name}`);
     }
   }
 
@@ -105,10 +107,18 @@ export class ResourceTracker {
     const { deckCards, genieWishes, tomeSummons, consumedFood, consumedBooze } = JSON.parse(data);
     const result = new ResourceTracker();
     result.deckCards = deckCards ?? [];
-    result.genieWishes = genieWishes ?? [];
-    result.tomeSummons = tomeSummons ?? [];
-    result.consumedFood = new Map(consumedFood ?? []);
-    result.consumedBooze = new Map(consumedBooze ?? []);
+    result.genieWishes = genieWishes ? genieWishes.map((name: string) => Effect.get(name)) : [];
+    result.tomeSummons = tomeSummons ? tomeSummons.map((name: string) => Skill.get(name)) : [];
+    result.consumedFood = new Map(
+      consumedFood
+        ? consumedFood.map(([name, count]: [string, number]) => [Item.get(name), count])
+        : []
+    );
+    result.consumedBooze = new Map(
+      consumedBooze
+        ? consumedBooze.map(([name, count]: [string, number]) => [Item.get(name), count])
+        : []
+    );
     return result;
   }
 }

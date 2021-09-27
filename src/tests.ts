@@ -1,33 +1,28 @@
 import {
   availableAmount,
-  buy,
   cliExecute,
   containsText,
   create,
-  eat,
   equip,
   getProperty,
   handlingChoice,
   haveEffect,
-  haveSkill,
   itemAmount,
   maximize,
-  mpCost,
-  myAdventures,
   myBasestat,
   myBuffedstat,
   myClass,
   myGardenType,
   myHp,
   myMaxhp,
-  myMp,
+  myThrall,
   myTurncount,
   numericModifier,
-  outfit,
   print,
   retrieveItem,
   runChoice,
   runCombat,
+  setAutoAttack,
   setLocation,
   totalFreeRests,
   use,
@@ -45,26 +40,29 @@ import {
   $skill,
   $slot,
   $stat,
+  $thralls,
   adventureMacroAuto,
   get,
   have,
   Mood,
   PropertiesManager,
+  SongBoom,
   TunnelOfLove,
+  Witchess,
 } from "libram";
 import { adventureMacro, Macro, saberYr, withMacro } from "./combat";
 import {
-  ensureCreateItem,
   ensureEffect,
-  ensureItem,
   ensureMpSausage,
   ensureMpTonic,
   ensureNpcEffect,
+  ensureOutfit,
   ensurePotionEffect,
   ensurePullEffect,
   ensureSong,
   incrementProperty,
   mapMonster,
+  myFamiliarWeight,
   pullIfPossible,
   sausageFightGuaranteed,
   setChoice,
@@ -105,18 +103,21 @@ export abstract class Test {
       const startTime = Date.now();
       const startTurns = myTurncount();
       this.prepare();
-      cliExecute(`outfit save CS ${this.constructor.name}`);
-      visitUrl(`choice.php?whichchoice=1089&option=${this.id}`);
+      // cliExecute(`outfit save CS ${this.constructor.name}`);
+      ensureOutfit(`CS ${this.constructor.name}`);
+      print(`Executing test ${this.constructor.name}, predicting ${this.predictedTurns()} turns.`);
+      visitUrl("council.php");
+      runChoice(this.id);
       if (!this.isDone()) {
-        throw 'Failed to do test " + testNum + ". Maybe we are out of turns.';
+        throw `Failed to do test ${this.constructor.name}. Maybe we are out of turns.`;
       }
       const log = {
         turns: myTurncount() - startTurns,
-        seconds: Date.now() - startTime,
+        seconds: (Date.now() - startTime) / 1000,
       };
       print(
         `Finished test ${this.constructor.name}. ` +
-          `Took ${log.seconds} seconds and ${log.turns} turns.`,
+          `Took ${log.seconds.toFixed(1)} seconds and ${log.turns} turns.`,
         "blue"
       );
       testLog[this.constructor.name] = log;
@@ -125,6 +126,7 @@ export abstract class Test {
 
   abstract get id(): number;
   abstract get name(): string;
+  abstract predictedTurns(): number;
   abstract prepare(): void;
 }
 
@@ -137,16 +139,23 @@ export class CoilWireTest extends Test {
     return "Coil Wire";
   }
 
+  predictedTurns(): number {
+    return 60;
+  }
+
   prepare(): void {
     // FIXME: Outfit
-    equip($item`Iunion Crown`);
-    equip($slot`shirt`, $item`none`);
-    equip($item`Fourth of May Cosplay Saber`);
-    equip($item`Kramco Sausage-o-Matic™`);
-    equip($item`Cargo Cultist Shorts`);
-    equip($slot`acc1`, $item`Retrospecs`);
-    equip($slot`acc2`, $item`Powerful Glove`);
-    equip($slot`acc3`, $item`Lil' Doctor™ bag`);
+    cliExecute("fold makeshift garbage shirt");
+
+    // equip($item`Iunion Crown`);
+    // equip($slot`shirt`, $item`makeshift garbage shirt`);
+    // equip($item`Fourth of May Cosplay Saber`);
+    // equip($item`Kramco Sausage-o-Matic™`);
+    // equip($item`Cargo Cultist Shorts`);
+    // equip($slot`acc1`, $item`Retrospecs`);
+    // equip($slot`acc2`, $item`Powerful Glove`);
+    // equip($slot`acc3`, $item`Lil' Doctor™ bag`);
+    ensureOutfit("CS Leveling");
   }
 }
 
@@ -159,6 +168,10 @@ export class HpTest extends Test {
     return "Donate Blood";
   }
 
+  predictedTurns(): number {
+    return Math.max(1, 60 - Math.floor((myMaxhp() - myBuffedstat($stat`Muscle`) - 3) / 30));
+  }
+
   prepare(): void {
     if (!have($effect`That's Just Cloud-Talk, Man`)) {
       visitUrl("place.php?whichplace=campaway&action=campaway_sky");
@@ -167,7 +180,6 @@ export class HpTest extends Test {
     // Boxing Daycare
     ensureEffect($effect`Uncucumbered`);
 
-    this.context.resources.wish($effect`Different Way of Seeing Things`);
     this.context.resources.wish($effect`New and Improved`);
 
     this.context.resources.deck("rope");
@@ -176,7 +188,7 @@ export class HpTest extends Test {
     ensureEffect($effect`Thaumodynamic`);
     ensureEffect($effect`You Learned Something Maybe!`);
 
-    cliExecute("fold makeshift garbage shirt");
+    retrieveItem($item`codpiece`);
 
     // FIXME: Outfit
     // equip($item`Iunion Crown`);
@@ -187,7 +199,7 @@ export class HpTest extends Test {
     // equip($slot`acc1`, $item`Retrospecs`);
     // equip($slot`acc2`, $item`Powerful Glove`);
     // equip($slot`acc3`, $item`Lil' Doctor™ Bag`);
-    outfit("CS Leveling");
+    ensureOutfit("CS Leveling");
 
     // Prep Sweet Synthesis.
     if (myGardenType() === "peppermint") {
@@ -197,11 +209,6 @@ export class HpTest extends Test {
         "WARNING: This script is built for peppermint garden. Switch gardens or find other candy.",
         "red"
       );
-    }
-
-    if (!have($effect`Holiday Yoked`)) {
-      useFamiliar($familiar`Ghost of Crimbo Carols`);
-      adventureMacro($location`Noob Cave`, Macro.skill($skill`Reflex Hammer`));
     }
 
     if (availableAmount($item`li'l ninja costume`) === 0 && !get("_bagOfCandy")) {
@@ -225,18 +232,16 @@ export class HpTest extends Test {
     // Use ten-percent bonus
     tryUse(1, $item`a ten-percent bonus`);
 
+    if (!have($effect`Holiday Yoked`) || !have($item`Sacramento wine`)) {
+      useFamiliar($familiar`Ghost of Crimbo Carols`);
+      withMacro(Macro.kill(), () => Witchess.fightPiece($monster`Witchess Bishop`));
+    }
+
     ensureEffect($effect`Starry-Eyed`);
     ensureEffect($effect`Triple-Sized`);
+    ensureEffect($effect`Feeling Excited`);
+    ensureEffect($effect`Hulkien`);
     ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
-
-    if (!have($effect`On the Shoulders of Giants`)) {
-      buy($item`Dramatic™ range`);
-      use($item`Dramatic™ range`);
-      useSkill($skill`Advanced Saucecrafting`);
-      cliExecute("cargo pocket tangerine");
-      create($item`Hawking's Elixir of Brilliance`);
-      use($item`Hawking's Elixir of Brilliance`);
-    }
 
     if (!have($effect`Purity of Spirit`)) {
       this.context.resources.clipArt($item`cold-filtered water`);
@@ -276,9 +281,6 @@ export class HpTest extends Test {
 
     // LOV Tunnel
     if (!TunnelOfLove.isUsed()) {
-      while (myMp() - mpCost($skill`Summon Candy Heart`) > 200) {
-        useSkill(1, $skill`Summon Candy Heart`);
-      }
       useDefaultFamiliar();
       Macro.if_("monstername LOV Enforcer", Macro.attack().repeat())
         .if_("monstername LOV Engineer", Macro.skill($skill`Saucegeyser`).repeat())
@@ -300,6 +302,15 @@ export class HpTest extends Test {
       equip($item`LOV Epaulettes`);
     }
 
+    if (availableAmount($item`very pointy crown`) === 0 && get("_witchessFights") < 5) {
+      setAutoAttack(0);
+      withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Queen`));
+    }
+    if (availableAmount($item`battle broom`) === 0 && get("_witchessFights") < 5) {
+      setAutoAttack(0);
+      withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Witch`));
+    }
+
     // Professor 9x free sausage fight @ NEP
     if (sausageFightGuaranteed()) {
       useFamiliar($familiar`Pocket Professor`);
@@ -309,25 +320,17 @@ export class HpTest extends Test {
       // equip($slot`acc1`, $item`hewn moon-rune spoon`);
       // equip($slot`acc2`, $item`Brutal brogues`);
       // equip($slot`acc3`, $item`Beach Comb`);
-      outfit("CS Professor");
+      ensureOutfit("CS Professor");
 
       adventureMacroAuto(
         $location`Noob Cave`,
-        Macro.trySkill(Skill.get("Lecture on Relativity")).kill()
+        Macro.if_("!monstername sausage goblin", Macro.abort())
+          .trySkill(Skill.get("Lecture on Relativity"))
+          .kill()
       );
     }
 
-    if (get("_godLobsterFights") < 2) {
-      useFamiliar($familiar`God Lobster`);
-      this.context.propertyManager.setChoices({ [1310]: 1 });
-      while (get("_godLobsterFights") < 2) {
-        tryEquip($item`God Lobster's Scepter`);
-        visitUrl("main.php?fightgodlobster=1");
-        runCombat();
-        visitUrl("choice.php");
-        if (handlingChoice()) runChoice(1);
-      }
-    }
+    ensureOutfit("CS Leveling");
 
     // 17 free NEP fights
     while (
@@ -344,8 +347,8 @@ export class HpTest extends Test {
       adventureMacroAuto(
         $location`The Neverending Party`,
         Macro.externalIf(
-          get("_neverendingPartyFreeTurns") < 10,
-          Macro.trySkill("Chest X-Ray", "Shattering Punch", "Gingerbread Mob Hit")
+          get("_neverendingPartyFreeTurns") === 10,
+          Macro.trySkill("Chest X-Ray", "Shattering Punch", "Gingerbread Mob Hit").abort()
         ).kill()
       );
     }
@@ -357,25 +360,37 @@ export class HpTest extends Test {
     else ensurePotionEffect($effect`Expert Oiliness`, $item`oil of expertise`);
 
     ensureEffect($effect`Song of Starch`);
-    ensureEffect($effect`Rage of the Reindeer`);
+    // ensureEffect($effect`Rage of the Reindeer`);
     ensureEffect($effect`Quiet Determination`);
-    ensureEffect($effect`Disdain of the War Snapper`);
-    ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
+    // ensureEffect($effect`Disdain of the War Snapper`);
+    // ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
 
     useFamiliar($familiar`Left-Hand Man`);
 
     // FIXME: Outfit
-    maximize("hp", false);
+    // maximize("hp", false);
   }
+}
+
+function statTurns(stat: Stat) {
+  let baseStat = stat;
+  if ($thralls`Elbow Macaroni, Penne Dreadful`.includes(myThrall())) {
+    baseStat = $stat`Mysticality`;
+  }
+  return Math.max(1, 60 - Math.floor((myBuffedstat(stat) - myBasestat(baseStat)) / 30));
 }
 
 export class MuscleTest extends Test {
   get id(): number {
-    return 3;
+    return 2;
   }
 
   get name(): string {
     return "Feed The Children";
+  }
+
+  predictedTurns(): number {
+    return statTurns($stat`Muscle`);
   }
 
   prepare(): void {
@@ -384,11 +399,11 @@ export class MuscleTest extends Test {
 
     ensureEffect($effect`Song of Bravado`);
     ensureSong($effect`Stevedave's Shanty of Superiority`);
-    ensureSong($effect`Power Ballad of the Arrowsmith`);
+    // ensureSong($effect`Power Ballad of the Arrowsmith`);
     ensureEffect($effect`Rage of the Reindeer`);
     ensureEffect($effect`Quiet Determination`);
-    ensureEffect($effect`Disdain of the War Snapper`);
-    ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
+    // ensureEffect($effect`Disdain of the War Snapper`);
+    // ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
 
     useFamiliar($familiar`Left-Hand Man`);
     maximize("muscle", false);
@@ -397,9 +412,9 @@ export class MuscleTest extends Test {
       () => ensureEffect($effect`Lack of Body-Building`), // will stay on all the way to weapon damage.
       () => ensureEffect($effect`Ham-Fisted`),
     ]) {
-      if (myBuffedstat($stat`muscle`) - myBasestat($stat`mysticality`) < 1770) increaser();
+      if (this.predictedTurns() > 1) increaser();
     }
-    if (myBuffedstat($stat`muscle`) - myBasestat($stat`mysticality`) < 1770) {
+    if (this.predictedTurns() > 1) {
       throw "Not enough muscle to cap.";
     }
   }
@@ -414,16 +429,20 @@ export class MysticalityTest extends Test {
     return "Build Playground Mazes";
   }
 
+  predictedTurns(): number {
+    return statTurns($stat`Mysticality`);
+  }
+
   prepare(): void {
     ensureEffect($effect`Song of Bravado`);
     ensureSong($effect`Stevedave's Shanty of Superiority`);
     ensureEffect($effect`Quiet Judgement`);
-    ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
-    cliExecute("retrocape mysticality");
+    // ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
 
     useFamiliar($familiar`Left-Hand Man`);
-    maximize("mysticality", false);
-    if (myBuffedstat($stat`mysticality`) - myBasestat($stat`mysticality`) < 1770) {
+    // FIXME: Outfit
+    // maximize("mysticality", false);
+    if (this.predictedTurns() > 1) {
       throw "Not enough mysticality to cap.";
     }
   }
@@ -436,6 +455,10 @@ export class MoxieTest extends Test {
 
   get name(): string {
     return "Feed Conspirators";
+  }
+
+  predictedTurns(): number {
+    return statTurns($stat`Moxie`);
   }
 
   prepare(): void {
@@ -451,19 +474,17 @@ export class MoxieTest extends Test {
     ensureEffect($effect`Song of Bravado`);
     ensureSong($effect`Stevedave's Shanty of Superiority`);
     ensureEffect($effect`Quiet Desperation`);
-    ensureEffect($effect`Disco Fever`);
-    ensureEffect($effect`Blubbered Up`);
-    ensureEffect($effect`Mariachi Mood`);
-    ensureNpcEffect($effect`Butt-Rock Hair`, 5, $item`hair spray`);
-    use(availableAmount($item`rhinestone`), $item`rhinestone`);
-    if (!have($effect`Unrunnable Face`)) {
-      tryUse(1, $item`runproof mascara`);
-    }
-    cliExecute("retrocape moxie");
+    // ensureEffect($effect`Disco Fever`);
+    // ensureEffect($effect`Blubbered Up`);
+    // ensureNpcEffect($effect`Butt-Rock Hair`, 5, $item`hair spray`);
+    // use(availableAmount($item`rhinestone`), $item`rhinestone`);
+    // if (!have($effect`Unrunnable Face`)) {
+    //   tryUse(1, $item`runproof mascara`);
+    // }
 
     useFamiliar($familiar`Left-Hand Man`);
     maximize("moxie", false);
-    if (myBuffedstat($stat`moxie`) - myBasestat($stat`mysticality`) < 1770) {
+    if (this.predictedTurns() > 1) {
       throw "Not enough moxie to cap.";
     }
   }
@@ -476,6 +497,16 @@ export class ItemTest extends Test {
 
   get name(): string {
     return "Make Margaritas";
+  }
+
+  predictedTurns(): number {
+    const denominator = have($effect`Steely-Eyed Squint`) ? 15 : 30;
+    return Math.max(
+      1,
+      60 -
+        Math.floor(numericModifier("Item Drop") / denominator) -
+        Math.floor(numericModifier("Booze Drop") / 15)
+    );
   }
 
   prepare(): void {
@@ -518,30 +549,20 @@ export class ItemTest extends Test {
     this.context.synthesisPlanner.synthesize($effect`Synthesis: Collection`);
 
     ensureEffect($effect`Nearly All-Natural`); // bag of grain
-    ensureEffect($effect`Fortune of the Wheel`);
     ensureEffect($effect`Steely-Eyed Squint`);
+
+    ensureEffect($effect`There's No N in Love`);
+
+    this.context.resources.wish($effect`Infernal Thirst`);
+
+    // Fortune of the Wheel
+    // this.context.resources.deck("wheel");
 
     // FIXME: Outfit
     maximize(
       "item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag",
       false
     );
-
-    const itemTurns = () =>
-      60 -
-      Math.floor(numericModifier("item drop") / 30) -
-      Math.floor(numericModifier("booze drop") / 15);
-
-    if (itemTurns() > 1 && !get("_clanFortuneBuffUsed")) {
-      print("Not enough item drop, using fortune buff.");
-      ensureEffect($effect`There's No N in Love`);
-    }
-
-    if (itemTurns() > 1) throw "Not enough item drop! Figure out why.";
-    if (itemTurns() > 1) {
-      print("Not enough item drop, using Infernal Thirst.");
-      this.context.resources.wish($effect`Infernal Thirst`);
-    }
   }
 }
 
@@ -552,6 +573,10 @@ export class HotTest extends Test {
 
   get name(): string {
     return "Clean Steam Tunnels";
+  }
+
+  predictedTurns(): number {
+    return Math.max(1, 60 - numericModifier("Hot Resistance"));
   }
 
   prepare(): void {
@@ -569,8 +594,7 @@ export class HotTest extends Test {
       adventureMacro(
         $location`The Dire Warren`,
         Macro.skill($skill`Become a Cloud of Mist`)
-          // eslint-disable-next-line libram/verify-constants
-          .skill($skill`Fire Extinguisher: Foam 'Em Up`)
+          .skill($skill`Fire Extinguisher: Foam Yourself`)
           .skill($skill`Use the Force`)
       );
     }
@@ -578,10 +602,7 @@ export class HotTest extends Test {
     // These should have fallen through all the way from leveling.
     ensureEffect($effect`Fidoxene`);
     ensureEffect($effect`Do I Know You From Somewhere?`);
-    ensureEffect($effect`Puzzle Champ`);
-    ensureEffect($effect`Billiards Belligerence`);
-
-    // Pool buff. This will fall through to fam weight.
+    // ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
 
     if (
@@ -591,58 +612,22 @@ export class HotTest extends Test {
       ensurePotionEffect($effect`Sleazy Hands`, $item`lotion of sleaziness`);
     }
 
-    ensureEffect($effect`Astral Shell`);
-    if (haveEffect($effect`Feeling Peaceful`) === 0) useSkill($skill`Feel Peaceful`);
-
-    // Build up 50 turns of Deep Dark Visions for spell damage later.
-    while (
-      haveSkill($skill`Deep Dark Visions`) &&
-      haveEffect($effect`Visions of the Deep Dark Deeps`) < 50
-    ) {
-      if (myMp() < 20) {
-        ensureCreateItem(1, $item`magical sausage`);
-        eat(1, $item`magical sausage`);
-      }
-      while (myHp() < myMaxhp()) {
-        useSkill(1, $skill`Cannelloni Cocoon`);
-      }
-      if (myMp() < 100) {
-        ensureCreateItem(1, $item`magical sausage`);
-        eat(1, $item`magical sausage`);
-      }
-      if (Math.round(numericModifier("spooky resistance")) < 10) {
-        ensureEffect($effect`Does It Have a Skull In There??`);
-        if (Math.round(numericModifier("spooky resistance")) < 10) {
-          throw "Not enough spooky res for Deep Dark Visions.";
-        }
-      }
-      useSkill(1, $skill`Deep Dark Visions`);
-    }
+    ensureEffect($effect`Feeling Peaceful`);
+    // Reward
+    ensureEffect($effect`Amazing`);
 
     // Beach comb buff.
     ensureEffect($effect`Hot-Headed`);
 
     useFamiliar($familiar`Exotic Parrot`);
     if (availableAmount($item`cracker`) === 0) {
-      retrieveItem(1, $item`box of Familiar Jacks`);
-      use(1, $item`box of Familiar Jacks`);
+      retrieveItem($item`box of Familiar Jacks`);
+      use($item`box of Familiar Jacks`);
     }
-    equip($item`cracker`);
-
-    cliExecute("retrocape vampire hold");
 
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     // FIXME: Outfit
     maximize("hot res, 0.01 familiar weight", false);
-
-    // OK to waste a couple turns here
-    if (Math.round(numericModifier("hot resistance")) < 59) {
-      ensurePullEffect($effect`Fireproof Lips`, $item`SPF 451 lip balm`);
-    }
-
-    if (Math.round(numericModifier("hot resistance")) < 59) {
-      throw "Something went wrong building hot res.";
-    }
   }
 }
 
@@ -655,6 +640,10 @@ export class NoncombatTest extends Test {
     return "Be a Living Statue";
   }
 
+  predictedTurns(): number {
+    return Math.max(1, 60 - 3 * Math.floor(numericModifier("Combat Rate") / 5));
+  }
+
   prepare(): void {
     if (getProperty("_horsery") !== "dark horse") cliExecute("horsery dark");
 
@@ -662,13 +651,7 @@ export class NoncombatTest extends Test {
     ensureEffect($effect`Blood Bond`);
     ensureEffect($effect`Leash of Linguini`);
 
-    // These should have fallen through all the way from leveling.
-    ensureEffect($effect`Fidoxene`);
-    ensureEffect($effect`Do I Know You From Somewhere?`);
-    ensureEffect($effect`Puzzle Champ`);
-    ensureEffect($effect`Billiards Belligerence`);
-
-    equip($slot`acc3`, $item`Powerful Glove`);
+    equip($slot`acc2`, $item`Powerful Glove`);
 
     ensureEffect($effect`The Sonata of Sneakiness`);
     ensureEffect($effect`Smooth Movements`);
@@ -688,7 +671,7 @@ export class NoncombatTest extends Test {
     // Rewards
     ensureEffect($effect`Throwing Some Shade`);
 
-    if (Math.round(numericModifier("combat rate")) > -40) {
+    if (Math.round(numericModifier("combat rate")) > -39) {
       throw "Not enough -combat to cap.";
     }
   }
@@ -703,6 +686,10 @@ export class FamiliarTest extends Test {
     return "Breed More Collies";
   }
 
+  predictedTurns(): number {
+    return Math.max(1, 60 - Math.floor(myFamiliarWeight() / 5));
+  }
+
   prepare(): void {
     if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
     ensureEffect($effect`Blood Bond`);
@@ -713,8 +700,6 @@ export class FamiliarTest extends Test {
     ensureEffect($effect`Do I Know You From Somewhere?`);
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
-
-    if (availableAmount($item`rope`) === 0) cliExecute("play rope");
 
     if (haveEffect($effect`Meteor Showered`) === 0) {
       equip($item`Fourth of May Cosplay Saber`);
@@ -743,12 +728,19 @@ export class WeaponTest extends Test {
     return "Reduce Gazelle Population";
   }
 
+  predictedTurns(): number {
+    return Math.max(
+      1,
+      60 -
+        Math.floor(numericModifier("weapon damage") / 25) -
+        Math.floor(numericModifier("weapon damage percent") / 25)
+    );
+  }
+
   prepare(): void {
     if (haveEffect($effect`Do You Crush What I Crush?`) === 0) {
-      if (get("_reflexHammerUsed") >= 3) throw "Out of reflex hammers!";
       useFamiliar($familiar`Ghost of Crimbo Carols`);
-      equip($slot`acc3`, $item`Lil' Doctor™ bag`);
-      adventureMacro($location`The Dire Warren`, Macro.skill($skill`Reflex Hammer`));
+      adventureMacro($location`The Dire Warren`, Macro.skill($skill`Feel Hatred`));
     }
 
     ensureEffect($effect`Carol of the Bulls`);
@@ -759,6 +751,8 @@ export class WeaponTest extends Test {
     ensureEffect($effect`Disdain of the War Snapper`);
     ensureEffect($effect`Tenacity of the Snapper`);
     ensureSong($effect`Jackasses' Symphony of Destruction`);
+
+    ensureEffect($effect`Billiards Belligerence`);
 
     if (availableAmount($item`vial of hamethyst juice`) > 0) {
       ensureEffect($effect`Ham-Fisted`);
@@ -782,6 +776,7 @@ export class WeaponTest extends Test {
 
     // Paint ungulith (Saber YR)
     if (!get("_chateauMonsterFought")) {
+      useFamiliar($familiar`Ghost of Crimbo Carols`);
       equip($item`Fourth of May Cosplay Saber`);
       this.context.propertyManager.setChoices({ [1387]: 3 });
       Macro.skill($skill`Meteor Shower`)
@@ -792,6 +787,8 @@ export class WeaponTest extends Test {
       saberYr();
     }
 
+    SongBoom.setSong("These Fists Were Made for Punchin'");
+
     // Corrupted marrow
     ensureEffect($effect`Cowrruption`);
 
@@ -800,12 +797,7 @@ export class WeaponTest extends Test {
     // FIXME: Outfit
     maximize("weapon damage", false);
 
-    const weaponTurns = () =>
-      60 -
-      Math.floor(numericModifier("weapon damage") / 25 + 0.001) -
-      Math.floor(numericModifier("weapon damage percent") / 25 + 0.001);
-
-    if (weaponTurns() > 2) {
+    if (this.predictedTurns() > 3) {
       throw "Something went wrong with weapon damage.";
     }
   }
@@ -818,6 +810,15 @@ export class SpellTest extends Test {
 
   get name(): string {
     return "Make Sausage";
+  }
+
+  predictedTurns(): number {
+    return Math.max(
+      1,
+      60 -
+        Math.floor(numericModifier("spell damage") / 50 + 0.001) -
+        Math.floor(numericModifier("spell damage percent") / 50 + 0.001)
+    );
   }
 
   prepare(): void {
@@ -844,7 +845,7 @@ export class SpellTest extends Test {
 
     ensurePullEffect($effect`Pisces in the Skyces`, $item`tobiko marble soda`);
 
-    useSkill(1, $skill`Summon Sugar Sheets`);
+    this.context.resources.tome($skill`Summon Sugar Sheets`);
     if (availableAmount($item`sugar chapeau`) === 0 && availableAmount($item`sugar sheet`) > 0) {
       create(1, $item`sugar chapeau`);
     }
@@ -863,23 +864,5 @@ export class SpellTest extends Test {
     useFamiliar($familiar`Left-Hand Man`);
 
     maximize("spell damage", false);
-
-    if (Math.round(numericModifier("spell damage percent")) % 50 >= 40) {
-      ensureItem(1, $item`soda water`);
-      ensurePotionEffect($effect`Concentration`, $item`cordial of concentration`);
-    }
-
-    const spellTurns = () =>
-      60 -
-      Math.floor(numericModifier("spell damage") / 50 + 0.001) -
-      Math.floor(numericModifier("spell damage percent") / 50 + 0.001);
-
-    while (spellTurns() > myAdventures()) {
-      eat(1, $item`magical sausage`);
-    }
-
-    if (spellTurns() > 22) {
-      throw "Something went wrong with spell damage.";
-    }
   }
 }

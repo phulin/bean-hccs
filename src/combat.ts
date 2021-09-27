@@ -7,6 +7,7 @@ import {
   inMultiFight,
   lastChoice,
   myFamiliar,
+  print,
   runChoice,
   runCombat,
   setAutoAttack,
@@ -84,6 +85,7 @@ export class Macro extends LibramMacro {
 }
 
 export function main(): void {
+  print(`Submitting macro: ${Macro.load()}`);
   Macro.load().submit();
   multiFight();
 }
@@ -140,6 +142,7 @@ export function adventureMacroAuto(
 }
 
 export function withMacro<T>(macro: Macro, action: () => T): T {
+  if (getAutoAttack() !== 0) setAutoAttack(0);
   macro.save();
   try {
     return action();

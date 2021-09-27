@@ -1,20 +1,20 @@
-import { buy, cliExecute, visitUrl, print, use, pvpAttacksLeft } from 'kolmafia';
-import { $item, have } from 'libram';
-import { setClan } from './lib';
+import { buy, cliExecute, print, pvpAttacksLeft, use, visitUrl } from "kolmafia";
+import { $item, have } from "libram";
+import { setClan } from "./lib";
 
 buy(1, $item`foreign language tapes`);
 buy(1, $item`continental juice bar`);
 buy(1, $item`ceiling fan`);
 
-if (have($item`peppermint pip packet`)) use(1, $item`peppermint pip packet`);
+if (have($item`Peppermint Pip Packet`)) use(1, $item`Peppermint Pip Packet`);
 
-visitUrl('peevpee.php?action=smashstone&confirm=on');
-print('Stone smashed.');
-use(3, $item`meteorite-ade`);
+visitUrl("peevpee.php?action=smashstone&confirm=on");
+print("Stone smashed.");
+use(3, $item`Meteorite-Ade`);
 use(1, $item`School of Hard Knocks Diploma`);
 if (pvpAttacksLeft() > 0) {
-  cliExecute('uberpvpoptimizer');
-  cliExecute('pvp fame letter');
+  cliExecute("uberpvpoptimizer");
+  cliExecute("pvp fame letter");
 }
 
-setClan('Ferengi Commerce Authority');
+setClan("Bonus Adventures from Hell");

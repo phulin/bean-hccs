@@ -5,7 +5,9 @@ import {
   myLevel,
   mySpleenUse,
   print,
+  retrieveItem,
   runChoice,
+  use,
   visitUrl,
 } from "kolmafia";
 import { $effect, $effects, $item, get, Mood, PropertiesManager, set } from "libram";
@@ -69,7 +71,7 @@ propertyManager.set({ autoSatisfyWithCoinmasters: true });
 // Turn off Lil' Doctor quests.
 propertyManager.setChoices({ [1340]: 3 });
 
-const resources = ResourceTracker.deserialize(get("_hccs_resourceTracker") ?? "{}");
+const resources = ResourceTracker.deserialize(get("_hccs_resourceTracker") || "{}");
 
 const context = { synthesisPlanner, resources, propertyManager };
 
@@ -102,8 +104,12 @@ try {
   if (get("_deckCardsDrawn") < 5) resources.deck("1952");
   autosell(1, $item`1952 Mickey Mantle card`);
 
+  if (!get("_borrowedTimeUsed")) use($item`borrowed time`);
+
   // Buy toy accordion
   ensureItem(1, $item`toy accordion`);
+
+  visitUrl("council.php");
 
   new CoilWireTest(context).run();
   new HpTest(context).run();
@@ -112,15 +118,16 @@ try {
   new MoxieTest(context).run();
 
   tryUse(1, $item`astral six-pack`);
-  resources.consumeTo(3, $item`astral pilsner`);
+  resources.consumeTo(2, $item`astral pilsner`);
+  resources.consumeTo(3, $item`Sacramento wine`);
 
   new ItemTest(context).run();
   new HotTest(context).run();
   new NoncombatTest(context).run();
 
+  resources.consumeTo(13, $item`vintage smart drink`);
   new FamiliarTest(context).run();
 
-  resources.consumeTo(13, $item`emergency margarita`);
   resources.consumeTo(15, $item`Sockdollager`);
   new WeaponTest(context).run();
 
@@ -136,7 +143,7 @@ try {
     visitUrl(`choice.php?whichchoice=1089&option=30`);
   }
 
-  const time = Date.now() - startTime;
+  const time = (Date.now() - startTime) / 1000;
   const minutes = Math.floor(time / 60);
   const seconds = time - minutes * 60;
   print("============================================", "green");
@@ -146,9 +153,9 @@ try {
   resources.summarize();
 
   shrug($effect`Cowrruption`);
+  retrieveItem($item`bitchin' meatcar`);
 } finally {
   cliExecute("ccs default");
-  cliExecute("boombox food");
 
   set("_hccs_resourceTracker", resources.serialize());
   propertyManager.resetAll();
