@@ -2,7 +2,9 @@ import {
   autosell,
   canInteract,
   cliExecute,
+  myClass,
   myLevel,
+  myPrimestat,
   mySpleenUse,
   print,
   retrieveItem,
@@ -10,7 +12,19 @@ import {
   use,
   visitUrl,
 } from "kolmafia";
-import { $effect, $effects, $item, get, Mood, PropertiesManager, set } from "libram";
+import {
+  $classes,
+  $effect,
+  $effects,
+  $item,
+  $stat,
+  Clan,
+  get,
+  have,
+  Mood,
+  PropertiesManager,
+  set,
+} from "libram";
 
 import { ensureEffect, ensureItem, shrug, tryUse } from "./lib";
 import { ResourceTracker } from "./resources";
@@ -30,6 +44,9 @@ import {
 } from "./tests";
 
 function breakfast() {
+  // Buy toy accordion
+  ensureItem(1, $item`toy accordion`);
+
   if (!get("_chateauDeskHarvested")) {
     // Chateau juice bar
     visitUrl("place.php?whichplace=chateau&action=chateau_desk2");
@@ -45,28 +62,50 @@ function breakfast() {
   // Vote.
   if (get("_voteModifier") === "") {
     visitUrl("place.php?whichplace=town_right&action=townright_vote");
-    visitUrl("choice.php?option=1&whichchoice=1331&g=2&local%5B%5D=2&local%5B%5D=3");
+    visitUrl("choice.php?option=1&whichchoice=1331&g=2&local%5B%5D=1&local%5B%5D=2");
+    // Make sure initiative-tracking works.
+    visitUrl("place.php?whichplace=town_right&action=townright_vote");
   }
 
-  // // Sell pork gems + tent
-  // visitUrl("tutorial.php?action=toot");
-  // tryUse(1, $item`letter from King Ralph XI`);
-  // tryUse(1, $item`pork elf goodies sack`);
-  // autosell(5, $item`baconstone`);
-  // autosell(5, $item`porquoise`);
-  // autosell(5, $item`hamethyst`);
+  // Pantogram.
+  // Hilarity is better for later farming than NC
+  if (!have($item`pantogram pants`)) {
+    ensureItem(1, $item`hermit permit`);
+    retrieveItem(1, $item`ten-leaf clover`);
+    cliExecute("pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent");
+  }
+
+  // Sell pork gems + tent
+  visitUrl("tutorial.php?action=toot");
+  tryUse(1, $item`letter from King Ralph XI`);
+  tryUse(1, $item`pork elf goodies sack`);
+  autosell(5, $item`baconstone`);
+  autosell(5, $item`porquoise`);
+  autosell(5, $item`hamethyst`);
+}
+
+const validClasses = $classes`Seal Clubber, Turtle Tamer, Pastamancer, Sauceror`;
+if (!validClasses.includes(myClass())) {
+  throw `Invalid class ${myClass()}`;
 }
 
 // Sweet Synthesis plan.
 // This is the sequence of synthesis effects; we will, if possible, come up with a plan for allocating candy to each of these.
 const synthesisPlanner = new SynthesisPlanner(
-  $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Collection`
+  myPrimestat() === $stat`Muscle`
+    ? $effects`Synthesis: Movement, Synthesis: Strong, Synthesis: Collection`
+    : $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Collection`
 );
 
 const propertyManager = new PropertiesManager();
 
-propertyManager.set({ autoSatisfyWithNPCs: true });
-propertyManager.set({ autoSatisfyWithCoinmasters: true });
+propertyManager.set({
+  autoSatisfyWithNPCs: true,
+  autoSatisfyWithCoinmasters: true,
+  battleAction: "custom combat script",
+  hpAutoRecovery: 0.6,
+  hpAutoRecoveryTarget: 0.95,
+});
 
 // Turn off Lil' Doctor quests.
 propertyManager.setChoices({ [1340]: 3 });
@@ -90,6 +129,8 @@ cliExecute("mood apathetic");
 // All combat handled by our consult script (hccs_combat.js).
 cliExecute("ccs bean-hccs");
 
+Clan.join("Bonus Adventures from Hell");
+
 const startTime = Date.now();
 
 try {
@@ -99,15 +140,12 @@ try {
     }
   }
 
-  breakfast();
-
   if (get("_deckCardsDrawn") < 5) resources.deck("1952");
   autosell(1, $item`1952 Mickey Mantle card`);
 
-  if (!get("_borrowedTimeUsed")) use($item`borrowed time`);
+  breakfast();
 
-  // Buy toy accordion
-  ensureItem(1, $item`toy accordion`);
+  if (!get("_borrowedTimeUsed")) use($item`borrowed time`);
 
   visitUrl("council.php");
 
@@ -118,21 +156,17 @@ try {
   new MoxieTest(context).run();
 
   tryUse(1, $item`astral six-pack`);
-  resources.consumeTo(2, $item`astral pilsner`);
-  resources.consumeTo(3, $item`Sacramento wine`);
+  resources.consumeTo(5, $item`astral pilsner`);
 
   new ItemTest(context).run();
   new HotTest(context).run();
   new NoncombatTest(context).run();
 
-  resources.consumeTo(13, $item`vintage smart drink`);
   new FamiliarTest(context).run();
 
-  resources.consumeTo(15, $item`Sockdollager`);
   new WeaponTest(context).run();
 
   ensureEffect($effect`Simmering`);
-  resources.consumeTo(10, $item`weird gazelle steak`);
   new SpellTest(context).run();
 
   if (get("csServicesPerformed").split(",").length !== 11) {
@@ -154,6 +188,7 @@ try {
 
   shrug($effect`Cowrruption`);
   retrieveItem($item`bitchin' meatcar`);
+  cliExecute("pull all");
 } finally {
   cliExecute("ccs default");
 

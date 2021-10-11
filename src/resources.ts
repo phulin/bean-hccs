@@ -1,21 +1,30 @@
 import {
   cliExecute,
+  create,
   eat,
+  effectModifier,
   haveEffect,
   itemAmount,
   itemType,
   myFullness,
   myInebriety,
   print,
+  pullsRemaining,
   retrieveItem,
+  toItem,
+  toSkill,
+  use,
   useSkill,
 } from "kolmafia";
 import { $effect, $item, $skill, get, have } from "libram";
+import { pullIfPossible } from "./lib";
 
 export class ResourceTracker {
   deckCards: string[] = [];
   genieWishes: Effect[] = [];
+  // Items represent clip art summons.
   tomeSummons: (Skill | Item)[] = [];
+  pulls: Item[] = [];
   consumedFood = new Map<Item, number>();
   consumedBooze = new Map<Item, number>();
 
@@ -48,13 +57,30 @@ export class ResourceTracker {
     }
   }
 
-  tome(skill: Skill, attempt = false): void {
+  tome(skillOrItem: Skill | Item, attempt = false): void {
     if (get("tomeSummons") < 3) {
-      useSkill(skill);
-      this.tomeSummons.push(skill);
+      if (skillOrItem instanceof Skill) useSkill(skillOrItem);
+      else create(skillOrItem);
+      this.tomeSummons.push(skillOrItem);
     } else if (!attempt) {
-      print(`WARNING: Tried to use tome summon ${skill}, but we're out.`, "orange");
+      print(`WARNING: Tried to use tome summon ${skillOrItem}, but we're out.`, "orange");
     }
+  }
+
+  pull(item: Item, maxPrice: number, attempt = false): void {
+    if (pullsRemaining() > 0 && pullIfPossible(1, item, maxPrice)) {
+      this.pulls.push(item);
+    } else if (!attempt) {
+      print(`WARNING: Tried to pull ${item}, but we're out of pulls.`, "orange");
+    }
+  }
+
+  ensurePullPotion(item: Item, maxPrice: number, attempt = false): void {
+    const effect = effectModifier(item, "Effect");
+    if (!have(item) && !have(effect)) {
+      this.pull(item, maxPrice, attempt);
+    }
+    if (!have(effect)) use(item);
   }
 
   consumeTo(threshold: number, item: Item): void {
@@ -81,8 +107,9 @@ export class ResourceTracker {
   summarize(): void {
     print("====== RESOURCE SUMMARY ======");
     print(`Deck: ${this.deckCards.join(", ")}`);
-    print(`Wishes: ${this.genieWishes.map((effect) => effect.name).join(", ")}`);
+    print(`Wishes: ${this.genieWishes.join(", ")}`);
     print(`Tomes: ${this.tomeSummons.map((skillOrItem) => skillOrItem.name).join(", ")}`);
+    print(`Pulls: ${this.pulls.join(", ")}`);
     print("FOOD");
     for (const [food, count] of this.consumedFood) {
       print(`${count} ${count > 1 ? food.plural : food.name}`);
@@ -98,17 +125,26 @@ export class ResourceTracker {
       deckCards: this.deckCards,
       genieWishes: this.genieWishes,
       tomeSummons: this.tomeSummons,
+      pulls: this.pulls,
       consumedFood: [...this.consumedFood.entries()],
       consumedBooze: [...this.consumedBooze.entries()],
     });
   }
 
   static deserialize(data: string): ResourceTracker {
-    const { deckCards, genieWishes, tomeSummons, consumedFood, consumedBooze } = JSON.parse(data);
+    const { deckCards, genieWishes, tomeSummons, pulls, consumedFood, consumedBooze } =
+      JSON.parse(data);
     const result = new ResourceTracker();
     result.deckCards = deckCards ?? [];
     result.genieWishes = genieWishes ? genieWishes.map((name: string) => Effect.get(name)) : [];
-    result.tomeSummons = tomeSummons ? tomeSummons.map((name: string) => Skill.get(name)) : [];
+    result.tomeSummons = tomeSummons
+      ? tomeSummons.map((name: string) => {
+          const skill = toSkill(name);
+          const item = toItem(name);
+          return skill !== $skill`none` ? skill : item;
+        })
+      : [];
+    result.pulls = pulls ? pulls.map((name: string) => Item.get(name)) : [];
     result.consumedFood = new Map(
       consumedFood
         ? consumedFood.map(([name, count]: [string, number]) => [Item.get(name), count])
