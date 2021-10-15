@@ -28,6 +28,7 @@ import {
   setAutoAttack,
   setLocation,
   totalFreeRests,
+  toUrl,
   use,
   useFamiliar,
   useSkill,
@@ -78,21 +79,6 @@ import { SynthesisPlanner } from "./synthesis";
 
 function useDefaultFamiliar() {
   useFamiliar($familiar`Melodramedary`);
-}
-
-function ensureInnerElf() {
-  if (haveEffect($effect`Inner Elf`) === 0) {
-    Clan.join("Hobopolis Vacation Home");
-    try {
-      useFamiliar($familiar`Machine Elf`);
-      equip($slot`acc3`, $item`Kremlin's Greatest Briefcase`);
-      setChoice(326, 1);
-      ensureEffect($effect`Blood Bubble`);
-      adventureMacro($location`The Slime Tube`, Macro.skill($skill`KGB tranquilizer dart`));
-    } finally {
-      Clan.join("Bonus Adventures from Hell");
-    }
-  }
 }
 
 export const testLog: { [index: string]: { turns: number; seconds: number } } = {};
@@ -147,6 +133,22 @@ export abstract class Test {
   abstract get name(): string;
   abstract predictedTurns(): number;
   abstract prepare(): void;
+
+  // Utility methods
+  ensureInnerElf(): void {
+    if (haveEffect($effect`Inner Elf`) === 0) {
+      Clan.join("Hobopolis Vacation Home");
+      try {
+        useFamiliar($familiar`Machine Elf`);
+        equip($slot`acc3`, $item`Kremlin's Greatest Briefcase`);
+        this.context.propertyManager.setChoices({ [326]: 1 });
+        ensureEffect($effect`Blood Bubble`);
+        adventureMacro($location`The Slime Tube`, Macro.skill($skill`KGB tranquilizer dart`));
+      } finally {
+        Clan.join("Bonus Adventures from Hell");
+      }
+    }
+  }
 }
 
 export class CoilWireTest extends Test {
@@ -190,18 +192,19 @@ export class HpTest extends Test {
       ensureEffect($effect`Merry Smithsness`);
     }
 
-    this.context.resources.deck("rope");
-
     if (myPrimestat() === $stat`Muscle`) {
       ensureEffect($effect`Muddled`);
       ensureEffect($effect`Muscle Unbound`);
       this.context.resources.wish($effect`HGH-charged`);
       this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 10000);
+      this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
+      this.context.resources.deck("strength");
     } else {
       ensureEffect($effect`Uncucumbered`);
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
       this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 10000);
+      this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
     }
 
     ensureEffect($effect`You Learned Something Maybe!`);
@@ -262,6 +265,7 @@ export class HpTest extends Test {
     tryUse(1, $item`a ten-percent bonus`);
 
     ensureEffect($effect`Starry-Eyed`);
+    ensureEffect($effect`Favored by Lyle`);
     ensureEffect($effect`Triple-Sized`);
     ensureEffect($effect`Feeling Excited`);
     if (myPrimestat() === $stat`Muscle`) {
@@ -273,6 +277,7 @@ export class HpTest extends Test {
     // Plan is for these buffs to fall all the way through to item -> hot res -> fam weight.
     ensureEffect($effect`Fidoxene`);
     ensureEffect($effect`Do I Know You From Somewhere?`);
+    ensureEffect($effect`Lack of Body-Building`);
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
 
@@ -303,21 +308,27 @@ export class HpTest extends Test {
     mood.skill($skill`Blood Bubble`);
     mood.skill($skill`Carol of the Bulls`);
     mood.skill($skill`Carol of the Hells`);
+    mood.skill($skill`Drescher's Annoying Noise`);
+    mood.skill($skill`Get Big`);
     mood.skill($skill`Leash of Linguini`);
     mood.skill($skill`Pride of the Puffin`);
-    mood.skill($skill`Drescher's Annoying Noise`);
+    mood.skill($skill`Rage of the Reindeer`);
     mood.skill($skill`Singer's Faithful Ocelot`);
     mood.skill($skill`Stevedave's Shanty of Superiority`);
     if (myPrimestat() === $stat`Mysticality`) mood.skill($skill`Inscrutable Gaze`);
     mood.execute();
 
-    ensureInnerElf();
-
     // LOV Tunnel
     if (!TunnelOfLove.isUsed()) {
       useDefaultFamiliar();
-      Macro.if_("monstername LOV Enforcer", Macro.attack().repeat())
-        .if_("monstername LOV Engineer", Macro.skill($skill`Saucegeyser`).repeat())
+      Macro.if_(
+        "monstername LOV Enforcer",
+        Macro.skill($skill`Micrometeorite`)
+          .item($item`Time-Spinner`)
+          .attack()
+          .repeat()
+      )
+        .if_("monstername LOV Engineer", Macro.skill($skill`Weapon of the Pastalord`).repeat())
         .if_("monstername LOV Equivocator", Macro.pickpocket().kill())
         .setAutoAttack();
 
@@ -378,8 +389,20 @@ export class HpTest extends Test {
     ) {
       useDefaultFamiliar();
 
+      this.ensureInnerElf();
+
+      if (get("_questPartyFair") === "unstarted") {
+        visitUrl(toUrl($location`The Neverending Party`));
+        if (["food", "booze"].includes(get("_questPartyFairQuest"))) {
+          print("Gerald/ine quest!", "blue");
+          runChoice(1); // Accept quest
+        } else {
+          runChoice(2); // Decline quest
+        }
+      }
+
       // NEP noncombat. Fight.
-      setChoice(1324, 5);
+      this.context.propertyManager.setChoices({ [1324]: 5 });
 
       adventureMacroAuto(
         $location`The Neverending Party`,
@@ -470,7 +493,7 @@ export class MuscleTest extends Test {
     ensureSong($effect`Power Ballad of the Arrowsmith`);
     ensureEffect($effect`Rage of the Reindeer`);
     ensureEffect($effect`Quiet Determination`);
-    ensureEffect($effect`Disdain of the War Snapper`);
+    if (myClass() !== $class`Turtle Tamer`) ensureEffect($effect`Disdain of the War Snapper`);
     ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
 
     useFamiliar($familiar`Left-Hand Man`);
@@ -510,6 +533,12 @@ export class MysticalityTest extends Test {
     useFamiliar($familiar`Left-Hand Man`);
     maximize("mysticality", false);
 
+    for (const increaser of [
+      () => ensureEffect($effect`We're All Made of Starfish`), // will stay on all the way to weapon damage.
+      () => ensureEffect($effect`Baconstoned`),
+    ]) {
+      if (this.predictedTurns() > 1) increaser();
+    }
     if (this.predictedTurns() > 1) {
       throw "Not enough mysticality to cap.";
     }
@@ -547,6 +576,8 @@ export class MoxieTest extends Test {
     if (!have($effect`Unrunnable Face`)) {
       tryUse(1, $item`runproof mascara`);
     }
+
+    tryUse(1, $item`eyedrops of newt`);
 
     useFamiliar($familiar`Left-Hand Man`);
     maximize("moxie", false);
@@ -668,7 +699,7 @@ export class HotTest extends Test {
 
     ensureEffect($effect`Feeling Peaceful`);
     // Reward
-    ensureEffect($effect`Amazing`);
+    if (have($item`pocket maze`)) ensureEffect($effect`Amazing`);
 
     // Beach comb buff.
     ensureEffect($effect`Hot-Headed`);
@@ -785,7 +816,7 @@ export class FamiliarTest extends Test {
     // NC reward
     ensureEffect($effect`Robot Friends`);
 
-    this.context.resources.pull($item`Great Wolf's beastly trousers`, 0);
+    // this.context.resources.pull($item`Great Wolf's beastly trousers`, 0);
 
     useFamiliar($familiar`Exotic Parrot`);
     maximize("familiar weight", false);
@@ -836,7 +867,7 @@ export class WeaponTest extends Test {
     ensureEffect($effect`Rage of the Reindeer`);
     ensureEffect($effect`Frenzied, Bloody`);
     ensureEffect($effect`Scowl of the Auk`);
-    ensureEffect($effect`Disdain of the War Snapper`);
+    if (myClass() !== $class`Turtle Tamer`) ensureEffect($effect`Disdain of the War Snapper`);
     ensureEffect($effect`Tenacity of the Snapper`);
     ensureSong($effect`Jackasses' Symphony of Destruction`);
 
@@ -862,6 +893,8 @@ export class WeaponTest extends Test {
       retrieveItem(1, $item`ebony epee`);
     }
 
+    this.ensureInnerElf();
+
     // Paint ungulith (Saber YR)
     if (!get("_chateauMonsterFought")) {
       useFamiliar($familiar`Ghost of Crimbo Carols`);
@@ -885,7 +918,7 @@ export class WeaponTest extends Test {
     // FIXME: Outfit
     maximize("weapon damage", false);
 
-    if (this.predictedTurns() >= 5) {
+    if (this.predictedTurns() >= 4) {
       this.context.resources.ensurePullPotion($item`wasabi marble soda`, 15000);
     }
 
@@ -949,7 +982,7 @@ export class SpellTest extends Test {
       create(1, $item`sugar chapeau`);
     }
 
-    ensureInnerElf();
+    this.ensureInnerElf();
 
     if (haveEffect($effect`Meteor Showered`) === 0 && get("_meteorShowerUses") < 5) {
       if (myFamiliar() === $familiar`Left-Hand Man`) useFamiliar($familiar`none`);

@@ -1,13 +1,13 @@
 # bean-hccs
 
-This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Softcore or Hardcore Community Service runs as a Pastamancer. I use it daily for ~1/120 softcore CS runs (yes, the name is a misnomer). Expect to need to make some changes, unless your set of IotMs is a strict superset of mine. For most folks, this will be an outline that can get you to daycount with some customization work.
+This is a Kingdom of Loathing script by myself, `worthawholebean (#1972588)` (`ikzann#8468` on Discord) to do 1-day Softcore or Hardcore Community Service runs as a Pastamancer. At times I use it daily for ~1/120 softcore CS runs (yes, the name is a misnomer). Expect to need to make some changes, unless your set of IotMs is a strict superset of mine. For most folks, this will be an outline that can get you to daycount with some customization work.
 
 You'll have to build this yourself to make modifications. This use a typical node.js / babel / webpack setup. To install:
-- Install node.js.
+- Install node.js and yarn (`npm install -g yarn`).
 - Checkout the repository somewhere outside your mafia folder.
-- Run `npm install` and `npm build`
+- Run `yarn install` and `yarn build`
 - Symbolic link the build folder (`KoLmafia/scripts/bean-hccs`) into your mafia directory, as well as `KoLmafia/ccs/bean-hccs.ccs`. Or make a copy every time you update.
-- Run `npm run watch` as you make changes and the build folder will automatically update.
+- Run `yarn watch` as you make changes and the build folder will automatically update.
 
 If you are scared of TypeScript, the old ASH version is still available on the `softcore` branch.
 

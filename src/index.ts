@@ -67,14 +67,6 @@ function breakfast() {
     visitUrl("place.php?whichplace=town_right&action=townright_vote");
   }
 
-  // Pantogram.
-  // Hilarity is better for later farming than NC
-  if (!have($item`pantogram pants`)) {
-    ensureItem(1, $item`hermit permit`);
-    retrieveItem(1, $item`ten-leaf clover`);
-    cliExecute("pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent");
-  }
-
   // Sell pork gems + tent
   visitUrl("tutorial.php?action=toot");
   tryUse(1, $item`letter from King Ralph XI`);
@@ -82,6 +74,14 @@ function breakfast() {
   autosell(5, $item`baconstone`);
   autosell(5, $item`porquoise`);
   autosell(5, $item`hamethyst`);
+
+  // Pantogram.
+  // Hilarity is better for later farming than NC
+  if (!have($item`pantogram pants`)) {
+    ensureItem(1, $item`hermit permit`);
+    retrieveItem(1, $item`ten-leaf clover`);
+    cliExecute("pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent");
+  }
 }
 
 const validClasses = $classes`Seal Clubber, Turtle Tamer, Pastamancer, Sauceror`;
@@ -145,7 +145,10 @@ try {
 
   breakfast();
 
-  if (!get("_borrowedTimeUsed")) use($item`borrowed time`);
+  if (!get("_borrowedTimeUsed")) {
+    if (!have($item`borrowed time`)) resources.tome($item`borrowed time`);
+    use($item`borrowed time`);
+  }
 
   visitUrl("council.php");
 
