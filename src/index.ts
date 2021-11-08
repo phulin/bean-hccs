@@ -9,6 +9,7 @@ import {
   print,
   retrieveItem,
   runChoice,
+  setAutoAttack,
   use,
   visitUrl,
 } from "kolmafia";
@@ -71,9 +72,6 @@ function breakfast() {
   visitUrl("tutorial.php?action=toot");
   tryUse(1, $item`letter from King Ralph XI`);
   tryUse(1, $item`pork elf goodies sack`);
-  autosell(5, $item`baconstone`);
-  autosell(5, $item`porquoise`);
-  autosell(5, $item`hamethyst`);
 
   // Pantogram.
   // Hilarity is better for later farming than NC
@@ -193,6 +191,7 @@ try {
   retrieveItem($item`bitchin' meatcar`);
   cliExecute("pull all");
 } finally {
+  setAutoAttack(0);
   cliExecute("ccs default");
 
   set("_hccs_resourceTracker", resources.serialize());

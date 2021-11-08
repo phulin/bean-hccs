@@ -107,27 +107,31 @@ export class ResourceTracker {
   summarize(): void {
     print("====== RESOURCE SUMMARY ======");
     print(`Deck: ${this.deckCards.join(", ")}`);
-    print(`Wishes: ${this.genieWishes.join(", ")}`);
+    print(`Wishes: ${this.genieWishes.map((effect) => effect.name).join(", ")}`);
     print(`Tomes: ${this.tomeSummons.map((skillOrItem) => skillOrItem.name).join(", ")}`);
-    print(`Pulls: ${this.pulls.join(", ")}`);
-    print("FOOD");
-    for (const [food, count] of this.consumedFood) {
-      print(`${count} ${count > 1 ? food.plural : food.name}`);
+    print(`Pulls: ${this.pulls.map((item) => item.name).join(", ")}`);
+    if (this.consumedFood.size > 0) {
+      print("FOOD");
+      for (const [food, count] of this.consumedFood) {
+        print(`${count} ${count > 1 ? food.plural : food.name}`);
+      }
     }
-    print("BOOZE");
-    for (const [booze, count] of this.consumedBooze) {
-      print(`${count} ${count > 1 ? booze.plural : booze.name}`);
+    if (this.consumedBooze.size > 0) {
+      print("BOOZE");
+      for (const [booze, count] of this.consumedBooze) {
+        print(`${count} ${count > 1 ? booze.plural : booze.name}`);
+      }
     }
   }
 
   serialize(): string {
     return JSON.stringify({
       deckCards: this.deckCards,
-      genieWishes: this.genieWishes,
-      tomeSummons: this.tomeSummons,
-      pulls: this.pulls,
-      consumedFood: [...this.consumedFood.entries()],
-      consumedBooze: [...this.consumedBooze.entries()],
+      genieWishes: this.genieWishes.map((effect) => effect.name),
+      tomeSummons: this.tomeSummons.map((itemOrSkill) => itemOrSkill.name),
+      pulls: this.pulls.map((item) => item.name),
+      consumedFood: [...this.consumedFood.entries()].map(([food, count]) => [food.name, count]),
+      consumedBooze: [...this.consumedBooze.entries()].map(([booze, count]) => [booze.name, count]),
     });
   }
 

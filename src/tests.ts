@@ -10,6 +10,7 @@ import {
   haveEffect,
   itemAmount,
   maximize,
+  mpCost,
   myBasestat,
   myBuffedstat,
   myClass,
@@ -78,7 +79,7 @@ import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
 
 function useDefaultFamiliar() {
-  useFamiliar($familiar`Melodramedary`);
+  useFamiliar($familiar`Hovering Sombrero`);
 }
 
 export const testLog: { [index: string]: { turns: number; seconds: number } } = {};
@@ -195,6 +196,7 @@ export class HpTest extends Test {
     if (myPrimestat() === $stat`Muscle`) {
       ensureEffect($effect`Muddled`);
       ensureEffect($effect`Muscle Unbound`);
+      ensureEffect($effect`Lack of Body-Building`);
       this.context.resources.wish($effect`HGH-charged`);
       this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 10000);
       this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
@@ -203,6 +205,7 @@ export class HpTest extends Test {
       ensureEffect($effect`Uncucumbered`);
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
+      ensureEffect($effect`We're All Made of Starfish`);
       this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 10000);
       this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
     }
@@ -230,6 +233,7 @@ export class HpTest extends Test {
         mapMonster($location`The Haiku Dungeon`, $monster`amateur ninja`);
         runCombat();
       });
+      retrieveItem($item`bag of many confections`);
     }
 
     if (availableAmount($item`government cheese`) + availableAmount($item`government`) === 0) {
@@ -247,6 +251,11 @@ export class HpTest extends Test {
     if (availableAmount($item`Crimbo candied pecan`) === 3) {
       // Yahtzee!
       this.context.resources.pull($item`Crimbo fudge`, 4000);
+    }
+
+    while (get("libramSummons") < 6) {
+      ensureMpTonic(mpCost($skill`Summon Candy Heart`));
+      useSkill($skill`Summon Candy Heart`);
     }
 
     this.context.synthesisPlanner.synthesize(
@@ -308,6 +317,7 @@ export class HpTest extends Test {
     mood.skill($skill`Blood Bubble`);
     mood.skill($skill`Carol of the Bulls`);
     mood.skill($skill`Carol of the Hells`);
+    mood.skill($skill`Carol of the Thrills`);
     mood.skill($skill`Drescher's Annoying Noise`);
     mood.skill($skill`Get Big`);
     mood.skill($skill`Leash of Linguini`);
@@ -315,6 +325,7 @@ export class HpTest extends Test {
     mood.skill($skill`Rage of the Reindeer`);
     mood.skill($skill`Singer's Faithful Ocelot`);
     mood.skill($skill`Stevedave's Shanty of Superiority`);
+    mood.skill($skill`Ur-Kel's Aria of Annoyance`);
     if (myPrimestat() === $stat`Mysticality`) mood.skill($skill`Inscrutable Gaze`);
     mood.execute();
 
@@ -343,11 +354,10 @@ export class HpTest extends Test {
       if (itemAmount($item`LOV Extraterrestrial Chocolate`) > 0) {
         use($item`LOV Extraterrestrial Chocolate`);
       }
-
-      equip($item`LOV Epaulettes`);
     }
 
     if (get("_godLobsterFights") < 2) {
+      equip($item`LOV Epaulettes`);
       useFamiliar($familiar`God Lobster`);
       setChoice(1310, 1);
       while (get("_godLobsterFights") < 2) {
@@ -362,6 +372,7 @@ export class HpTest extends Test {
     // Professor 9x free sausage fight @ NEP
     if (sausageFightGuaranteed()) {
       useFamiliar($familiar`Pocket Professor`);
+      equip($item`LOV Epaulettes`);
       tryEquip($item`Pocket Professor memory chip`);
 
       equip($item`Kramco Sausage-o-Matic™`);
@@ -374,6 +385,7 @@ export class HpTest extends Test {
         $location`Noob Cave`,
         Macro.if_("!monstername sausage goblin", Macro.abort())
           .trySkill(Skill.get("Lecture on Relativity"))
+          .trySkill("Feel Pride")
           .kill()
       );
     }
@@ -387,6 +399,8 @@ export class HpTest extends Test {
       get("_shatteringPunchUsed") < 3 ||
       !get("_gingerbreadMobHitUsed")
     ) {
+      equip($item`LOV Epaulettes`);
+
       useDefaultFamiliar();
 
       this.ensureInnerElf();
@@ -411,6 +425,15 @@ export class HpTest extends Test {
           Macro.trySkill("Chest X-Ray", "Shattering Punch", "Gingerbread Mob Hit").abort()
         ).kill()
       );
+    }
+
+    while (get("_machineTunnelsAdv") < 5) {
+      // DMT noncombat. Run.
+      this.context.propertyManager.setChoices({ [1119]: 5 });
+
+      useFamiliar($familiar`Machine Elf`);
+
+      adventureMacroAuto($location`The Deep Machine Tunnels`, Macro.kill());
     }
 
     if (myPrimestat() === $stat`Muscle`) {
@@ -559,6 +582,8 @@ export class MoxieTest extends Test {
   }
 
   prepare(): void {
+    if (myClass() === $class`Pastamancer`) useSkill($skill`Bind Penne Dreadful`);
+
     // Beach Comb
     ensureEffect($effect`Pomp & Circumsands`);
 
@@ -634,8 +659,6 @@ export class ItemTest extends Test {
 
     ensureEffect($effect`There's No N in Love`);
 
-    this.context.resources.wish($effect`Infernal Thirst`);
-
     // Fortune of the Wheel
     this.context.resources.deck("wheel");
 
@@ -644,6 +667,10 @@ export class ItemTest extends Test {
       "item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag",
       false
     );
+
+    if (this.predictedTurns() > 1) {
+      this.context.resources.wish($effect`Infernal Thirst`);
+    }
 
     if (this.predictedTurns() > 1) {
       throw "Not enough item drop to cap.";
@@ -726,7 +753,8 @@ export class NoncombatTest extends Test {
   }
 
   predictedTurns(): number {
-    return Math.max(1, 60 - 3 * Math.floor(numericModifier("Combat Rate") / 5));
+    const uncappedCombatRate = 5 * (numericModifier("Combat Rate") + 25) - 25;
+    return Math.max(1, 60 + 3 * Math.floor(uncappedCombatRate / 5));
   }
 
   prepare(): void {

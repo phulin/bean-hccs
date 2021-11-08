@@ -14,7 +14,7 @@ use(3, $item`Meteorite-Ade`);
 use(1, $item`School of Hard Knocks Diploma`);
 if (pvpAttacksLeft() > 0) {
   cliExecute("uberpvpoptimizer");
-  cliExecute("pvp fame letter");
+  cliExecute("swagger");
 }
 
 setClan("Bonus Adventures from Hell");
