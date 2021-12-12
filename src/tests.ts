@@ -67,6 +67,7 @@ import {
   ensureOutfit,
   ensurePotionEffect,
   ensureSong,
+  equalizeStat,
   incrementProperty,
   mapMonster,
   myFamiliarWeight,
@@ -334,8 +335,10 @@ export class HpTest extends Test {
       useDefaultFamiliar();
       Macro.if_(
         "monstername LOV Enforcer",
-        Macro.skill($skill`Micrometeorite`)
-          .item($item`Time-Spinner`)
+        Macro.externalIf(
+          myPrimestat() === $stat`Muscle`,
+          Macro.skill($skill`Micrometeorite`).item($item`Time-Spinner`)
+        )
           .attack()
           .repeat()
       )
@@ -468,13 +471,7 @@ export class HpTest extends Test {
     // Reset location so maximizer doesn't get confused.
     setLocation($location`none`);
 
-    if (myClass() === $class`Pastamancer`) useSkill($skill`Bind Undead Elbow Macaroni`);
-    else if (myClass() === $class`Sauceror`) {
-      // useSkill($skill`Prevent Scurvy and Sobriety`);
-      // useSkill($skill`Advanced Saucecrafting`);
-      // ensurePotionEffect($effect`Expert Oiliness`, $item`oil of expertise`);
-      throw "No support for getting cherry....";
-    }
+    equalizeStat($stat`Muscle`);
 
     ensureEffect($effect`Song of Starch`);
     // ensureEffect($effect`Rage of the Reindeer`);
@@ -511,6 +508,8 @@ export class MuscleTest extends Test {
   }
 
   prepare(): void {
+    equalizeStat($stat`Muscle`);
+
     ensureEffect($effect`Song of Bravado`);
     ensureSong($effect`Stevedave's Shanty of Superiority`);
     ensureSong($effect`Power Ballad of the Arrowsmith`);
@@ -582,7 +581,7 @@ export class MoxieTest extends Test {
   }
 
   prepare(): void {
-    if (myClass() === $class`Pastamancer`) useSkill($skill`Bind Penne Dreadful`);
+    equalizeStat($stat`Moxie`);
 
     // Beach Comb
     ensureEffect($effect`Pomp & Circumsands`);

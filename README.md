@@ -11,8 +11,6 @@ You'll have to build this yourself to make modifications. This use a typical nod
 
 If you are scared of TypeScript, the old ASH version is still available on the `softcore` branch.
 
-You'll need to set up a mood named "hccs" with whatever you have (+ML, +stats, +mainstat) for leveling combats. I hope to fix this soon.
-
 The script is fine to run twice; if it breaks somewhere, fix the problem manually and then the script should start where it left off. I have tested it, but not extensively, so please understand that this code is not at the same quality level as autoscend. It may very well mess up spectacularly, and it has done so at times in my runs. You have been warned.
 
 Notes:

@@ -18,3 +18,5 @@ if (pvpAttacksLeft() > 0) {
 }
 
 setClan("Bonus Adventures from Hell");
+
+cliExecute("breakfast");
