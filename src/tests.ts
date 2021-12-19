@@ -1,5 +1,6 @@
 import {
   availableAmount,
+  buy,
   cliExecute,
   containsText,
   create,
@@ -201,14 +202,17 @@ export class HpTest extends Test {
       this.context.resources.wish($effect`HGH-charged`);
       this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 10000);
       this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
+      this.context.resources.ensurePullPotion($item`abstraction: purpose`, 30000);
       this.context.resources.deck("strength");
     } else {
       ensureEffect($effect`Uncucumbered`);
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
       ensureEffect($effect`We're All Made of Starfish`);
+      this.context.resources.wish($effect`Different Way of Seeing Things`);
       this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 10000);
       this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
+      this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
     }
 
     ensureEffect($effect`You Learned Something Maybe!`);
@@ -661,6 +665,11 @@ export class ItemTest extends Test {
     // Fortune of the Wheel
     this.context.resources.deck("wheel");
 
+    if (!have($item`oversized sparkler`) && !get("_fireworksShopEquipmentBought")) {
+      visitUrl("clan_viplounge.php?action=fwshop&whichfloor=2");
+      buy($item`oversized sparkler`);
+    }
+
     // FIXME: Outfit
     maximize(
       "item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag",
@@ -941,6 +950,10 @@ export class WeaponTest extends Test {
     SongBoom.setSong("These Fists Were Made for Punchin'");
 
     ensureEffect($effect`Bow-Legged Swagger`);
+
+    if (myBasestat($stat`Muscle`) > 150) {
+      this.context.resources.pull($item`Stick-Knife of Loathing`, 0);
+    }
 
     // FIXME: Outfit
     maximize("weapon damage", false);
