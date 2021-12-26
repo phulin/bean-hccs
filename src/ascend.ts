@@ -1,20 +1,22 @@
-import { containsText, visitUrl } from 'kolmafia';
+import { containsText, use, visitUrl } from "kolmafia";
+import { $item, AsdonMartin } from "libram";
 
-if (!containsText(visitUrl('charpane.php'), 'Astral Spirit')) {
-  visitUrl('ascend.php?action=ascend&confirm=on&confirm2=on');
+if (!containsText(visitUrl("charpane.php"), "Astral Spirit")) {
+  if (!AsdonMartin.installed()) use($item`Asdon Martin keyfob`);
+  visitUrl("ascend.php?action=ascend&confirm=on&confirm2=on");
 }
-if (!containsText(visitUrl('charpane.php'), 'Astral Spirit')) throw 'Failed to ascend.';
-visitUrl('afterlife.php?action=pearlygates');
+if (!containsText(visitUrl("charpane.php"), "Astral Spirit")) throw "Failed to ascend.";
+visitUrl("afterlife.php?action=pearlygates");
 
 // abort('perm skills');
 
 // Pilsners
-visitUrl('afterlife.php?action=buydeli&whichitem=5046');
+visitUrl("afterlife.php?action=buydeli&whichitem=5046");
 // Statuette
-visitUrl('afterlife.php?action=buyarmory&whichitem=5037');
+visitUrl("afterlife.php?action=buyarmory&whichitem=5037");
 
 // Pastamancer, Blender, Male, CS
 visitUrl(
-  'afterlife.php?action=ascend&confirmascend=1&whichsign=8&gender=1&whichclass=3&whichpath=25&asctype=2&nopetok=1&noskillsok=1&pwd',
+  "afterlife.php?action=ascend&confirmascend=1&whichsign=8&gender=1&whichclass=3&whichpath=25&asctype=2&nopetok=1&noskillsok=1&pwd",
   true
 );

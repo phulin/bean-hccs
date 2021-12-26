@@ -6,7 +6,9 @@ import {
   create,
   equip,
   getClanName,
+  getFuel,
   getProperty,
+  getWorkshed,
   handlingChoice,
   haveEffect,
   itemAmount,
@@ -61,6 +63,7 @@ import {
 } from "libram";
 import { adventureMacro, Macro, saberYr, withMacro } from "./combat";
 import {
+  ensureDough,
   ensureEffect,
   ensureMpSausage,
   ensureMpTonic,
@@ -77,6 +80,7 @@ import {
   tryEquip,
   tryUse,
 } from "./lib";
+import { globalOptions } from "./options";
 import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
 
@@ -200,19 +204,36 @@ export class HpTest extends Test {
       ensureEffect($effect`Muscle Unbound`);
       ensureEffect($effect`Lack of Body-Building`);
       this.context.resources.wish($effect`HGH-charged`);
-      this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 10000);
       this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
       this.context.resources.ensurePullPotion($item`abstraction: purpose`, 30000);
-      this.context.resources.deck("strength");
+      if (globalOptions.levelAggressively) {
+        this.context.resources.deck("strength");
+        this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 30000);
+        this.context.resources.ensurePullPotion($item`Mer-kin strongjuice`, 30000);
+        this.context.resources.wish($effect`New and Improved`);
+      }
     } else {
       ensureEffect($effect`Uncucumbered`);
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
       ensureEffect($effect`We're All Made of Starfish`);
       this.context.resources.wish($effect`Different Way of Seeing Things`);
-      this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 10000);
       this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
       this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
+      if (globalOptions.levelAggressively) {
+        this.context.resources.deck("magician");
+        this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 30000);
+        this.context.resources.ensurePullPotion($item`Mer-kin smartjuice`, 30000);
+        this.context.resources.wish($effect`New and Improved`);
+      }
+
+      if (!get("_preventScurvy")) useSkill($skill`Prevent Scurvy and Sobriety`);
+      if (get("reagentSummons") === 0) useSkill($skill`Advanced Saucecrafting`);
+      ensureEffect($effect`Mystically Oiled`);
+    }
+
+    if (!have($item`green mana`) && !have($effect`Giant Growth`)) {
+      this.context.resources.pull($item`green mana`, 30000);
     }
 
     ensureEffect($effect`You Learned Something Maybe!`);
@@ -244,7 +265,12 @@ export class HpTest extends Test {
     if (availableAmount($item`government cheese`) + availableAmount($item`government`) === 0) {
       equip($slot`off-hand`, $item`none`);
       setChoice(1387, 3); // Force drop items.
-      adventureMacro($location`Noob Cave`, Macro.skill($skill`Use the Force`));
+      adventureMacro(
+        $location`Noob Cave`,
+        Macro.externalIf(have($item`green mana`), Macro.skill("Giant Growth")).skill(
+          $skill`Use the Force`
+        )
+      );
     }
 
     if (get("_candySummons") === 0) {
@@ -363,6 +389,14 @@ export class HpTest extends Test {
       }
     }
 
+    if (globalOptions.levelAggressively) {
+      while (get("_snojoFreeFights") < 10) {
+        equip($item`LOV Epaulettes`);
+        useDefaultFamiliar();
+        adventureMacroAuto($location`The X-32-F Combat Training Snowman`, Macro.attack().repeat());
+      }
+    }
+
     if (get("_godLobsterFights") < 2) {
       equip($item`LOV Epaulettes`);
       useFamiliar($familiar`God Lobster`);
@@ -374,6 +408,19 @@ export class HpTest extends Test {
         visitUrl("choice.php");
         if (handlingChoice()) runChoice(1);
       }
+    }
+
+    if (availableAmount($item`dented scepter`) === 0 && get("_witchessFights") < 5) {
+      setAutoAttack(0);
+      equip($item`Fourth of May Cosplay Saber`);
+      withMacro(Macro.skill($skill`Saucegeyser`).repeat(), () =>
+        Witchess.fightPiece($monster`Witchess King`)
+      );
+    }
+    if (availableAmount($item`battle broom`) === 0 && get("_witchessFights") < 5) {
+      setAutoAttack(0);
+      equip($item`Fourth of May Cosplay Saber`);
+      withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Witch`));
     }
 
     // Professor 9x free sausage fight @ NEP
@@ -398,6 +445,20 @@ export class HpTest extends Test {
     }
 
     ensureOutfit("CS Leveling");
+
+    while (
+      globalOptions.levelAggressively &&
+      get("lastCopyableMonster") === $monster`sausage goblin` &&
+      get("_backUpUses") < 11
+    ) {
+      useDefaultFamiliar();
+      if (get("backupCameraMode") !== "ml") cliExecute("backupcamera ml");
+      equip($item`backup camera`);
+      adventureMacroAuto(
+        $location`Noob Cave`,
+        Macro.skill($skill`Back-Up to your Last Enemy`).kill()
+      );
+    }
 
     // 17 free NEP fights
     while (
@@ -434,6 +495,17 @@ export class HpTest extends Test {
       );
     }
 
+    if (availableAmount($item`very pointy crown`) === 0 && get("_witchessFights") < 5) {
+      setAutoAttack(0);
+      equip($item`Fourth of May Cosplay Saber`);
+      withMacro(
+        Macro.item([$item`jam band bootleg`, $item`gas can`])
+          .attack()
+          .repeat(),
+        () => Witchess.fightPiece($monster`Witchess Queen`)
+      );
+    }
+
     while (get("_machineTunnelsAdv") < 5) {
       // DMT noncombat. Run.
       this.context.propertyManager.setChoices({ [1119]: 5 });
@@ -447,29 +519,6 @@ export class HpTest extends Test {
       useSkill($skill`Prevent Scurvy and Sobriety`);
       useSkill($skill`Advanced Saucecrafting`);
       ensurePotionEffect($effect`Stabilizing Oiliness`, $item`oil of stability`);
-    }
-
-    if (availableAmount($item`very pointy crown`) === 0 && get("_witchessFights") < 5) {
-      setAutoAttack(0);
-      equip($item`Fourth of May Cosplay Saber`);
-      withMacro(
-        Macro.item([$item`jam band bootleg`, $item`gas can`])
-          .attack()
-          .repeat(),
-        () => Witchess.fightPiece($monster`Witchess Queen`)
-      );
-    }
-    if (availableAmount($item`dented scepter`) === 0 && get("_witchessFights") < 5) {
-      setAutoAttack(0);
-      equip($item`Fourth of May Cosplay Saber`);
-      withMacro(Macro.skill($skill`Saucegeyser`).repeat(), () =>
-        Witchess.fightPiece($monster`Witchess King`)
-      );
-    }
-    if (availableAmount($item`battle broom`) === 0 && get("_witchessFights") < 5) {
-      setAutoAttack(0);
-      equip($item`Fourth of May Cosplay Saber`);
-      withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Witch`));
     }
 
     // Reset location so maximizer doesn't get confused.
@@ -662,8 +711,14 @@ export class ItemTest extends Test {
 
     ensureEffect($effect`There's No N in Love`);
 
-    // Fortune of the Wheel
-    this.context.resources.deck("wheel");
+    if (getWorkshed() === $item`Asdon Martin keyfob` && !have($effect`Driving Observantly`)) {
+      const breadNeeded = Math.max(0, Math.ceil((37 - getFuel()) / 5));
+      const doughNeeded = Math.max(0, breadNeeded - itemAmount($item`loaf of soda bread`));
+      ensureDough(doughNeeded);
+      create(doughNeeded, $item`loaf of soda bread`);
+      cliExecute(`asdonmartin fuel ${breadNeeded} loaf of soda bread`);
+      cliExecute("asdonmartin drive observantly");
+    }
 
     if (!have($item`oversized sparkler`) && !get("_fireworksShopEquipmentBought")) {
       visitUrl("clan_viplounge.php?action=fwshop&whichfloor=2");
@@ -675,6 +730,11 @@ export class ItemTest extends Test {
       "item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag",
       false
     );
+
+    if (this.predictedTurns() > 1) {
+      // Fortune of the Wheel
+      this.context.resources.deck("wheel");
+    }
 
     if (this.predictedTurns() > 1) {
       this.context.resources.wish($effect`Infernal Thirst`);
@@ -1015,7 +1075,7 @@ export class SpellTest extends Test {
 
     this.context.resources.pull($item`Staff of Simmering Hatred`, 0);
 
-    this.context.resources.ensurePullPotion($item`tobiko marble soda`, 15000);
+    this.context.resources.ensurePullPotion($item`tobiko marble soda`, 15000, true);
 
     this.context.resources.tome($skill`Summon Sugar Sheets`);
     if (availableAmount($item`sugar chapeau`) === 0 && availableAmount($item`sugar sheet`) > 0) {

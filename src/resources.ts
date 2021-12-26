@@ -1,4 +1,5 @@
 import {
+  chew,
   cliExecute,
   create,
   eat,
@@ -80,7 +81,10 @@ export class ResourceTracker {
     if (!have(item) && !have(effect)) {
       this.pull(item, maxPrice, attempt);
     }
-    if (!have(effect)) use(item);
+    if (!have(effect)) {
+      if (itemType(item) === "spleen item") chew(item);
+      else use(item);
+    }
   }
 
   consumeTo(threshold: number, item: Item): void {

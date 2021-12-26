@@ -19,6 +19,7 @@ import {
   $effects,
   $item,
   $stat,
+  AsdonMartin,
   Clan,
   get,
   have,
@@ -28,6 +29,7 @@ import {
 } from "libram";
 
 import { ensureEffect, ensureItem, shrug, tryUse } from "./lib";
+import { globalOptions } from "./options";
 import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
 import {
@@ -82,118 +84,137 @@ function breakfast() {
   }
 }
 
-const validClasses = $classes`Seal Clubber, Turtle Tamer, Pastamancer, Sauceror`;
-if (!validClasses.includes(myClass())) {
-  throw `Invalid class ${myClass()}`;
-}
-
-// Sweet Synthesis plan.
-// This is the sequence of synthesis effects; we will, if possible, come up with a plan for allocating candy to each of these.
-const synthesisPlanner = new SynthesisPlanner(
-  myPrimestat() === $stat`Muscle`
-    ? $effects`Synthesis: Movement, Synthesis: Strong, Synthesis: Collection`
-    : $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Collection`
-);
-
-const propertyManager = new PropertiesManager();
-
-propertyManager.set({
-  autoSatisfyWithNPCs: true,
-  autoSatisfyWithCoinmasters: true,
-  battleAction: "custom combat script",
-  hpAutoRecovery: 0.6,
-  hpAutoRecoveryTarget: 0.95,
-});
-
-// Turn off Lil' Doctor quests.
-propertyManager.setChoices({ [1340]: 3 });
-
-const resources = ResourceTracker.deserialize(get("_hccs_resourceTracker") || "{}");
-
-const context = { synthesisPlanner, resources, propertyManager };
-
-Mood.setDefaultOptions({
-  // mpSources: [],
-  songSlots: [
-    $effects`Stevedave's Shanty of Superiority`,
-    $effects`Ur-Kel's Aria of Annoyance`,
-    $effects`Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction`,
-    $effects`Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Fat Leon's Phat Loot Lyric, Polka of Plenty`,
-  ],
-});
-
-cliExecute("mood apathetic");
-
-// All combat handled by our consult script (hccs_combat.js).
-cliExecute("ccs bean-hccs");
-
-Clan.join("Bonus Adventures from Hell");
-
-const startTime = Date.now();
-
-try {
-  if (myLevel() === 1 && mySpleenUse() === 0) {
-    while (get("_universeCalculated") < get("skillLevel144")) {
-      cliExecute("numberology 69");
+export function main(argString = ""): void {
+  const args = argString.split(" ");
+  for (const arg of args) {
+    if (arg.match(/level/)) {
+      globalOptions.levelAggressively = true;
+    } else if (arg.length > 0) {
+      print(`Invalid argument ${arg} passed. Run garbo help to see valid arguments.`, "red");
+      return;
     }
   }
 
-  if (get("_deckCardsDrawn") < 5) resources.deck("1952");
-  autosell(1, $item`1952 Mickey Mantle card`);
-
-  breakfast();
-
-  if (!get("_borrowedTimeUsed")) {
-    if (!have($item`borrowed time`)) resources.tome($item`borrowed time`);
-    use($item`borrowed time`);
+  const validClasses = $classes`Seal Clubber, Turtle Tamer, Pastamancer, Sauceror`;
+  if (!validClasses.includes(myClass())) {
+    throw `Invalid class ${myClass()}`;
   }
 
-  visitUrl("council.php");
+  // Sweet Synthesis plan.
+  // This is the sequence of synthesis effects; we will, if possible, come up with a plan for allocating candy to each of these.
+  const synthesisPlanner = new SynthesisPlanner(
+    myPrimestat() === $stat`Muscle`
+      ? $effects`Synthesis: Movement, Synthesis: Strong, Synthesis: Collection`
+      : $effects`Synthesis: Learning, Synthesis: Smart, Synthesis: Collection`
+  );
 
-  new CoilWireTest(context).run();
-  new HpTest(context).run();
-  new MuscleTest(context).run();
-  new MysticalityTest(context).run();
-  new MoxieTest(context).run();
+  const propertyManager = new PropertiesManager();
 
-  tryUse(1, $item`astral six-pack`);
-  resources.consumeTo(5, $item`astral pilsner`);
+  propertyManager.set({
+    autoSatisfyWithNPCs: true,
+    autoSatisfyWithCoinmasters: true,
+    battleAction: "custom combat script",
+    hpAutoRecovery: 0.6,
+    hpAutoRecoveryTarget: 0.95,
+  });
 
-  new ItemTest(context).run();
-  new HotTest(context).run();
-  new NoncombatTest(context).run();
+  // Turn off Lil' Doctor quests.
+  propertyManager.setChoices({ [1340]: 3 });
 
-  new FamiliarTest(context).run();
+  const resources = ResourceTracker.deserialize(get("_hccs_resourceTracker") || "{}");
 
-  new WeaponTest(context).run();
+  const context = { synthesisPlanner, resources, propertyManager };
 
-  ensureEffect($effect`Simmering`);
-  new SpellTest(context).run();
+  Mood.setDefaultOptions({
+    // mpSources: [],
+    songSlots: [
+      $effects`Stevedave's Shanty of Superiority`,
+      $effects`Ur-Kel's Aria of Annoyance`,
+      $effects`Power Ballad of the Arrowsmith, The Magical Mojomuscular Melody, The Moxious Madrigal, Ode to Booze, Jackasses' Symphony of Destruction`,
+      $effects`Carlweather's Cantata of Confrontation, The Sonata of Sneakiness, Fat Leon's Phat Loot Lyric, Polka of Plenty`,
+    ],
+  });
 
-  if (get("csServicesPerformed").split(",").length !== 11) {
-    throw "Something went wrong with tests...";
+  cliExecute("mood apathetic");
+
+  // All combat handled by our consult script (hccs_combat.js).
+  cliExecute("ccs bean-hccs");
+
+  Clan.join("Bonus Adventures from Hell");
+
+  const startTime = Date.now();
+
+  try {
+    if (myLevel() === 1 && mySpleenUse() === 0) {
+      while (get("_universeCalculated") < get("skillLevel144")) {
+        cliExecute("numberology 69");
+      }
+    }
+
+    if (get("_deckCardsDrawn") < 5) resources.deck("1952");
+    autosell(1, $item`1952 Mickey Mantle card`);
+
+    breakfast();
+
+    if (!get("_borrowedTimeUsed")) {
+      if (!have($item`borrowed time`)) resources.tome($item`borrowed time`);
+      use($item`borrowed time`);
+    }
+
+    visitUrl("council.php");
+
+    new CoilWireTest(context).run();
+    new HpTest(context).run();
+    new MuscleTest(context).run();
+    new MysticalityTest(context).run();
+    new MoxieTest(context).run();
+
+    tryUse(1, $item`astral six-pack`);
+    resources.consumeTo(5, $item`astral pilsner`);
+
+    new ItemTest(context).run();
+    new HotTest(context).run();
+    new NoncombatTest(context).run();
+
+    new FamiliarTest(context).run();
+
+    new WeaponTest(context).run();
+
+    ensureEffect($effect`Simmering`);
+    new SpellTest(context).run();
+
+    if (get("csServicesPerformed").split(",").length !== 11) {
+      throw "Something went wrong with tests...";
+    }
+
+    if (!canInteract()) {
+      visitUrl(`choice.php?whichchoice=1089&option=30`);
+    }
+
+    const time = (Date.now() - startTime) / 1000;
+    const minutes = Math.floor(time / 60);
+    const seconds = time - minutes * 60;
+    print("============================================", "green");
+    print(`Run finished! Run took a total of ${minutes}m${seconds.toFixed(1)}s.`, "green");
+    print("============================================", "green");
+    print();
+    resources.summarize();
+
+    shrug($effect`Cowrruption`);
+    retrieveItem($item`bitchin' meatcar`);
+    cliExecute("pull all");
+
+    if (AsdonMartin.installed()) {
+      // Get 1110 turns of Driving Observantly.
+      new Mood().drive(AsdonMartin.Driving.Observantly).execute(1110);
+      use($item`portable Mayo Clinic`);
+      retrieveItem($item`Mayo Minder™`);
+    }
+  } finally {
+    setAutoAttack(0);
+    cliExecute("ccs default");
+
+    set("_hccs_resourceTracker", resources.serialize());
+    propertyManager.resetAll();
   }
-
-  if (!canInteract()) {
-    visitUrl(`choice.php?whichchoice=1089&option=30`);
-  }
-
-  const time = (Date.now() - startTime) / 1000;
-  const minutes = Math.floor(time / 60);
-  const seconds = time - minutes * 60;
-  print("============================================", "green");
-  print(`Run finished! Run took a total of ${minutes}m${seconds.toFixed(1)}s.`, "green");
-  print("============================================", "green");
-  print();
-  resources.summarize();
-
-  shrug($effect`Cowrruption`);
-  retrieveItem($item`bitchin' meatcar`);
-  cliExecute("pull all");
-} finally {
-  setAutoAttack(0);
-  cliExecute("ccs default");
-
-  set("_hccs_resourceTracker", resources.serialize());
-  propertyManager.resetAll();
 }
