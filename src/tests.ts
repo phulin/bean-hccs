@@ -229,7 +229,7 @@ export class HpTest extends Test {
 
       if (!get("_preventScurvy")) useSkill($skill`Prevent Scurvy and Sobriety`);
       if (get("reagentSummons") === 0) useSkill($skill`Advanced Saucecrafting`);
-      ensureEffect($effect`Mystically Oiled`);
+      ensurePotionEffect($effect`Mystically Oiled`, $item`ointment of the occult`);
     }
 
     if (!have($item`green mana`) && !have($effect`Giant Growth`)) {
