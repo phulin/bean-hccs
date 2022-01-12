@@ -28,7 +28,7 @@
     "babel-loader": "^8.2.2",
     "core-js": "^3.8.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-libram": "^0.2.0",
+    "eslint-plugin-libram": "^0.2.9",
     "libram": "^0.4.8",
     "patch-package": "^6.2.2",
     "typescript": "^4.0.3",

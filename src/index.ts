@@ -2,6 +2,7 @@ import {
   autosell,
   canInteract,
   cliExecute,
+  equip,
   myClass,
   myLevel,
   myPrimestat,
@@ -11,12 +12,14 @@ import {
   runChoice,
   setAutoAttack,
   use,
+  useFamiliar,
   visitUrl,
 } from "kolmafia";
 import {
   $classes,
   $effect,
   $effects,
+  $familiar,
   $item,
   $stat,
   AsdonMartin,
@@ -77,11 +80,11 @@ function breakfast() {
 
   // Pantogram.
   // Hilarity is better for later farming than NC
-  if (!have($item`pantogram pants`)) {
-    ensureItem(1, $item`hermit permit`);
-    retrieveItem(1, $item`ten-leaf clover`);
-    cliExecute("pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent");
-  }
+  // if (!have($item`pantogram pants`)) {
+  //   ensureItem(1, $item`hermit permit`);
+  //   retrieveItem(1, $item`ten-leaf clover`);
+  //   cliExecute("pantogram mysticality|hot|drops of blood|hilarity|your dreams|silent");
+  // }
 }
 
 export function main(argString = ""): void {
@@ -116,6 +119,7 @@ export function main(argString = ""): void {
     battleAction: "custom combat script",
     hpAutoRecovery: 0.6,
     hpAutoRecoveryTarget: 0.95,
+    requireBoxServants: false,
   });
 
   // Turn off Lil' Doctor quests.
@@ -209,7 +213,13 @@ export function main(argString = ""): void {
       new Mood().drive(AsdonMartin.Driving.Observantly).execute(1110);
       use($item`portable Mayo Clinic`);
       retrieveItem($item`Mayo Minder™`);
+      cliExecute("mayominder adv");
     }
+
+    useFamiliar($familiar`Shorter-Order Cook`);
+    equip($item`blue plate`);
+
+    use($item`can of Rain-Doh`);
   } finally {
     setAutoAttack(0);
     cliExecute("ccs default");

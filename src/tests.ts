@@ -227,8 +227,8 @@ export class HpTest extends Test {
         this.context.resources.wish($effect`New and Improved`);
       }
 
-      if (!get("_preventScurvy")) useSkill($skill`Prevent Scurvy and Sobriety`);
-      if (get("reagentSummons") === 0) useSkill($skill`Advanced Saucecrafting`);
+      useSkill($skill`Prevent Scurvy and Sobriety`);
+      useSkill($skill`Advanced Saucecrafting`);
       ensureEffect($effect`Mystically Oiled`);
     }
 
@@ -253,12 +253,18 @@ export class HpTest extends Test {
     if (availableAmount($item`li'l ninja costume`) === 0 && !get("_bagOfCandy")) {
       equip($slot`off-hand`, $item`none`);
       SourceTerminal.educate($skill`Portscan`);
-      withMacro(Macro.skill("Portscan", "Chest X-Ray"), () => {
-        ensureMpTonic(50);
-        useFamiliar($familiar`Stocking Mimic`);
-        mapMonster($location`The Haiku Dungeon`, $monster`amateur ninja`);
-        runCombat();
-      });
+      withMacro(
+        Macro.externalIf(
+          have($item`cosmic bowling ball`),
+          Macro.skill($skill`Bowl Straight Up`)
+        ).skill("Portscan", "Chest X-Ray"),
+        () => {
+          ensureMpTonic(50);
+          useFamiliar($familiar`Stocking Mimic`);
+          mapMonster($location`The Haiku Dungeon`, $monster`amateur ninja`);
+          runCombat();
+        }
+      );
       retrieveItem($item`bag of many confections`);
     }
 
@@ -417,7 +423,11 @@ export class HpTest extends Test {
         Witchess.fightPiece($monster`Witchess King`)
       );
     }
-    if (availableAmount($item`battle broom`) === 0 && get("_witchessFights") < 5) {
+    if (
+      availableAmount($item`battle broom`) === 0 &&
+      get("_witchessFights") < 5 &&
+      myPrimestat() === $stat`Mysticality`
+    ) {
       setAutoAttack(0);
       equip($item`Fourth of May Cosplay Saber`);
       withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Witch`));
@@ -439,7 +449,6 @@ export class HpTest extends Test {
         $location`Noob Cave`,
         Macro.if_("!monstername sausage goblin", Macro.abort())
           .trySkill(Skill.get("Lecture on Relativity"))
-          .trySkill("Feel Pride")
           .kill()
       );
     }
@@ -488,10 +497,13 @@ export class HpTest extends Test {
 
       adventureMacroAuto(
         $location`The Neverending Party`,
-        Macro.externalIf(
-          get("_neverendingPartyFreeTurns") === 10,
-          Macro.trySkill("Chest X-Ray", "Shattering Punch", "Gingerbread Mob Hit").abort()
-        ).kill()
+        Macro.if_("!haveskill Bowl Sideways && haveskill Feel Pride", Macro.skill("Feel Pride"))
+          .trySkill("Bowl Sideways")
+          .externalIf(
+            get("_neverendingPartyFreeTurns") === 10,
+            Macro.trySkill("Chest X-Ray", "Shattering Punch", "Gingerbread Mob Hit").abort()
+          )
+          .kill()
       );
     }
 
