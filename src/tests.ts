@@ -81,6 +81,7 @@ import {
   tryUse,
 } from "./lib";
 import { globalOptions } from "./options";
+import { donOutfit } from "./outfit";
 import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
 
@@ -115,8 +116,6 @@ export abstract class Test {
       const startTime = Date.now();
       const startTurns = myTurncount();
       this.prepare();
-      // cliExecute(`outfit save CS ${this.constructor.name}`);
-      // ensureOutfit(`CS ${this.constructor.name}`);
       print(`Executing test ${this.constructor.name}, predicting ${this.predictedTurns()} turns.`);
       visitUrl("council.php");
       runChoice(this.id);
@@ -238,7 +237,17 @@ export class HpTest extends Test {
 
     ensureEffect($effect`You Learned Something Maybe!`);
 
-    ensureOutfit("CS Leveling");
+    donOutfit("CS Leveling", {
+      hat: $item`Iunion Crown`,
+      back: $item`unwrapped knock-off retro superhero cape`,
+      shirt: $item`makeshift garbage shirt`,
+      weapon: $item`Fourth of May Cosplay Saber`,
+      "off-hand": $item`familiar scrapbook`,
+      pants: $item`Cargo Cultist Shorts`,
+      acc1: $item`Powerful Glove`,
+      acc2: $item`Retrospecs`,
+      acc3: $item`Lil' Doctor™ bag`,
+    });
 
     // Prep Sweet Synthesis.
     if (myGardenType() === "peppermint") {
@@ -443,7 +452,17 @@ export class HpTest extends Test {
       // equip($slot`acc1`, $item`hewn moon-rune spoon`);
       // equip($slot`acc2`, $item`Brutal brogues`);
       // equip($slot`acc3`, $item`Beach Comb`);
-      ensureOutfit("CS Professor");
+      donOutfit("CS Leveling", {
+        hat: $item`Daylight Shavings Helmet`,
+        back: $item`unwrapped knock-off retro superhero cape`,
+        shirt: $item`makeshift garbage shirt`,
+        weapon: $item`Fourth of May Cosplay Saber`,
+        "off-hand": $item`familiar scrapbook`,
+        pants: $item`Cargo Cultist Shorts`,
+        acc1: $item`hewn moon-rune spoon`,
+        acc2: $item`Brutal brogues`,
+        acc3: $item`Beach Comb`,
+      });
 
       adventureMacroAuto(
         $location`Noob Cave`,
@@ -453,7 +472,7 @@ export class HpTest extends Test {
       );
     }
 
-    ensureOutfit("CS Leveling");
+    donOutfit("CS Leveling");
 
     while (
       globalOptions.levelAggressively &&

@@ -366,3 +366,7 @@ export function equalizeStat(targetStat: Stat): void {
     use(potion);
   }
 }
+
+export function arrayEqual<T>(x: T[], y: T[]): boolean {
+  return x.length === y.length && x.every((x, index) => x === y[index]);
+}
