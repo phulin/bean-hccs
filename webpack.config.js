@@ -1,13 +1,16 @@
 // eslint-env node
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const path = require("path");
 
+// eslint-disable-next-line no-undef
 module.exports = {
   entry: {
     hccs: "./src/index.ts",
     hccs_combat: "./src/combat.ts",
     hccs_pre: "./src/pre.ts",
     hccs_ascend: "./src/ascend.ts",
+    halfloop: "./src/halfloop.ts",
   },
   mode: "development",
   devtool: false,
