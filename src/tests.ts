@@ -6,7 +6,6 @@ import {
   create,
   equip,
   getClanName,
-  getFuel,
   getProperty,
   getWorkshed,
   handlingChoice,
@@ -51,6 +50,7 @@ import {
   $stat,
   $thralls,
   adventureMacroAuto,
+  AsdonMartin,
   Clan,
   get,
   have,
@@ -63,7 +63,6 @@ import {
 } from "libram";
 import { adventureMacro, Macro, saberYr, withMacro } from "./combat";
 import {
-  ensureDough,
   ensureEffect,
   ensureMpSausage,
   ensureMpTonic,
@@ -445,19 +444,14 @@ export class HpTest extends Test {
     // Professor 9x free sausage fight @ NEP
     if (sausageFightGuaranteed()) {
       useFamiliar($familiar`Pocket Professor`);
-      equip($item`LOV Epaulettes`);
       tryEquip($item`Pocket Professor memory chip`);
 
-      equip($item`Kramco Sausage-o-Matic™`);
-      // equip($slot`acc1`, $item`hewn moon-rune spoon`);
-      // equip($slot`acc2`, $item`Brutal brogues`);
-      // equip($slot`acc3`, $item`Beach Comb`);
-      donOutfit("CS Leveling", {
+      donOutfit("CS Professor", {
         hat: $item`Daylight Shavings Helmet`,
-        back: $item`unwrapped knock-off retro superhero cape`,
+        back: $item`LOV Epaulettes`,
         shirt: $item`makeshift garbage shirt`,
         weapon: $item`Fourth of May Cosplay Saber`,
-        "off-hand": $item`familiar scrapbook`,
+        "off-hand": $item`Kramco Sausage-o-Matic™`,
         pants: $item`Cargo Cultist Shorts`,
         acc1: $item`hewn moon-rune spoon`,
         acc2: $item`Brutal brogues`,
@@ -516,7 +510,7 @@ export class HpTest extends Test {
 
       adventureMacroAuto(
         $location`The Neverending Party`,
-        Macro.if_("!haveskill Bowl Sideways && haveskill Feel Pride", Macro.skill("Feel Pride"))
+        Macro.if_("!hasskill Bowl Sideways && hasskill Feel Pride", Macro.skill("Feel Pride"))
           .trySkill("Bowl Sideways")
           .externalIf(
             get("_neverendingPartyFreeTurns") === 10,
@@ -740,15 +734,8 @@ export class ItemTest extends Test {
     if (have($item`bag of grain`)) ensureEffect($effect`Nearly All-Natural`);
     ensureEffect($effect`Steely-Eyed Squint`);
 
-    ensureEffect($effect`There's No N in Love`);
-
     if (getWorkshed() === $item`Asdon Martin keyfob` && !have($effect`Driving Observantly`)) {
-      const breadNeeded = Math.max(0, Math.ceil((37 - getFuel()) / 5));
-      const doughNeeded = Math.max(0, breadNeeded - itemAmount($item`loaf of soda bread`));
-      ensureDough(doughNeeded);
-      create(doughNeeded, $item`loaf of soda bread`);
-      cliExecute(`asdonmartin fuel ${breadNeeded} loaf of soda bread`);
-      cliExecute("asdonmartin drive observantly");
+      new Mood().drive(AsdonMartin.Driving.Observantly).execute();
     }
 
     if (!have($item`oversized sparkler`) && !get("_fireworksShopEquipmentBought")) {
@@ -756,11 +743,23 @@ export class ItemTest extends Test {
       buy($item`oversized sparkler`);
     }
 
-    // FIXME: Outfit
-    maximize(
-      "item, 2 booze drop, -equip broken champagne bottle, -equip surprisingly capacious handbag",
-      false
-    );
+    cliExecute("fold wad of used tape");
+    donOutfit("CS ItemTest", {
+      hat: $item`wad of used tape`,
+      back: $item`vampyric cloake`,
+      shirt: $item`none`,
+      weapon: have($item`oversized sparkler`) ? $item`oversized sparkler` : $item`none`,
+      "off-hand": $item`latte lovers member's mug`,
+      pants: $item`none`,
+      acc1: $item`government-issued night-vision goggles`,
+      acc2: $item`Guzzlr tablet`,
+      acc3: $item`none`,
+    });
+    equip($item`li'l ninja costume`);
+
+    if (this.predictedTurns() > 1) {
+      ensureEffect($effect`There's No N in Love`);
+    }
 
     if (this.predictedTurns() > 1) {
       // Fortune of the Wheel
@@ -891,16 +890,28 @@ export class NoncombatTest extends Test {
     ensureEffect($effect`Blessing of the Bird`);
     ensureEffect($effect`Blessing of your favorite Bird`);
 
-    if (getClanName() === "Bonus Adventures from Hell" && !get("_floundryItemCreated")) {
-      retrieveItem($item`codpiece`);
-    }
-
     maximize("-combat, 0.01familiar weight, equip Kremlin's Greatest Briefcase", false);
 
-    // Rewards
-    ensureEffect($effect`Throwing Some Shade`);
+    if (this.predictedTurns() > 1 && getWorkshed() === $item`Asdon Martin keyfob`) {
+      new Mood().drive(AsdonMartin.Driving.Stealthily).execute();
+    }
 
-    if (Math.round(numericModifier("combat rate")) > -40) {
+    // Rewards
+    if (this.predictedTurns() > 1) {
+      ensureEffect($effect`Throwing Some Shade`);
+    }
+
+    if (
+      this.predictedTurns() > 1 &&
+      getClanName() === "Bonus Adventures from Hell" &&
+      !get("_floundryItemCreated")
+    ) {
+      retrieveItem($item`codpiece`);
+
+      maximize("-combat, 0.01familiar weight, equip Kremlin's Greatest Briefcase", false);
+    }
+
+    if (this.predictedTurns() > 1) {
       throw "Not enough -combat to cap.";
     }
   }

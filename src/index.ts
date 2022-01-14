@@ -3,6 +3,7 @@ import {
   canInteract,
   cliExecute,
   equip,
+  getClanName,
   myClass,
   myLevel,
   myPrimestat,
@@ -198,11 +199,6 @@ export function main(argString = ""): void {
     const time = (Date.now() - startTime) / 1000;
     const minutes = Math.floor(time / 60);
     const seconds = time - minutes * 60;
-    print("============================================", "green");
-    print(`Run finished! Run took a total of ${minutes}m${seconds.toFixed(1)}s.`, "green");
-    print("============================================", "green");
-    print();
-    resources.summarize();
 
     shrug($effect`Cowrruption`);
     retrieveItem($item`bitchin' meatcar`);
@@ -211,15 +207,25 @@ export function main(argString = ""): void {
     if (AsdonMartin.installed()) {
       // Get 1110 turns of Driving Observantly.
       new Mood().drive(AsdonMartin.Driving.Observantly).execute(1110);
-      use($item`portable Mayo Clinic`);
-      retrieveItem($item`Mayo Minder™`);
-      cliExecute("mayominder adv");
+      use($item`cold medicine cabinet`);
+      // retrieveItem($item`Mayo Minder™`);
+      // cliExecute("mayominder adv");
     }
 
     useFamiliar($familiar`Shorter-Order Cook`);
     equip($item`blue plate`);
 
     use($item`can of Rain-Doh`);
+
+    if (getClanName() === "Bonus Adventures from Hell" && !get("_floundryItemCreated")) {
+      retrieveItem($item`carpe`);
+    }
+
+    print("============================================", "green");
+    print(`Run finished! Run took a total of ${minutes}m${seconds.toFixed(1)}s.`, "green");
+    print("============================================", "green");
+    print();
+    resources.summarize();
   } finally {
     setAutoAttack(0);
     cliExecute("ccs default");

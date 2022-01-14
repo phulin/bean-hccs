@@ -114,6 +114,7 @@ export class ResourceTracker {
     print(`Wishes: ${this.genieWishes.map((effect) => effect.name).join(", ")}`);
     print(`Tomes: ${this.tomeSummons.map((skillOrItem) => skillOrItem.name).join(", ")}`);
     print(`Pulls: ${this.pulls.map((item) => item.name).join(", ")}`);
+    print("Consumed:");
     if (this.consumedFood.size > 0) {
       print("FOOD");
       for (const [food, count] of this.consumedFood) {
