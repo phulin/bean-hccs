@@ -10,6 +10,7 @@ import {
   getClanName,
   getFuel,
   getProperty,
+  getWorkshed,
   haveEffect,
   haveSkill,
   myClass,
@@ -218,7 +219,8 @@ export function fuelAsdon(goal: number): number {
   return endingFuel;
 }
 
-export function ensureAsdonEffect(ef: Effect): void {
+export function tryEnsureAsdonEffect(ef: Effect): void {
+  if (getWorkshed() !== $item`Asdon Martin keyfob`) return;
   if (haveEffect(ef) === 0) {
     fuelAsdon(37);
   }

@@ -4,10 +4,10 @@ import {
   cliExecute,
   containsText,
   create,
+  eat,
   equip,
   getClanName,
   getProperty,
-  getWorkshed,
   handlingChoice,
   haveEffect,
   itemAmount,
@@ -20,6 +20,8 @@ import {
   myGardenType,
   myHp,
   myMaxhp,
+  myMaxmp,
+  myMp,
   myPrimestat,
   myThrall,
   myTurncount,
@@ -50,9 +52,11 @@ import {
   $stat,
   $thralls,
   adventureMacroAuto,
-  AsdonMartin,
+  Bandersnatch,
+  clamp,
   Clan,
   get,
+  getModifier,
   have,
   Mood,
   PropertiesManager,
@@ -67,7 +71,6 @@ import {
   ensureMpSausage,
   ensureMpTonic,
   ensureNpcEffect,
-  ensureOutfit,
   ensurePotionEffect,
   ensureSong,
   equalizeStat,
@@ -76,6 +79,7 @@ import {
   myFamiliarWeight,
   sausageFightGuaranteed,
   setChoice,
+  tryEnsureAsdonEffect,
   tryEquip,
   tryUse,
 } from "./lib";
@@ -171,7 +175,17 @@ export class CoilWireTest extends Test {
 
   prepare(): void {
     cliExecute("fold makeshift garbage shirt");
-    ensureOutfit("CS Leveling");
+    donOutfit("CS Leveling", {
+      hat: $item`Iunion Crown`,
+      back: $item`unwrapped knock-off retro superhero cape`,
+      shirt: $item`makeshift garbage shirt`,
+      weapon: $item`Fourth of May Cosplay Saber`,
+      "off-hand": $item`familiar scrapbook`,
+      pants: $item`Cargo Cultist Shorts`,
+      acc1: $item`Powerful Glove`,
+      acc2: $item`Retrospecs`,
+      acc3: $item`Lil' Doctor™ bag`,
+    });
   }
 }
 
@@ -236,17 +250,7 @@ export class HpTest extends Test {
 
     ensureEffect($effect`You Learned Something Maybe!`);
 
-    donOutfit("CS Leveling", {
-      hat: $item`Iunion Crown`,
-      back: $item`unwrapped knock-off retro superhero cape`,
-      shirt: $item`makeshift garbage shirt`,
-      weapon: $item`Fourth of May Cosplay Saber`,
-      "off-hand": $item`familiar scrapbook`,
-      pants: $item`Cargo Cultist Shorts`,
-      acc1: $item`Powerful Glove`,
-      acc2: $item`Retrospecs`,
-      acc3: $item`Lil' Doctor™ bag`,
-    });
+    donOutfit("CS Leveling");
 
     // Prep Sweet Synthesis.
     if (myGardenType() === "peppermint") {
@@ -466,14 +470,13 @@ export class HpTest extends Test {
       );
     }
 
-    donOutfit("CS Leveling");
-
     while (
       globalOptions.levelAggressively &&
       get("lastCopyableMonster") === $monster`sausage goblin` &&
       get("_backUpUses") < 11
     ) {
       useDefaultFamiliar();
+      donOutfit("CS Leveling");
       if (get("backupCameraMode") !== "ml") cliExecute("backupcamera ml");
       equip($item`backup camera`);
       adventureMacroAuto(
@@ -489,11 +492,21 @@ export class HpTest extends Test {
       get("_shatteringPunchUsed") < 3 ||
       !get("_gingerbreadMobHitUsed")
     ) {
-      equip($item`LOV Epaulettes`);
+      this.ensureInnerElf();
 
       useDefaultFamiliar();
 
-      this.ensureInnerElf();
+      donOutfit("CS Leveling 2", {
+        hat: $item`Iunion Crown`,
+        back: $item`LOV Epaulettes`,
+        shirt: $item`makeshift garbage shirt`,
+        weapon: $item`Fourth of May Cosplay Saber`,
+        "off-hand": $item`familiar scrapbook`,
+        pants: $item`Cargo Cultist Shorts`,
+        acc1: $item`Powerful Glove`,
+        acc2: $item`Retrospecs`,
+        acc3: $item`Lil' Doctor™ bag`,
+      });
 
       if (get("_questPartyFair") === "unstarted") {
         visitUrl(toUrl($location`The Neverending Party`));
@@ -700,17 +713,45 @@ export class ItemTest extends Test {
   }
 
   predictedTurns(): number {
-    const denominator = have($effect`Steely-Eyed Squint`) ? 15 : 30;
     return Math.max(
       1,
       60 -
-        Math.floor(numericModifier("Item Drop") / denominator) -
-        Math.floor(numericModifier("Booze Drop") / 15)
+        Math.floor(numericModifier("Item Drop") / 30 + 0.001) -
+        Math.floor(numericModifier("Booze Drop") / 15 + 0.001)
     );
   }
 
   prepare(): void {
     ensureMpSausage(500);
+
+    if (
+      !get("latteUnlocks").includes("carrot") &&
+      getModifier("Item Drop", $item`latte lovers member's mug`) < 20
+    ) {
+      useFamiliar($familiar`Frumious Bandersnatch`);
+      donOutfit("CS Bander", {
+        hat: $item`Daylight Shavings Helmet`,
+        back: $item`none`,
+        shirt: $item`none`,
+        weapon: $item`Fourth of May Cosplay Saber`,
+        "off-hand": $item`latte lovers member's mug`,
+        pants: $item`Cargo Cultist Shorts`,
+        acc1: $item`Brutal brogues`,
+        acc2: $item`Beach Comb`,
+        acc3: $item`hewn moon-rune spoon`,
+      });
+      while (
+        !get("latteUnlocks").includes("carrot") &&
+        getModifier("Item Drop", $item`latte lovers member's mug`) < 20 &&
+        Bandersnatch.couldRunaway()
+      ) {
+        ensureSong($effect`Ode to Booze`);
+        adventureMacro($location`The Dire Warren`, Macro.runaway());
+        if (get("latteUnlocks").includes("carrot")) {
+          cliExecute("latte refill cinnamon pumpkin carrot");
+        }
+      }
+    }
 
     useFamiliar($familiar`Trick-or-Treating Tot`);
 
@@ -727,16 +768,18 @@ export class ItemTest extends Test {
     ensureEffect($effect`Fat Leon's Phat Loot Lyric`);
     ensureEffect($effect`Singer's Faithful Ocelot`);
     ensureEffect($effect`The Spirit of Taking`);
-    ensureEffect($effect`items.enh`);
+    // ensureEffect($effect`items.enh`);
+
+    if (have($item`lavender candy heart`)) {
+      ensureEffect($effect`Heart of Lavender`);
+    }
 
     this.context.synthesisPlanner.synthesize($effect`Synthesis: Collection`);
 
     if (have($item`bag of grain`)) ensureEffect($effect`Nearly All-Natural`);
     ensureEffect($effect`Steely-Eyed Squint`);
 
-    if (getWorkshed() === $item`Asdon Martin keyfob` && !have($effect`Driving Observantly`)) {
-      new Mood().drive(AsdonMartin.Driving.Observantly).execute();
-    }
+    tryEnsureAsdonEffect($effect`Driving Observantly`);
 
     if (!have($item`oversized sparkler`) && !get("_fireworksShopEquipmentBought")) {
       visitUrl("clan_viplounge.php?action=fwshop&whichfloor=2");
@@ -749,7 +792,7 @@ export class ItemTest extends Test {
       back: $item`vampyric cloake`,
       shirt: $item`none`,
       weapon: have($item`oversized sparkler`) ? $item`oversized sparkler` : $item`none`,
-      "off-hand": $item`latte lovers member's mug`,
+      "off-hand": $item`cursed magnifying glass`,
       pants: $item`none`,
       acc1: $item`government-issued night-vision goggles`,
       acc2: $item`Guzzlr tablet`,
@@ -758,19 +801,20 @@ export class ItemTest extends Test {
     equip($item`li'l ninja costume`);
 
     if (this.predictedTurns() > 1) {
-      ensureEffect($effect`There's No N in Love`);
-    }
-
-    if (this.predictedTurns() > 1) {
       // Fortune of the Wheel
       this.context.resources.deck("wheel");
     }
 
-    if (this.predictedTurns() > 1) {
+    if (this.predictedTurns() > 3) {
       this.context.resources.wish($effect`Infernal Thirst`);
     }
 
-    if (this.predictedTurns() > 1) {
+    if (this.predictedTurns() > 3) {
+      // opportunity cost here is substantial - 80k or so if garboing.
+      ensureEffect($effect`There's No N in Love`);
+    }
+
+    if (this.predictedTurns() > 3) {
       throw "Not enough item drop to cap.";
     }
   }
@@ -872,6 +916,7 @@ export class NoncombatTest extends Test {
     if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
     ensureEffect($effect`Blood Bond`);
     ensureEffect($effect`Leash of Linguini`);
+    ensureEffect($effect`Empathy`);
 
     equip($slot`acc2`, $item`Powerful Glove`);
 
@@ -892,9 +937,7 @@ export class NoncombatTest extends Test {
 
     maximize("-combat, 0.01familiar weight, equip Kremlin's Greatest Briefcase", false);
 
-    if (this.predictedTurns() > 1 && getWorkshed() === $item`Asdon Martin keyfob`) {
-      new Mood().drive(AsdonMartin.Driving.Stealthily).execute();
-    }
+    tryEnsureAsdonEffect($effect`Driving Stealthily`);
 
     // Rewards
     if (this.predictedTurns() > 1) {
@@ -934,12 +977,32 @@ export class FamiliarTest extends Test {
     if (myHp() < 30) useSkill(1, $skill`Cannelloni Cocoon`);
     ensureEffect($effect`Blood Bond`);
     ensureEffect($effect`Leash of Linguini`);
+    ensureEffect($effect`Empathy`);
 
     // These should have fallen through all the way from leveling.
     ensureEffect($effect`Fidoxene`);
     ensureEffect($effect`Do I Know You From Somewhere?`);
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
+
+    while (
+      get("_sausagesEaten") < 3 &&
+      !have($effect`Heart of Green`) &&
+      !have($item`green candy heart`)
+    ) {
+      const cost = mpCost($skill`Summon Candy Heart`);
+      while (
+        myMp() < cost &&
+        cost < Math.min(myMaxmp(), myMp() + 999 * clamp(3 - get("_sausagesEaten"), 0, 3))
+      ) {
+        eat($item`magical sausage`);
+      }
+      useSkill($skill`Summon Candy Heart`);
+    }
+
+    if (have($item`green candy heart`)) {
+      ensureEffect($effect`Heart of Green`);
+    }
 
     if (haveEffect($effect`Meteor Showered`) === 0) {
       equip($item`Fourth of May Cosplay Saber`);
@@ -1050,6 +1113,10 @@ export class WeaponTest extends Test {
     ensureEffect($effect`Cowrruption`);
 
     SongBoom.setSong("These Fists Were Made for Punchin'");
+
+    if (myClass() === $class`Seal Clubber`) {
+      ensureEffect($effect`Barrel Chested`);
+    }
 
     ensureEffect($effect`Bow-Legged Swagger`);
 

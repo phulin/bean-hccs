@@ -14,7 +14,7 @@ export function main(): void {
     Paths.CommunityService,
     $class`Seal Clubber`,
     Lifestyle.softcore,
-    "blender",
+    "platypus",
     $item`astral six-pack`,
     $item`astral statuette`
   );
