@@ -147,7 +147,8 @@ export function main(argString = ""): void {
 
   Clan.join("Bonus Adventures from Hell");
 
-  const startTime = Date.now();
+  const startTime = Date.now() - 1000 * get("_hccs_secondsElapsed", 0);
+  let secondsElapsed;
 
   try {
     if (myLevel() === 1 && mySpleenUse() === 0) {
@@ -196,9 +197,7 @@ export function main(argString = ""): void {
       visitUrl(`choice.php?whichchoice=1089&option=30`);
     }
 
-    const time = (Date.now() - startTime) / 1000;
-    const minutes = Math.floor(time / 60);
-    const seconds = time - minutes * 60;
+    secondsElapsed = (Date.now() - startTime) / 1000;
 
     shrug($effect`Cowrruption`);
     retrieveItem($item`bitchin' meatcar`);
@@ -220,17 +219,21 @@ export function main(argString = ""): void {
     if (getClanName() === "Bonus Adventures from Hell" && !get("_floundryItemCreated")) {
       retrieveItem($item`carpe`);
     }
-
-    print("============================================", "green");
-    print(`Run finished! Run took a total of ${minutes}m${seconds.toFixed(1)}s.`, "green");
-    print("============================================", "green");
-    print();
-    resources.summarize();
   } finally {
     setAutoAttack(0);
     cliExecute("ccs default");
 
     set("_hccs_resourceTracker", resources.serialize());
+    set("_hccs_secondsElapsed", secondsElapsed);
     propertyManager.resetAll();
   }
+
+  const minutes = Math.floor(secondsElapsed / 60);
+  const seconds = secondsElapsed - minutes * 60;
+
+  print("============================================", "green");
+  print(`Run finished! Run took a total of ${minutes}m${seconds.toFixed(1)}s.`, "green");
+  print("============================================", "green");
+  print();
+  resources.summarize();
 }

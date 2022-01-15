@@ -875,7 +875,7 @@ export class HotTest extends Test {
 
     useFamiliar($familiar`Exotic Parrot`);
     if (availableAmount($item`cracker`) === 0) {
-      retrieveItem($item`box of Familiar Jacks`);
+      this.context.resources.clipArt($item`box of Familiar Jacks`);
       use($item`box of Familiar Jacks`);
     }
 
@@ -1201,12 +1201,6 @@ export class SpellTest extends Test {
         Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`)
       );
       if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty("_meteorShowerUses");
-    }
-
-    // Sigils of Yeg = 200% SD
-    if (!get("_cargoPocketEmptied") && !have($effect`Sigils of Yeg`)) {
-      if (!have($item`Yeg's Motel hand soap`)) cliExecute("cargo 177");
-      ensureEffect($effect`Sigils of Yeg`);
     }
 
     if (availableAmount($item`LOV Elixir #6`) > 0) ensureEffect($effect`The Magic of LOV`);
