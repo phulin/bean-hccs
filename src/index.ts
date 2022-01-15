@@ -3,7 +3,6 @@ import {
   canInteract,
   cliExecute,
   equip,
-  getClanName,
   myClass,
   myLevel,
   myPrimestat,
@@ -23,7 +22,6 @@ import {
   $familiar,
   $item,
   $stat,
-  AsdonMartin,
   Clan,
   get,
   have,
@@ -203,22 +201,10 @@ export function main(argString = ""): void {
     retrieveItem($item`bitchin' meatcar`);
     cliExecute("pull all");
 
-    if (AsdonMartin.installed()) {
-      // Get 1110 turns of Driving Observantly.
-      new Mood().drive(AsdonMartin.Driving.Observantly).execute(1110);
-      use($item`cold medicine cabinet`);
-      // retrieveItem($item`Mayo Minder™`);
-      // cliExecute("mayominder adv");
-    }
-
     useFamiliar($familiar`Shorter-Order Cook`);
     equip($item`blue plate`);
 
-    use($item`can of Rain-Doh`);
-
-    if (getClanName() === "Bonus Adventures from Hell" && !get("_floundryItemCreated")) {
-      retrieveItem($item`carpe`);
-    }
+    if (have($item`can of Rain-Doh`)) use($item`can of Rain-Doh`);
   } finally {
     setAutoAttack(0);
     cliExecute("ccs default");
