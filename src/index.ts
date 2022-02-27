@@ -195,8 +195,6 @@ export function main(argString = ""): void {
       visitUrl(`choice.php?whichchoice=1089&option=30`);
     }
 
-    secondsElapsed = (Date.now() - startTime) / 1000;
-
     shrug($effect`Cowrruption`);
     retrieveItem($item`bitchin' meatcar`);
     cliExecute("pull all");
@@ -210,6 +208,8 @@ export function main(argString = ""): void {
     cliExecute("ccs default");
 
     set("_hccs_resourceTracker", resources.serialize());
+
+    secondsElapsed = (Date.now() - startTime) / 1000;
     set("_hccs_secondsElapsed", secondsElapsed);
     propertyManager.resetAll();
   }

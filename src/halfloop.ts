@@ -20,7 +20,7 @@ import { main as pre } from "./pre";
 export function main(): void {
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
-  if (myDaycount() === 2) {
+  if (myDaycount() >= 2) {
     withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
     if (myInebriety() <= inebrietyLimit() && myAdventures() > 0) {
@@ -52,6 +52,8 @@ export function main(): void {
     }
 
     if (canInteract()) {
+      withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
+
       if (AsdonMartin.installed() && !get("_workshedItemUsed")) {
         // Get 1110 turns of Driving Observantly (1230 - 120 expected CS turns).
         new Mood().drive(AsdonMartin.Driving.Observantly).execute(1230 - myTurncount());

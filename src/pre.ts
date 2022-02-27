@@ -3,7 +3,7 @@ import { $item, have } from "libram";
 import { setClan } from "./lib";
 
 export function main(): void {
-  buy(1, $item`foreign language tapes`);
+  buy(1, $item`electric muscle stimulator`);
   buy(1, $item`continental juice bar`);
   buy(1, $item`ceiling fan`);
 
