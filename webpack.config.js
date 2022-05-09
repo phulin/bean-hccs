@@ -11,6 +11,8 @@ module.exports = {
     hccs_pre: "./src/pre.ts",
     hccs_ascend: "./src/ascend.ts",
     halfloop: "./src/halfloop.ts",
+    fullloop: "./src/fullloop.ts",
+    neptest: "./src/nep.ts",
   },
   mode: "development",
   devtool: false,

@@ -6,6 +6,7 @@ import {
   myDaycount,
   myFamiliar,
   myInebriety,
+  myPath,
   myTurncount,
   pvpAttacksLeft,
   retrieveItem,
@@ -15,12 +16,16 @@ import {
 import { $familiar, $item, AsdonMartin, Clan, get, Mood, withProperty } from "libram";
 import { main as hccs } from ".";
 import { main as ascend } from "./ascend";
+import { checkNepQuest, printNepQuestItem } from "./nep";
 import { main as pre } from "./pre";
 
 export function main(): void {
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
   if (myDaycount() >= 2) {
+    checkNepQuest();
+    printNepQuestItem();
+
     withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
     if (myInebriety() <= inebrietyLimit() && myAdventures() > 0) {
@@ -33,20 +38,20 @@ export function main(): void {
 
     if (myInebriety() === inebrietyLimit() && myAdventures() === 0) {
       cliExecute("nightcap ascend");
+    }
 
-      if (myInebriety() >= inebrietyLimit()) {
-        cliExecute("garbo ascend");
-        if (myAdventures() === 0) {
-          pre();
-          if (pvpAttacksLeft() === 0) {
-            ascend();
-          }
+    if (myInebriety() >= inebrietyLimit()) {
+      cliExecute("garbo ascend");
+      if (myAdventures() === 0) {
+        pre();
+        if (pvpAttacksLeft() === 0) {
+          ascend();
         }
       }
     }
   }
 
-  if (myDaycount() === 1) {
+  if (myDaycount() === 1 && myPath() === "Community Service") {
     if (!canInteract()) {
       hccs();
     }
@@ -62,6 +67,8 @@ export function main(): void {
         // cliExecute("mayominder adv");
       }
 
+      checkNepQuest();
+
       if (myInebriety() <= inebrietyLimit() && myAdventures() > 0) {
         if (!get("_floundryItemCreated")) {
           Clan.join("Bonus Adventures from Hell");
@@ -75,4 +82,6 @@ export function main(): void {
       }
     }
   }
+
+  printNepQuestItem();
 }
