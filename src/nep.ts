@@ -1,5 +1,7 @@
 import {
   adv1,
+  currentRound,
+  inMultiFight,
   itemAmount,
   itemType,
   print,
@@ -16,6 +18,7 @@ import {
   visitUrl,
 } from "kolmafia";
 import { $item, $items, $location, get, questStep } from "libram";
+import { Macro } from "./combat";
 import { setChoice } from "./lib";
 
 const checkItems = [
@@ -71,15 +74,28 @@ function withPrices<T>(newPrices: { item: Item; price: number; limit: number }[]
     reprice(pricesToUse);
     return action();
   } finally {
+    if (currentRound() > 0 || inMultiFight()) {
+      print("In fight, trying to get away to reprice items...", "red");
+      Macro.tryItem(...$items`Louder Than Bomb, divine champagne popper`)
+        .step("runaway")
+        .submit();
+    }
+
     reprice(before);
 
     refreshShop();
+    const lowPrice: Item[] = [];
     for (const { item } of pricesToUse) {
       if (shopPrice(item) <= 2000) {
         takeShop(item);
-        // eslint-disable-next-line no-unsafe-finally
-        throw `Uh oh. Item ${item} is too cheap. Removed from store. Please fix manually.`;
+        lowPrice.push(item);
       }
+    }
+    if (lowPrice.length > 0) {
+      // eslint-disable-next-line no-unsafe-finally
+      throw `Uh oh. Items ${lowPrice
+        .map((item) => item.name)
+        .join(", ")} are too cheap. Removed from store. Please fix manually.`;
     }
   }
 }

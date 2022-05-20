@@ -21,6 +21,7 @@ import {
   AsdonMartin,
   Clan,
   get,
+  have,
   Lifestyle,
   Mood,
   Paths,
@@ -42,7 +43,12 @@ function inCsLeg(): boolean {
 }
 
 function burnTurns(ascending: boolean): void {
-  if (myInebriety() <= inebrietyLimit() || myAdventures() > 0) {
+  if (have($item`can of Rain-Doh`)) use($item`can of Rain-Doh`);
+
+  if (
+    (myInebriety() === inebrietyLimit() && myAdventures() > 0) ||
+    myInebriety() < inebrietyLimit()
+  ) {
     carpe();
     cliExecute(ascending ? "garbo ascend" : "garbo");
   }
@@ -51,7 +57,7 @@ function burnTurns(ascending: boolean): void {
     cliExecute(ascending ? "nightcap ascend" : "nightcap");
   }
 
-  if (ascending && myInebriety() >= inebrietyLimit()) {
+  if (ascending && myInebriety() > inebrietyLimit()) {
     cliExecute("garbo ascend");
     if (myAdventures() === 0) {
       pre();
@@ -59,7 +65,10 @@ function burnTurns(ascending: boolean): void {
   }
 }
 
-export function main(): void {
+export function main(argString = ""): void {
+  const args = argString.split(" ");
+  const fullLoop = !args.includes("half");
+
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
   // End current day.
@@ -105,9 +114,14 @@ export function main(): void {
         use($item`cold medicine cabinet`);
       }
 
-      burnTurns(true);
+      burnTurns(fullLoop);
 
-      if (myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
+      if (
+        fullLoop &&
+        myInebriety() > inebrietyLimit() &&
+        myAdventures() === 0 &&
+        pvpAttacksLeft() === 0
+      ) {
         if (!AsdonMartin.installed() && !get("_workshedItemUsed")) {
           use($item`Asdon Martin keyfob`);
         }
@@ -125,7 +139,7 @@ export function main(): void {
   }
 
   // Casual portion
-  if (myDaycount() === 1 && canInteract() && !inCsLeg()) {
+  if (fullLoop && myDaycount() === 1 && canInteract() && !inCsLeg()) {
     if (!get("kingLiberated")) {
       checkNepQuest();
       printNepQuestItem();
