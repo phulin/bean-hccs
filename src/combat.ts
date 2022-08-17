@@ -6,6 +6,7 @@ import {
   handlingChoice,
   inMultiFight,
   lastChoice,
+  Location,
   myFamiliar,
   print,
   runChoice,

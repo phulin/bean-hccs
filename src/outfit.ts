@@ -4,10 +4,13 @@ import {
   equip,
   equippedAmount,
   haveOutfit,
+  Item,
   itemAmount,
   outfit,
   outfitPieces,
   retrieveItem,
+  Slot,
+  SlotType,
 } from "kolmafia";
 import { arrayToCountedMap, getFoldGroup, have } from "libram";
 import { arrayEqual } from "./lib";
@@ -46,7 +49,7 @@ export function donOutfit(name: string, equipment?: { [K in OutfitSlot]: Item })
 
   let success = true;
   for (const [slot, item] of Object.entries(equipment)) {
-    success &&= equip(Slot.get(slot), item);
+    success &&= equip(Slot.get(slot as SlotType), item);
   }
 
   cliExecute(`outfit save ${name}`);

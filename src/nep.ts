@@ -1,7 +1,9 @@
 import {
   adv1,
   currentRound,
+  equip,
   inMultiFight,
+  Item,
   itemAmount,
   itemType,
   print,
@@ -17,8 +19,8 @@ import {
   use,
   visitUrl,
 } from "kolmafia";
-import { $item, $items, $location, get, questStep } from "libram";
-import { Macro } from "./combat";
+import { $item, $items, $location, $skill, $slot, get, questStep } from "libram";
+import { adventureMacro, Macro } from "./combat";
 import { setChoice } from "./lib";
 
 const checkItems = [
@@ -144,8 +146,20 @@ export function checkNepQuest(): void {
         setChoice(1327, 3); // Find Gerald
       }
 
+      // Unequip June cleaver.
+      equip($slot`weapon`, $item`none`);
+      equip($slot`off-hand`, $item`none`);
+
+      // Clear any pending time pranks.
+      adventureMacro(
+        $location`The Haunted Kitchen`,
+        Macro.trySkill($skill`Feel Hatred`)
+          .tryItem($item`Louder Than Bomb`)
+          .runaway()
+      );
+
       withPrices(
-        checkItemsForQuest.map((item) => ({ item, price: 1999, limit: 0 })),
+        checkItemsForQuest.map((item) => ({ item, price: 420, limit: 0 })),
         () => {
           for (const item of checkItemsForQuest) {
             print(`${item.name} is ${shopPrice(item)} limit ${shopLimit(item)} in store.`, "blue");
@@ -190,7 +204,7 @@ export function main(): void {
   manageItemQuantities(items);
 
   withPrices(
-    items.map((item) => ({ item, price: 1999, limit: 0 })),
+    items.map((item) => ({ item, price: 420, limit: 0 })),
     () => {
       print("Doing nothing...");
     }

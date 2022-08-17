@@ -32,6 +32,7 @@ import {
   runCombat,
   setAutoAttack,
   setLocation,
+  Stat,
   totalFreeRests,
   toUrl,
   use,
@@ -215,9 +216,9 @@ export class HpTest extends Test {
       ensureEffect($effect`Muddled`);
       ensureEffect($effect`Muscle Unbound`);
       ensureEffect($effect`Lack of Body-Building`);
-      this.context.resources.wish($effect`HGH-charged`);
+      // this.context.resources.wish($effect`HGH-charged`);
       this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
-      this.context.resources.ensurePullPotion($item`abstraction: purpose`, 30000);
+      // this.context.resources.ensurePullPotion($item`abstraction: purpose`, 30000);
       if (globalOptions.levelAggressively) {
         this.context.resources.deck("strength");
         this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 30000);
@@ -229,9 +230,9 @@ export class HpTest extends Test {
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
       ensureEffect($effect`We're All Made of Starfish`);
-      this.context.resources.wish($effect`Different Way of Seeing Things`);
+      // this.context.resources.wish($effect`Different Way of Seeing Things`);
       this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
-      this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
+      // this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
       if (globalOptions.levelAggressively) {
         this.context.resources.deck("magician");
         this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 30000);
@@ -465,7 +466,7 @@ export class HpTest extends Test {
       adventureMacroAuto(
         $location`Noob Cave`,
         Macro.if_("!monstername sausage goblin", Macro.abort())
-          .trySkill(Skill.get("Lecture on Relativity"))
+          .trySkill($skill`lecture on relativity`)
           .kill()
       );
     }

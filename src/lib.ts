@@ -5,6 +5,7 @@ import {
   cliExecute,
   create,
   eat,
+  Effect,
   equip,
   familiarWeight,
   getClanName,
@@ -13,6 +14,9 @@ import {
   getWorkshed,
   haveEffect,
   haveSkill,
+  Item,
+  Location,
+  Monster,
   myClass,
   myFamiliar,
   myMaxmp,
@@ -24,6 +28,8 @@ import {
   retrieveItem,
   setProperty,
   shopAmount,
+  Skill,
+  Stat,
   storageAmount,
   takeShop,
   toEffect,
@@ -58,7 +64,7 @@ export function entries<V>(obj: { [index: string]: V }): [string, V][] {
 }
 
 export function incrementProperty(name: string): void {
-  set(name, get<number>(name) + 1);
+  set(name, get(name) + 1);
 }
 
 export function setChoice(adv: number, choice: number): void {

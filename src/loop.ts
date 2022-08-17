@@ -2,12 +2,14 @@ import {
   canInteract,
   cliExecute,
   inebrietyLimit,
+  maximize,
   myAdventures,
   myDaycount,
   myFamiliar,
   myInebriety,
   myPath,
   myTurncount,
+  print,
   pvpAttacksLeft,
   retrieveItem,
   use,
@@ -68,6 +70,8 @@ function burnTurns(ascending: boolean): void {
 export function main(argString = ""): void {
   const args = argString.split(" ");
   const fullLoop = !args.includes("half");
+
+  print(`Starting ${fullLoop ? "full" : "half"} loop.`, "blue");
 
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
@@ -141,6 +145,7 @@ export function main(argString = ""): void {
   // Casual portion
   if (fullLoop && myDaycount() === 1 && canInteract() && !inCsLeg()) {
     if (!get("kingLiberated")) {
+      maximize("", false);
       checkNepQuest();
       printNepQuestItem();
 

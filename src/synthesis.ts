@@ -1,7 +1,9 @@
 import {
   availableAmount,
+  Effect,
   getInventory,
   haveEffect,
+  Item,
   mySign,
   print,
   retrieveItem,
