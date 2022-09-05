@@ -9,6 +9,7 @@ import {
   myInebriety,
   myPath,
   myTurncount,
+  Path,
   print,
   pvpAttacksLeft,
   retrieveItem,
@@ -26,7 +27,6 @@ import {
   have,
   Lifestyle,
   Mood,
-  Paths,
   withProperty,
 } from "libram";
 import { main as hccs } from ".";
@@ -41,7 +41,7 @@ function carpe(): void {
 }
 
 function inCsLeg(): boolean {
-  return myPath() === "Community Service" || get("csServicesPerformed") !== "";
+  return myPath().name === "Community Service" || get("csServicesPerformed") !== "";
 }
 
 function burnTurns(ascending: boolean): void {
@@ -90,7 +90,7 @@ export function main(argString = ""): void {
       }
 
       ascend(
-        Paths.CommunityService,
+        Path.get("CommunityService"),
         $class`Seal Clubber`,
         Lifestyle.softcore,
         "platypus",
@@ -131,7 +131,7 @@ export function main(argString = ""): void {
         }
 
         ascend(
-          Paths.Unrestricted,
+          Path.get("Unrestricted"),
           $class`Seal Clubber`,
           Lifestyle.casual,
           "platypus",

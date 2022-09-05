@@ -14,7 +14,7 @@
   "author": "Patrick Hulin",
   "license": "MIT",
   "dependencies": {
-    "kolmafia": "^3.3.0"
+    "kolmafia": "^4.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.8",
@@ -28,8 +28,8 @@
     "babel-loader": "^8.2.2",
     "core-js": "^3.8.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-libram": "^0.2.9",
-    "libram": "^0.6.23",
+    "eslint-plugin-libram": "^0.2.17",
+    "libram": "^0.7.1",
     "typescript": "^4.0.3",
     "webpack": "^5.8.0",
     "webpack-cli": "^4.2.0"

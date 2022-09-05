@@ -1,5 +1,5 @@
-import { containsText, use, visitUrl } from "kolmafia";
-import { $class, $item, ascend, AsdonMartin, Lifestyle, Paths } from "libram";
+import { containsText, Path, use, visitUrl } from "kolmafia";
+import { $class, $item, ascend, AsdonMartin, Lifestyle } from "libram";
 
 export function main(): void {
   if (!containsText(visitUrl("charpane.php"), "Astral Spirit")) {
@@ -11,7 +11,7 @@ export function main(): void {
   // abort('perm skills');
 
   ascend(
-    Paths.CommunityService,
+    Path.get("Community Service"),
     $class`Seal Clubber`,
     Lifestyle.softcore,
     "platypus",

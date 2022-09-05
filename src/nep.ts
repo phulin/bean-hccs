@@ -1,7 +1,10 @@
 import {
   adv1,
+  batchClose,
+  batchOpen,
   currentRound,
   equip,
+  handlingChoice,
   inMultiFight,
   Item,
   itemAmount,
@@ -54,12 +57,17 @@ function reprice(newPrices: { item: Item; price: number; limit: number }[]) {
   // } else {
   //   print(`Updated ${desired.map(([item]) => item.name).join(", ")}.`);
   // }
+  batchOpen();
   for (const { item, price, limit } of newPrices) {
     repriceShop(price, limit, item);
   }
+  batchClose();
 }
 
-function withPrices<T>(newPrices: { item: Item; price: number; limit: number }[], action: () => T) {
+export function withPrices<T>(
+  newPrices: { item: Item; price: number; limit: number }[],
+  action: () => T
+): T {
   refreshShop();
   const pricesToUse = newPrices.filter(({ item }) => shopAmount(item) === 520);
   print(`Using items ${pricesToUse.map(({ item }) => item.name).join(", ")}.`, "blue");
@@ -81,6 +89,13 @@ function withPrices<T>(newPrices: { item: Item; price: number; limit: number }[]
       Macro.tryItem(...$items`Louder Than Bomb, divine champagne popper`)
         .step("runaway")
         .submit();
+    }
+
+    if (handlingChoice()) {
+      print("Handling choice, running random choices until we're not...", "red");
+      for (let i = 0; i < 3 && handlingChoice(); i++) {
+        runChoice(1);
+      }
     }
 
     reprice(before);
@@ -200,13 +215,12 @@ export function printNepQuestItem(): void {
 }
 
 export function main(): void {
-  const items = $items`bottle of limeade, elven squeeze`;
-  manageItemQuantities(items);
-
-  withPrices(
-    items.map((item) => ({ item, price: 420, limit: 0 })),
-    () => {
-      print("Doing nothing...");
-    }
+  print("Resetting all items to mall max...", "blue");
+  reprice(
+    checkItems.map((item) => ({
+      item,
+      price: 999999999,
+      limit: 0,
+    }))
   );
 }

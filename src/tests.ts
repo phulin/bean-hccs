@@ -797,7 +797,7 @@ export class ItemTest extends Test {
       pants: $item`none`,
       acc1: $item`government-issued night-vision goggles`,
       acc2: $item`Guzzlr tablet`,
-      acc3: $item`none`,
+      acc3: $item`gold detective badge`,
     });
     equip($item`li'l ninja costume`);
 
@@ -1018,7 +1018,7 @@ export class FamiliarTest extends Test {
     // NC reward
     ensureEffect($effect`Robot Friends`);
 
-    // this.context.resources.pull($item`Great Wolf's beastly trousers`, 0);
+    this.context.resources.pull($item`Great Wolf's beastly trousers`, 0);
 
     useFamiliar($familiar`Exotic Parrot`);
     maximize("familiar weight", false);
