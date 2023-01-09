@@ -1,4 +1,4 @@
-import { buy, cliExecute, print, pvpAttacksLeft, use, visitUrl } from "kolmafia";
+import { buy, cliExecute, eudora, print, pvpAttacksLeft, use, visitUrl } from "kolmafia";
 import { $item, have } from "libram";
 import { setClan } from "./lib";
 
@@ -8,6 +8,7 @@ export function main(): void {
   buy(1, $item`ceiling fan`);
 
   if (have($item`Peppermint Pip Packet`)) use(1, $item`Peppermint Pip Packet`);
+  eudora("Our Daily Candles");
 
   visitUrl("peevpee.php?action=smashstone&confirm=on");
   print("Stone smashed.");

@@ -3,6 +3,7 @@ import {
   canInteract,
   cliExecute,
   equip,
+  getWorkshed,
   myClass,
   myLevel,
   myPrimestat,
@@ -28,6 +29,7 @@ import {
   Mood,
   PropertiesManager,
   set,
+  uneffect,
 } from "libram";
 
 import { ensureEffect, ensureItem, shrug, tryUse } from "./lib";
@@ -49,6 +51,10 @@ import {
 } from "./tests";
 
 function breakfast() {
+  if (getWorkshed() === $item`none`) {
+    use($item`Asdon Martin keyfob`);
+  }
+
   // Buy toy accordion
   ensureItem(1, $item`toy accordion`);
 
@@ -150,7 +156,7 @@ export function main(argString = ""): void {
 
   try {
     if (myLevel() === 1 && mySpleenUse() === 0) {
-      while (get("_universeCalculated") < get("skillLevel144")) {
+      while (get("_universeCalculated") < Math.min(3, get("skillLevel144"))) {
         cliExecute("numberology 69");
       }
     }
@@ -176,7 +182,6 @@ export function main(argString = ""): void {
     tryUse(1, $item`astral six-pack`);
     resources.consumeTo(5, $item`astral pilsner`);
 
-    new ItemTest(context).run();
     new HotTest(context).run();
     new NoncombatTest(context).run();
 
@@ -186,6 +191,8 @@ export function main(argString = ""): void {
 
     ensureEffect($effect`Simmering`);
     new SpellTest(context).run();
+
+    new ItemTest(context).run();
 
     if (get("csServicesPerformed").split(",").length !== 11) {
       throw "Something went wrong with tests...";
@@ -206,6 +213,8 @@ export function main(argString = ""): void {
   } finally {
     setAutoAttack(0);
     cliExecute("ccs default");
+    uneffect($effect`Teleportitis`);
+    uneffect($effect`Feeling Lost`);
 
     set("_hccs_resourceTracker", resources.serialize());
 

@@ -74,7 +74,6 @@ import {
   ensureNpcEffect,
   ensurePotionEffect,
   ensureSong,
-  equalizeStat,
   incrementProperty,
   mapMonster,
   myFamiliarWeight,
@@ -159,6 +158,37 @@ export abstract class Test {
       }
     }
   }
+
+  equalizeStat(targetStat: Stat): void {
+    if (targetStat === myPrimestat()) return;
+    if (statTurns(targetStat) <= 1) return;
+    if (myClass() === $class`Pastamancer`) {
+      if (targetStat === $stat`Muscle`) {
+        useSkill($skill`Bind Undead Elbow Macaroni`);
+      } else if (targetStat === $stat`Moxie`) {
+        useSkill($skill`Bind Penne Dreadful`);
+      }
+    } else {
+      const potion =
+        myPrimestat() === $stat`Muscle`
+          ? $item`oil of stability`
+          : myPrimestat() === $stat`Mysticality`
+          ? $item`oil of expertise`
+          : $item`oil of slipperiness`;
+      const effect = getModifier("Effect", potion);
+      if (have(effect)) return;
+
+      if (potion === $item`oil of stability`) {
+        useSkill($skill`Prevent Scurvy and Sobriety`);
+      } else {
+        this.context.resources.ensurePullPotion(potion, 20000);
+      }
+      if (!retrieveItem(potion)) {
+        throw `Couldn't make potion ${potion.name}.`;
+      }
+      use(potion);
+    }
+  }
 }
 
 export class CoilWireTest extends Test {
@@ -230,10 +260,10 @@ export class HpTest extends Test {
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
       ensureEffect($effect`We're All Made of Starfish`);
-      // this.context.resources.wish($effect`Different Way of Seeing Things`);
       this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
-      // this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
       if (globalOptions.levelAggressively) {
+        this.context.resources.wish($effect`Different Way of Seeing Things`);
+        this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
         this.context.resources.deck("magician");
         this.context.resources.ensurePullPotion($item`Hawking's Elixir of Brilliance`, 30000);
         this.context.resources.ensurePullPotion($item`Mer-kin smartjuice`, 30000);
@@ -315,8 +345,6 @@ export class HpTest extends Test {
       myPrimestat() === $stat`Muscle` ? $effect`Synthesis: Strong` : $effect`Synthesis: Smart`
     );
 
-    cliExecute("briefcase enchantment weapon hot -combat");
-
     // Depends on Ez's Bastille script.
     cliExecute(`bastille ${myPrimestat() === $stat`Muscle` ? "muscle" : "myst"} brutalist`);
 
@@ -325,6 +353,7 @@ export class HpTest extends Test {
 
     ensureEffect($effect`Starry-Eyed`);
     ensureEffect($effect`Favored by Lyle`);
+    ensureEffect($effect`Total Protonic Reversal`);
     ensureEffect($effect`Triple-Sized`);
     ensureEffect($effect`Feeling Excited`);
     if (myPrimestat() === $stat`Muscle`) {
@@ -342,7 +371,7 @@ export class HpTest extends Test {
 
     // Chateau rest
     while (get("timesRested") < totalFreeRests()) {
-      visitUrl("place.php?whichplace=chateau&action=chateau_restbox");
+      visitUrl("place.php?whichplace=chateau&action=chateau_restlabelfree");
     }
 
     if (!have($effect`Holiday Yoked`) || !have($item`Sacramento wine`)) {
@@ -410,10 +439,17 @@ export class HpTest extends Test {
 
     if (globalOptions.levelAggressively) {
       while (get("_snojoFreeFights") < 10) {
+        if (get("snojoSetting") === null) {
+          print("setting mode");
+          visitUrl("place.php?whichplace=snojo&action=snojo_controller");
+          runChoice(2); // Myst mode;
+        }
+        equip($slot`shirt`, $item`none`);
         equip($item`LOV Epaulettes`);
         useDefaultFamiliar();
         adventureMacroAuto($location`The X-32-F Combat Training Snowman`, Macro.attack().repeat());
       }
+      equip($item`makeshift garbage shirt`);
     }
 
     if (get("_godLobsterFights") < 2) {
@@ -563,7 +599,7 @@ export class HpTest extends Test {
     // Reset location so maximizer doesn't get confused.
     setLocation($location`none`);
 
-    equalizeStat($stat`Muscle`);
+    this.equalizeStat($stat`Muscle`);
 
     ensureEffect($effect`Song of Starch`);
     // ensureEffect($effect`Rage of the Reindeer`);
@@ -571,10 +607,12 @@ export class HpTest extends Test {
     // ensureEffect($effect`Disdain of the War Snapper`);
     // ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
 
-    useFamiliar($familiar`Left-Hand Man`);
+    if (this.predictedTurns() > 1) {
+      useFamiliar($familiar`Left-Hand Man`);
 
-    // FIXME: Outfit
-    maximize("hp", false);
+      // FIXME: Outfit
+      maximize("hp", false);
+    }
   }
 }
 
@@ -600,8 +638,6 @@ export class MuscleTest extends Test {
   }
 
   prepare(): void {
-    equalizeStat($stat`Muscle`);
-
     ensureEffect($effect`Song of Bravado`);
     ensureSong($effect`Stevedave's Shanty of Superiority`);
     ensureSong($effect`Power Ballad of the Arrowsmith`);
@@ -609,6 +645,8 @@ export class MuscleTest extends Test {
     ensureEffect($effect`Quiet Determination`);
     if (myClass() !== $class`Turtle Tamer`) ensureEffect($effect`Disdain of the War Snapper`);
     ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`Ben-Gal™ Balm`);
+
+    this.equalizeStat($stat`Muscle`);
 
     useFamiliar($familiar`Left-Hand Man`);
     maximize("muscle", false);
@@ -644,6 +682,8 @@ export class MysticalityTest extends Test {
     ensureEffect($effect`Quiet Judgement`);
     ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
 
+    this.equalizeStat($stat`Mysticality`);
+
     useFamiliar($familiar`Left-Hand Man`);
     maximize("mysticality", false);
 
@@ -673,7 +713,7 @@ export class MoxieTest extends Test {
   }
 
   prepare(): void {
-    equalizeStat($stat`Moxie`);
+    this.equalizeStat($stat`Moxie`);
 
     // Beach Comb
     ensureEffect($effect`Pomp & Circumsands`);
@@ -756,19 +796,24 @@ export class ItemTest extends Test {
 
     useFamiliar($familiar`Trick-or-Treating Tot`);
 
-    if (haveEffect($effect`Bat-Adjacent Form`) === 0) {
+    if (!have($effect`Bat-Adjacent Form`) || !have($effect`Cosmic Ball in the Air`)) {
       if (get("_reflexHammerUsed") >= 3) throw "Out of reflex hammers!";
       equip($item`vampyric cloake`);
       equip($slot`acc3`, $item`Lil' Doctor™ bag`);
       adventureMacro(
         $location`The Dire Warren`,
-        Macro.skill($skill`Become a Bat`).skill($skill`Reflex Hammer`)
+        Macro.skill($skill`Become a Bat`)
+          .trySkill($skill`Bowl Straight Up`)
+          .skill($skill`Reflex Hammer`)
       );
     }
 
     ensureEffect($effect`Fat Leon's Phat Loot Lyric`);
     ensureEffect($effect`Singer's Faithful Ocelot`);
     ensureEffect($effect`The Spirit of Taking`);
+    if (myClass() !== $class`Pastamancer`) {
+      ensureEffect($effect`Spice Haze`);
+    }
     // ensureEffect($effect`items.enh`);
 
     if (have($item`lavender candy heart`)) {
@@ -787,19 +832,29 @@ export class ItemTest extends Test {
       buy($item`oversized sparkler`);
     }
 
+    if (!have($item`gold detective badge`)) {
+      visitUrl("place.php?whichplace=town_wrong&action=townwrong_precinct");
+    }
+
     cliExecute("fold wad of used tape");
     donOutfit("CS ItemTest", {
       hat: $item`wad of used tape`,
       back: $item`vampyric cloake`,
       shirt: $item`none`,
       weapon: have($item`oversized sparkler`) ? $item`oversized sparkler` : $item`none`,
-      "off-hand": $item`cursed magnifying glass`,
+      "off-hand": $item`unbreakable umbrella`,
       pants: $item`none`,
-      acc1: $item`government-issued night-vision goggles`,
+      acc1:
+        getModifier("Item Drop", $item`combat lover's locket`) > 0
+          ? $item`combat lover's locket`
+          : $item`government-issued night-vision goggles`,
       acc2: $item`Guzzlr tablet`,
       acc3: $item`gold detective badge`,
     });
+    cliExecute("umbrella item");
     equip($item`li'l ninja costume`);
+
+    ensureEffect($effect`Feeling Lost`);
 
     if (this.predictedTurns() > 1) {
       // Fortune of the Wheel
@@ -875,11 +930,6 @@ export class HotTest extends Test {
     ensureEffect($effect`Hot-Headed`);
 
     useFamiliar($familiar`Exotic Parrot`);
-    if (availableAmount($item`cracker`) === 0) {
-      this.context.resources.clipArt($item`box of Familiar Jacks`);
-      use($item`box of Familiar Jacks`);
-    }
-
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     // FIXME: Outfit
     maximize("hot res, 0.01 familiar weight", false);
@@ -921,7 +971,7 @@ export class NoncombatTest extends Test {
 
     equip($slot`acc2`, $item`Powerful Glove`);
 
-    ensureEffect($effect`The Sonata of Sneakiness`);
+    new Mood().skill($skill`The Sonata of Sneakiness`).execute();
     ensureEffect($effect`Smooth Movements`);
     ensureEffect($effect`Invisible Avatar`);
     ensureEffect($effect`Silent Running`);
@@ -1020,7 +1070,14 @@ export class FamiliarTest extends Test {
 
     this.context.resources.pull($item`Great Wolf's beastly trousers`, 0);
 
-    useFamiliar($familiar`Exotic Parrot`);
+    // eslint-disable-next-line libram/verify-constants
+    useFamiliar($familiar`Mini-Trainbot`);
+    // eslint-disable-next-line libram/verify-constants
+    if (availableAmount($item`overloaded Yule battery`) === 0) {
+      this.context.resources.clipArt($item`box of Familiar Jacks`);
+      use($item`box of Familiar Jacks`);
+    }
+
     maximize("familiar weight", false);
   }
 }
@@ -1115,15 +1172,15 @@ export class WeaponTest extends Test {
 
     SongBoom.setSong("These Fists Were Made for Punchin'");
 
-    if (myClass() === $class`Seal Clubber`) {
+    if (myClass() === $class`Seal Clubber` && !get("_barrelPrayer")) {
       ensureEffect($effect`Barrel Chested`);
     }
 
     ensureEffect($effect`Bow-Legged Swagger`);
 
-    if (myBasestat($stat`Muscle`) > 150) {
-      this.context.resources.pull($item`Stick-Knife of Loathing`, 0);
-    }
+    this.context.resources.pull($item`Stick-Knife of Loathing`, 0);
+
+    useFamiliar($familiar`Disembodied Hand`);
 
     // FIXME: Outfit
     maximize("weapon damage", false);
@@ -1212,7 +1269,13 @@ export class SpellTest extends Test {
       retrieveItem(1, $item`weeping willow wand`);
     }
 
+    if (myClass() === $class`Sauceror` && !get("_barrelPrayer")) {
+      ensureEffect($effect`Warlock, Warstock, and Warbarrel`);
+    }
+
     useFamiliar($familiar`Left-Hand Man`);
+
+    cliExecute("briefcase enchantment spell");
 
     maximize("spell damage", false);
 

@@ -17,11 +17,9 @@ import {
   Item,
   Location,
   Monster,
-  myClass,
   myFamiliar,
   myMaxmp,
   myMp,
-  myPrimestat,
   outfit,
   print,
   pullsRemaining,
@@ -29,7 +27,6 @@ import {
   setProperty,
   shopAmount,
   Skill,
-  Stat,
   storageAmount,
   takeShop,
   toEffect,
@@ -41,18 +38,7 @@ import {
   visitUrl,
   weightAdjustment,
 } from "kolmafia";
-import {
-  $class,
-  $effect,
-  $effects,
-  $item,
-  $skill,
-  $stat,
-  get,
-  getModifier,
-  have,
-  set,
-} from "libram";
+import { $effect, $effects, $item, $skill, get, set } from "libram";
 
 export function entries<V>(obj: { [index: string]: V }): [string, V][] {
   const ownProps = Object.keys(obj);
@@ -344,35 +330,6 @@ export function ensureOde(turns: number): void {
 
 export function ensureOutfit(name: string): void {
   if (!outfit(name)) throw `Couldn't put on outfit ${name}.`;
-}
-
-export function equalizeStat(targetStat: Stat): void {
-  if (targetStat === myPrimestat()) return;
-  if (myClass() === $class`Pastamancer`) {
-    if (targetStat === $stat`Muscle`) {
-      useSkill($skill`Bind Undead Elbow Macaroni`);
-    } else if (targetStat === $stat`Moxie`) {
-      useSkill($skill`Bind Penne Dreadful`);
-    }
-  } else {
-    const potion =
-      myPrimestat() === $stat`Muscle`
-        ? $item`oil of stability`
-        : myPrimestat() === $stat`Mysticality`
-        ? $item`oil of expertise`
-        : $item`oil of slipperiness`;
-    const effect = getModifier("Effect", potion);
-    if (have(effect)) return;
-
-    if (potion === $item`oil of stability`) useSkill($skill`Prevent Scurvy and Sobriety`);
-    else if (potion === $item`oil of expertise`) {
-      throw "No support for getting a cherry... yet.";
-    }
-    if (!retrieveItem(potion)) {
-      throw `Couldn't make potion ${potion.name}.`;
-    }
-    use(potion);
-  }
 }
 
 export function arrayEqual<T>(x: T[], y: T[]): boolean {

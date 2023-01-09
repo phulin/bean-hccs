@@ -51,7 +51,10 @@ export class Macro extends LibramMacro {
   }
 
   kill(): Macro {
-    return this.skill($skill`Saucegeyser`).repeat();
+    return this.skill($skill`Stuffed Mortar Shell`)
+      .skill($skill`Micrometeorite`)
+      .skill($skill`Saucegeyser`)
+      .repeat();
   }
 
   static kill(): Macro {

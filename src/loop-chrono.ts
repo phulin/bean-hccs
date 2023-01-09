@@ -1,8 +1,7 @@
 import {
   canInteract,
-  Class,
   cliExecute,
-  getWorkshed,
+  eat,
   inebrietyLimit,
   maximize,
   myAdventures,
@@ -22,7 +21,6 @@ import {
   $class,
   $familiar,
   $item,
-  $stat,
   ascend,
   AsdonMartin,
   Clan,
@@ -55,7 +53,12 @@ function burnTurns(ascending: boolean): void {
     myInebriety() < inebrietyLimit()
   ) {
     carpe();
-    cliExecute(ascending ? "garbo ascend" : "garbo");
+    cliExecute(ascending ? "garboween ascend" : "garboween");
+    cliExecute("chrono");
+    eat(23 - get("_sausagesEaten"), $item`magical sausage`);
+    if (myAdventures() > 0) {
+      cliExecute("chrono");
+    }
   }
 
   if (myInebriety() === inebrietyLimit() && myAdventures() === 0) {
@@ -63,7 +66,7 @@ function burnTurns(ascending: boolean): void {
   }
 
   if (ascending && myInebriety() > inebrietyLimit()) {
-    cliExecute("garbo ascend");
+    cliExecute("chrono");
     if (myAdventures() === 0) {
       pre();
     }
@@ -72,20 +75,7 @@ function burnTurns(ascending: boolean): void {
 
 export function main(argString = ""): void {
   const args = argString.split(" ");
-  let fullLoop = true;
-  let loopClass = $class`Seal Clubber`;
-  for (const arg of args) {
-    if (arg === "half") {
-      fullLoop = false;
-    } else if (
-      Class.all()
-        .map((loopClass) => loopClass.toString().toLowerCase())
-        .includes(arg.toLowerCase())
-    ) {
-      loopClass = Class.get(arg as unknown as number);
-      print(`Ascending as class ${loopClass}.`, "blue");
-    }
-  }
+  const fullLoop = !args.includes("half");
 
   print(`Starting ${fullLoop ? "full" : "half"} loop.`, "blue");
 
@@ -107,9 +97,9 @@ export function main(argString = ""): void {
 
       ascend(
         Path.get("Community Service"),
-        loopClass,
+        $class`Seal Clubber`,
         Lifestyle.softcore,
-        loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
+        "platypus",
         $item`astral six-pack`,
         $item`astral statuette`
       );
@@ -148,9 +138,9 @@ export function main(argString = ""): void {
 
         ascend(
           Path.none,
-          loopClass,
+          $class`Seal Clubber`,
           Lifestyle.casual,
-          loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
+          "platypus",
           $item`astral six-pack`,
           $item`astral pet sweater`
         );
@@ -165,20 +155,17 @@ export function main(argString = ""): void {
       checkNepQuest();
       printNepQuestItem();
 
-      if (getWorkshed() === $item`none`) {
-        use($item`Asdon Martin keyfob`);
-      }
-
       cliExecute("loopcasual");
     }
 
     if (get("kingLiberated")) {
+      withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
+
       if (AsdonMartin.installed() && !get("_workshedItemUsed")) {
+        // Get 1110 turns of Driving Observantly (1230 - 450 expected casual turns).
         new Mood().drive(AsdonMartin.Driving.Observantly).execute(1230 - myTurncount());
         use($item`cold medicine cabinet`);
       }
-
-      withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
       burnTurns(false);
     }

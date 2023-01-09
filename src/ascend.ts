@@ -16,6 +16,6 @@ export function main(): void {
     Lifestyle.softcore,
     "platypus",
     $item`astral six-pack`,
-    $item`astral statuette`
+    $item`none`
   );
 }
