@@ -155,7 +155,6 @@ export function main(argString = ""): void {
       maximize("", false);
       checkNepQuest();
       printNepQuestItem();
-      print(`Workshed: ${getWorkshed()}`);
       if (getWorkshed() === Item.none) {
         use($item`Asdon Martin keyfob`);
       }
