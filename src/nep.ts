@@ -34,6 +34,12 @@ const checkItems = [
   $item`Dreadsylvanian grimlet`,
   $item`Dreadsylvanian spooky pocket`,
   $item`jumping horseradish`,
+  $item`Gets-You-Drunk`,
+  $item`ghost pepper`,
+  $item`Mr. Burnsger`,
+  $item`Doc Clock's thyme cocktail`,
+  $item`Schrödinger's thermos`,
+  $item`quantum taco`,
 ];
 
 function reprice(newPrices: { item: Item; price: number; limit: number }[]) {

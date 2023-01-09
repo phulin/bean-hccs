@@ -1,7 +1,9 @@
 import {
   canInteract,
   cliExecute,
+  getWorkshed,
   inebrietyLimit,
+  Item,
   maximize,
   myAdventures,
   myDaycount,
@@ -20,6 +22,7 @@ import {
   $class,
   $familiar,
   $item,
+  $skill,
   ascend,
   AsdonMartin,
   Clan,
@@ -90,7 +93,7 @@ export function main(argString = ""): void {
       }
 
       ascend(
-        Path.get("CommunityService"),
+        Path.get("Community Service"),
         $class`Seal Clubber`,
         Lifestyle.softcore,
         "platypus",
@@ -103,6 +106,10 @@ export function main(argString = ""): void {
   // CS portion
   if (myDaycount() === 1 && inCsLeg()) {
     if (!canInteract()) {
+      if (getWorkshed() === Item.none) {
+        use($item`Asdon Martin keyfob`);
+      }
+
       hccs();
     }
 
@@ -131,7 +138,7 @@ export function main(argString = ""): void {
         }
 
         ascend(
-          Path.get("Unrestricted"),
+          Path.none,
           $class`Seal Clubber`,
           Lifestyle.casual,
           "platypus",
@@ -148,11 +155,18 @@ export function main(argString = ""): void {
       maximize("", false);
       checkNepQuest();
       printNepQuestItem();
-
+      print(`Workshed: ${getWorkshed()}`);
+      if (getWorkshed() === Item.none) {
+        use($item`Asdon Martin keyfob`);
+      }
       cliExecute("loopcasual");
     }
 
     if (get("kingLiberated")) {
+      if (!have($skill`Liver of Steel`)) {
+        cliExecute("loopcasual");
+      }
+
       withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
       if (AsdonMartin.installed() && !get("_workshedItemUsed")) {
