@@ -264,8 +264,12 @@ export function pullIfPossible(quantity: number, it: Item, maxPrice: number): bo
     if (storageAmount(it) < quantityPull) {
       buyUsingStorage(quantityPull - storageAmount(it), it, maxPrice);
     }
-    cliExecute(`pull ${quantityPull} ${it.name}`);
-    return true;
+    if (storageAmount(it) >= quantityPull) {
+      cliExecute(`pull ${quantityPull} ${it.name}`);
+      return true;
+    } else {
+      return false;
+    }
   } else return false;
 }
 

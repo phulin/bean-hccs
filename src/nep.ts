@@ -1,7 +1,5 @@
 import {
   adv1,
-  batchClose,
-  batchOpen,
   cliExecute,
   currentRound,
   equip,
@@ -23,6 +21,7 @@ import {
   toUrl,
   use,
   visitUrl,
+  wait,
 } from "kolmafia";
 import {
   $effect,
@@ -55,22 +54,23 @@ const checkItems = [
   // $item`stinkwater`,
   $item`blood sausage`,
   $item`Dreadsylvanian hot pocket`,
-  // $item`Dreadsylvanian cold pocket`,
-  // $item`Dreadsylvanian spooky pocket`,
+  $item`Dreadsylvanian cold pocket`,
+  $item`Dreadsylvanian spooky pocket`,
   $item`Dreadsylvanian stink pocket`,
-  // $item`Dreadsylvanian sleaze pocket`,
+  $item`Dreadsylvanian sleaze pocket`,
   $item`Dreadsylvanian grimlet`,
   $item`Dreadsylvanian slithery nipple`,
   $item`bottle of Greedy Dog`,
   $item`karma shawarma`,
-  // $item`emergency margarita`,
-  // $item`vintage smart drink`,
+  $item`emergency margarita`,
+  $item`vintage smart drink`,
   $item`Mr. Burnsger`,
   $item`Doc Clock's thyme cocktail`,
+  $item`The Plumber's mushroom stew`,
   // $item`Shot of Kardashian Gin`,
   // $item`eldritch elixir`,
-  // $item`mentholated wine`,
-  // $item`Feliz Navidad`,
+  $item`mentholated wine`,
+  $item`Feliz Navidad`,
   // $item`Newark`,
   $item`drive-by shooting`,
   $item`Affirmation Cookie`,
@@ -94,11 +94,11 @@ function escape() {
 }
 
 function reprice(newPrices: { item: Item; price: number; limit: number }[]) {
-  batchOpen();
+  // batchOpen();
   for (const { item, price, limit } of newPrices) {
     repriceShop(price, limit, item);
   }
-  batchClose();
+  // batchClose();
 }
 
 function adjustAmount(item: Item, targetAmount: number) {
@@ -234,6 +234,7 @@ export function checkNepQuest(): void {
                 "blue"
               );
             }
+            wait(1);
             adv1($location`The Neverending Party`, -1);
           }
         );

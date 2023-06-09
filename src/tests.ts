@@ -1,6 +1,7 @@
 import {
   availableAmount,
   buy,
+  changeMcd,
   cliExecute,
   containsText,
   create,
@@ -16,9 +17,9 @@ import {
   myBasestat,
   myBuffedstat,
   myClass,
-  myFamiliar,
   myGardenType,
   myHp,
+  myLevel,
   myMaxhp,
   myMaxmp,
   myMp,
@@ -27,13 +28,14 @@ import {
   myTurncount,
   numericModifier,
   print,
+  restoreHp,
   retrieveItem,
   runChoice,
   runCombat,
   setAutoAttack,
   setLocation,
   Stat,
-  totalFreeRests,
+  toInt,
   toUrl,
   use,
   useFamiliar,
@@ -44,6 +46,7 @@ import {
   $class,
   $classes,
   $effect,
+  $effects,
   $familiar,
   $item,
   $location,
@@ -89,7 +92,7 @@ import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
 
 function useDefaultFamiliar() {
-  useFamiliar($familiar`Hovering Sombrero`);
+  useFamiliar($familiar`Melodramedary`);
 }
 
 export const testLog: { [index: string]: { turns: number; seconds: number } } = {};
@@ -145,7 +148,7 @@ export abstract class Test {
 
   // Utility methods
   ensureInnerElf(): void {
-    if (haveEffect($effect`Inner Elf`) === 0) {
+    if (haveEffect($effect`Inner Elf`) === 0 && myLevel() >= 13) {
       Clan.join("Hobopolis Vacation Home");
       try {
         useFamiliar($familiar`Machine Elf`);
@@ -205,6 +208,12 @@ export class CoilWireTest extends Test {
   }
 
   prepare(): void {
+    // Burn our 20-turn Crimbo Carol
+    if (!have($effect`Holiday Yoked`) && get("_feelHatredUsed") < 3) {
+      useFamiliar($familiar`Ghost of Crimbo Carols`);
+      adventureMacro($location`Noob Cave`, Macro.skill($skill`Feel Hatred`));
+    }
+
     cliExecute("fold makeshift garbage shirt");
     donOutfit("CS Leveling", {
       hat: $item`Iunion Crown`,
@@ -212,7 +221,7 @@ export class CoilWireTest extends Test {
       shirt: $item`makeshift garbage shirt`,
       weapon: $item`Fourth of May Cosplay Saber`,
       "off-hand": $item`familiar scrapbook`,
-      pants: $item`Cargo Cultist Shorts`,
+      pants: $item`designer sweatpants`,
       acc1: $item`Powerful Glove`,
       acc2: $item`Retrospecs`,
       acc3: $item`Lil' Doctor™ bag`,
@@ -238,18 +247,14 @@ export class HpTest extends Test {
       visitUrl("place.php?whichplace=campaway&action=campaway_sky");
     }
 
-    if (availableAmount($item`Flaskfull of Hollow`) > 0) {
-      ensureEffect($effect`Merry Smithsness`);
-    }
-
     if (myPrimestat() === $stat`Muscle`) {
       ensureEffect($effect`Muddled`);
       ensureEffect($effect`Muscle Unbound`);
       ensureEffect($effect`Lack of Body-Building`);
-      // this.context.resources.wish($effect`HGH-charged`);
-      this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
-      // this.context.resources.ensurePullPotion($item`abstraction: purpose`, 30000);
       if (globalOptions.levelAggressively) {
+        this.context.resources.ensurePullPotion($item`pressurized potion of puissance`, 30000);
+        this.context.resources.wish($effect`HGH-charged`);
+        this.context.resources.ensurePullPotion($item`abstraction: purpose`, 30000);
         this.context.resources.deck("strength");
         this.context.resources.ensurePullPotion($item`Ferrigno's Elixir of Power`, 30000);
         this.context.resources.ensurePullPotion($item`Mer-kin strongjuice`, 30000);
@@ -260,8 +265,8 @@ export class HpTest extends Test {
       ensureEffect($effect`Inscrutable Gaze`);
       ensureEffect($effect`Thaumodynamic`);
       ensureEffect($effect`We're All Made of Starfish`);
-      this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
       if (globalOptions.levelAggressively) {
+        this.context.resources.ensurePullPotion($item`pressurized potion of perspicacity`, 30000);
         this.context.resources.wish($effect`Different Way of Seeing Things`);
         this.context.resources.ensurePullPotion($item`abstraction: category`, 30000);
         this.context.resources.deck("magician");
@@ -281,8 +286,6 @@ export class HpTest extends Test {
 
     ensureEffect($effect`You Learned Something Maybe!`);
 
-    donOutfit("CS Leveling");
-
     // Prep Sweet Synthesis.
     if (myGardenType() === "peppermint") {
       cliExecute("garden pick");
@@ -293,33 +296,47 @@ export class HpTest extends Test {
       );
     }
 
+    equip($item`Powerful Glove`);
+
+    ensureEffect($effect`Starry-Eyed`);
+    ensureEffect($effect`Favored by Lyle`);
+    ensureEffect($effect`Total Protonic Reversal`);
+    ensureEffect($effect`Triple-Sized`);
+    ensureEffect($effect`Feeling Excited`);
+    if (myPrimestat() === $stat`Muscle`) {
+      ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`glittery mascara`);
+    } else {
+      ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
+    }
+
     if (availableAmount($item`li'l ninja costume`) === 0 && !get("_bagOfCandy")) {
-      equip($slot`off-hand`, $item`none`);
-      SourceTerminal.educate($skill`Portscan`);
+      donOutfit("CS MP", {
+        hat: $item`Iunion Crown`,
+        back: $item`unwrapped knock-off retro superhero cape`,
+        shirt: $item`Jurassic Parka`,
+        weapon: $item`industrial fire extinguisher`,
+        "off-hand": $item`Abracandalabra`,
+        pants: $item`Cargo Cultist Shorts`,
+        acc1: $item`Kremlin's Greatest Briefcase`,
+        acc2: $item`Retrospecs`,
+        acc3: $item`Lil' Doctor™ bag`,
+      });
+
+      SourceTerminal.educate($skill`Turbo`);
+      changeMcd(11);
+      ensureEffect($effect`Pride of the Puffin`);
+      ensureEffect($effect`Ur-Kel's Aria of Annoyance`);
       withMacro(
-        Macro.externalIf(
-          have($item`cosmic bowling ball`),
-          Macro.skill($skill`Bowl Straight Up`)
-        ).skill("Portscan", "Chest X-Ray"),
+        Macro.skill($skill`Turbo`)
+          .externalIf(have($item`green mana`), Macro.skill($skill`Giant Growth`))
+          .skill($skill`Chest X-Ray`),
         () => {
-          ensureMpTonic(50);
           useFamiliar($familiar`Stocking Mimic`);
           mapMonster($location`The Haiku Dungeon`, $monster`amateur ninja`);
           runCombat();
         }
       );
       retrieveItem($item`bag of many confections`);
-    }
-
-    if (availableAmount($item`government cheese`) + availableAmount($item`government`) === 0) {
-      equip($slot`off-hand`, $item`none`);
-      setChoice(1387, 3); // Force drop items.
-      adventureMacro(
-        $location`Noob Cave`,
-        Macro.externalIf(have($item`green mana`), Macro.skill("Giant Growth")).skill(
-          $skill`Use the Force`
-        )
-      );
     }
 
     if (get("_candySummons") === 0) {
@@ -345,38 +362,34 @@ export class HpTest extends Test {
       myPrimestat() === $stat`Muscle` ? $effect`Synthesis: Strong` : $effect`Synthesis: Smart`
     );
 
+    donOutfit("CS Leveling");
+
     // Depends on Ez's Bastille script.
     cliExecute(`bastille ${myPrimestat() === $stat`Muscle` ? "muscle" : "myst"} brutalist`);
 
     // Use ten-percent bonus
     tryUse(1, $item`a ten-percent bonus`);
 
-    ensureEffect($effect`Starry-Eyed`);
-    ensureEffect($effect`Favored by Lyle`);
-    ensureEffect($effect`Total Protonic Reversal`);
-    ensureEffect($effect`Triple-Sized`);
-    ensureEffect($effect`Feeling Excited`);
-    if (myPrimestat() === $stat`Muscle`) {
-      ensureNpcEffect($effect`Go Get 'Em, Tiger!`, 5, $item`glittery mascara`);
-    } else {
-      ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
-    }
-
     // Plan is for these buffs to fall all the way through to item -> hot res -> fam weight.
-    ensureEffect($effect`Fidoxene`);
+    // ensureEffect($effect`Fidoxene`);
     ensureEffect($effect`Do I Know You From Somewhere?`);
     ensureEffect($effect`Lack of Body-Building`);
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
 
     // Chateau rest
-    while (get("timesRested") < totalFreeRests()) {
-      visitUrl("place.php?whichplace=chateau&action=chateau_restlabelfree");
-    }
+    // while (get("timesRested") < totalFreeRests()) {
+    //   visitUrl("place.php?whichplace=chateau&action=chateau_restlabelfree");
+    // }
 
     if (!have($effect`Holiday Yoked`) || !have($item`Sacramento wine`)) {
       useFamiliar($familiar`Ghost of Crimbo Carols`);
-      withMacro(Macro.kill(), () => Witchess.fightPiece($monster`Witchess Bishop`));
+      withMacro(
+        Macro.skill($skill`Micrometeorite`)
+          .attack()
+          .repeat(),
+        () => Witchess.fightPiece($monster`Witchess Bishop`)
+      );
     }
 
     ensureEffect($effect`Song of Bravado`);
@@ -411,15 +424,14 @@ export class HpTest extends Test {
     // LOV Tunnel
     if (!TunnelOfLove.isUsed()) {
       useDefaultFamiliar();
-      Macro.if_(
-        "monstername LOV Enforcer",
-        Macro.externalIf(
-          myPrimestat() === $stat`Muscle`,
-          Macro.skill($skill`Micrometeorite`).item($item`Time-Spinner`)
-        )
-          .attack()
-          .repeat()
-      )
+      for (const effect of $effects`Frostbeard, Intimidating Mien, Pyromania, Rotten Memories, Takin' It Greasy, Your Fifteen Minutes`) {
+        ensureEffect(effect);
+      }
+      donOutfit("CS Leveling");
+      equip($item`June cleaver`);
+      equip($item`Abracandalabra`);
+
+      Macro.if_("monstername LOV Enforcer", Macro.attack().repeat())
         .if_("monstername LOV Engineer", Macro.skill($skill`Weapon of the Pastalord`).repeat())
         .if_("monstername LOV Equivocator", Macro.pickpocket().kill())
         .setAutoAttack();
@@ -437,24 +449,27 @@ export class HpTest extends Test {
       }
     }
 
-    if (globalOptions.levelAggressively) {
+    if (get("_snojoFreeFights") < 10 || get("_speakeasyFreeFights") < 3) {
+      useDefaultFamiliar();
+      donOutfit("CS Leveling 2");
+      equip($slot`shirt`, $item`none`);
       while (get("_snojoFreeFights") < 10) {
         if (get("snojoSetting") === null) {
           print("setting mode");
           visitUrl("place.php?whichplace=snojo&action=snojo_controller");
           runChoice(2); // Myst mode;
         }
-        equip($slot`shirt`, $item`none`);
-        equip($item`LOV Epaulettes`);
-        useDefaultFamiliar();
         adventureMacroAuto($location`The X-32-F Combat Training Snowman`, Macro.attack().repeat());
+      }
+      while (get("_speakeasyFreeFights") < 3) {
+        adventureMacroAuto($location`An Unusually Quiet Barroom Brawl`, Macro.attack().repeat());
       }
       equip($item`makeshift garbage shirt`);
     }
 
     if (get("_godLobsterFights") < 2) {
-      equip($item`LOV Epaulettes`);
       useFamiliar($familiar`God Lobster`);
+      donOutfit("CS Leveling 2");
       setChoice(1310, 1);
       while (get("_godLobsterFights") < 2) {
         tryEquip($item`God Lobster's Scepter`);
@@ -468,17 +483,24 @@ export class HpTest extends Test {
     if (availableAmount($item`dented scepter`) === 0 && get("_witchessFights") < 5) {
       setAutoAttack(0);
       equip($item`Fourth of May Cosplay Saber`);
-      withMacro(Macro.skill($skill`Saucegeyser`).repeat(), () =>
-        Witchess.fightPiece($monster`Witchess King`)
+      withMacro(
+        Macro.skill($skill`Micrometeorite`)
+          .attack()
+          .repeat(),
+        () => Witchess.fightPiece($monster`Witchess King`)
       );
     }
     if (
       availableAmount($item`battle broom`) === 0 &&
       get("_witchessFights") < 5 &&
-      myPrimestat() === $stat`Mysticality`
+      (myPrimestat() === $stat`Mysticality` || myClass() === $class`Seal Clubber`)
     ) {
       setAutoAttack(0);
-      equip($item`Fourth of May Cosplay Saber`);
+      equip(
+        myClass() === $class`Seal Clubber`
+          ? $item`June cleaver`
+          : $item`Fourth of May Cosplay Saber`
+      );
       withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Witch`));
     }
 
@@ -493,7 +515,7 @@ export class HpTest extends Test {
         shirt: $item`makeshift garbage shirt`,
         weapon: $item`Fourth of May Cosplay Saber`,
         "off-hand": $item`Kramco Sausage-o-Matic™`,
-        pants: $item`Cargo Cultist Shorts`,
+        pants: $item`designer sweatpants`,
         acc1: $item`hewn moon-rune spoon`,
         acc2: $item`Brutal brogues`,
         acc3: $item`Beach Comb`,
@@ -540,7 +562,7 @@ export class HpTest extends Test {
         weapon: $item`Fourth of May Cosplay Saber`,
         "off-hand": $item`familiar scrapbook`,
         pants: $item`Cargo Cultist Shorts`,
-        acc1: $item`Powerful Glove`,
+        acc1: $item`Cincho de Mayo`,
         acc2: $item`Retrospecs`,
         acc3: $item`Lil' Doctor™ bag`,
       });
@@ -560,7 +582,10 @@ export class HpTest extends Test {
 
       adventureMacroAuto(
         $location`The Neverending Party`,
-        Macro.if_("!hasskill Bowl Sideways && hasskill Feel Pride", Macro.skill("Feel Pride"))
+        Macro.if_(
+          "!hasskill Bowl Sideways && hasskill Feel Pride",
+          Macro.skill("Feel Pride").trySkill($skill`Cincho: Confetti Extravaganza`)
+        )
           .trySkill("Bowl Sideways")
           .externalIf(
             get("_neverendingPartyFreeTurns") === 10,
@@ -776,7 +801,7 @@ export class ItemTest extends Test {
         shirt: $item`none`,
         weapon: $item`Fourth of May Cosplay Saber`,
         "off-hand": $item`latte lovers member's mug`,
-        pants: $item`Cargo Cultist Shorts`,
+        pants: $item`designer sweatpants`,
         acc1: $item`Brutal brogues`,
         acc2: $item`Beach Comb`,
         acc3: $item`hewn moon-rune spoon`,
@@ -844,10 +869,7 @@ export class ItemTest extends Test {
       weapon: have($item`oversized sparkler`) ? $item`oversized sparkler` : $item`none`,
       "off-hand": $item`unbreakable umbrella`,
       pants: $item`none`,
-      acc1:
-        getModifier("Item Drop", $item`combat lover's locket`) > 0
-          ? $item`combat lover's locket`
-          : $item`government-issued night-vision goggles`,
+      acc1: $item`combat lover's locket`,
       acc2: $item`Guzzlr tablet`,
       acc3: $item`gold detective badge`,
     });
@@ -908,7 +930,7 @@ export class HotTest extends Test {
     }
 
     // These should have fallen through all the way from leveling.
-    ensureEffect($effect`Fidoxene`);
+    // ensureEffect($effect`Fidoxene`);
     ensureEffect($effect`Do I Know You From Somewhere?`);
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
@@ -930,6 +952,15 @@ export class HotTest extends Test {
     ensureEffect($effect`Hot-Headed`);
 
     useFamiliar($familiar`Exotic Parrot`);
+
+    maximize("spooky res, 0.01 familiar weight", false);
+    let attempts = 0;
+    while (haveEffect($effect`Visions of the Deep Dark Deeps`) < 40 && attempts++ < 5) {
+      restoreHp(myMaxhp());
+      ensureMpSausage(100);
+      useSkill($skill`Deep Dark Visions`);
+    }
+
     // Mafia sometimes can't figure out that multiple +weight things would get us to next tier.
     // FIXME: Outfit
     maximize("hot res, 0.01 familiar weight", false);
@@ -1068,15 +1099,23 @@ export class FamiliarTest extends Test {
     // NC reward
     ensureEffect($effect`Robot Friends`);
 
-    this.context.resources.pull($item`Great Wolf's beastly trousers`, 0);
+    this.context.resources.pull($item`repaid diaper`, 0);
 
-    // eslint-disable-next-line libram/verify-constants
-    useFamiliar($familiar`Mini-Trainbot`);
-    // eslint-disable-next-line libram/verify-constants
-    if (availableAmount($item`overloaded Yule battery`) === 0) {
-      this.context.resources.clipArt($item`box of Familiar Jacks`);
-      use($item`box of Familiar Jacks`);
+    if (get("commaFamiliar") !== $familiar`Homemade Robot`) {
+      if (availableAmount($item`homemade robot gear`) === 0) {
+        useFamiliar($familiar`Homemade Robot`);
+        this.context.resources.clipArt($item`box of Familiar Jacks`);
+        use($item`box of Familiar Jacks`);
+      } else {
+        retrieveItem($item`homemade robot gear`);
+      }
+
+      useFamiliar($familiar`Comma Chameleon`);
+      visitUrl(`inv_equip.php?which=2&action=equip&whichitem=${toInt($item`homemade robot gear`)}`);
+      visitUrl("charpane.php");
     }
+
+    useFamiliar($familiar`Comma Chameleon`);
 
     maximize("familiar weight", false);
   }
@@ -1101,14 +1140,15 @@ export class WeaponTest extends Test {
   }
 
   prepare(): void {
-    if (haveEffect($effect`Do You Crush What I Crush?`) === 0) {
+    if (!have($effect`Do You Crush What I Crush?`) && !have($effect`Holiday Yoked`)) {
       useFamiliar($familiar`Ghost of Crimbo Carols`);
       adventureMacro($location`The Dire Warren`, Macro.skill($skill`Feel Hatred`));
     }
 
     if (
       $classes`Seal Clubber, Pastamancer`.includes(myClass()) &&
-      haveEffect($effect`Saucefingers`) + haveEffect($effect`Elbow Sauce`) === 0
+      !have($effect`Saucefingers`) &&
+      !have($effect`Elbow Sauce`)
     ) {
       useFamiliar($familiar`Mini-Adventurer`);
       equip($item`latte lovers member's mug`);
@@ -1252,13 +1292,13 @@ export class SpellTest extends Test {
     this.ensureInnerElf();
 
     if (haveEffect($effect`Meteor Showered`) === 0 && get("_meteorShowerUses") < 5) {
-      if (myFamiliar() === $familiar`Left-Hand Man`) useFamiliar($familiar`none`);
+      useFamiliar($familiar`Melodramedary`);
       equip($item`Fourth of May Cosplay Saber`);
       adventureMacroAuto(
         $location`The Dire Warren`,
-        Macro.skill($skill`Meteor Shower`).skill($skill`Use the Force`)
+        Macro.skill($skill`Meteor Shower`).trySkill($skill`%fn, spit on me!`),
+        Macro.skill($skill`Use the Force`)
       );
-      if (haveEffect($effect`Meteor Showered`) > 0) incrementProperty("_meteorShowerUses");
     }
 
     if (availableAmount($item`LOV Elixir #6`) > 0) ensureEffect($effect`The Magic of LOV`);
@@ -1273,7 +1313,7 @@ export class SpellTest extends Test {
       ensureEffect($effect`Warlock, Warstock, and Warbarrel`);
     }
 
-    useFamiliar($familiar`Left-Hand Man`);
+    useFamiliar($familiar`Disembodied Hand`);
 
     cliExecute("briefcase enchantment spell");
 

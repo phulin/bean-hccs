@@ -4,6 +4,7 @@ import {
   cliExecute,
   equip,
   getWorkshed,
+  itemAmount,
   myClass,
   myLevel,
   myPrimestat,
@@ -22,6 +23,7 @@ import {
   $effects,
   $familiar,
   $item,
+  $skill,
   $stat,
   Clan,
   get,
@@ -32,7 +34,7 @@ import {
   uneffect,
 } from "libram";
 
-import { ensureEffect, ensureItem, shrug, tryUse } from "./lib";
+import { ensureEffect, ensureItem, setChoice, shrug, tryUse } from "./lib";
 import { globalOptions } from "./options";
 import { ResourceTracker } from "./resources";
 import { SynthesisPlanner } from "./synthesis";
@@ -53,6 +55,16 @@ import {
 function breakfast() {
   if (getWorkshed() === $item`none`) {
     use($item`Asdon Martin keyfob`);
+  }
+
+  if (!get("_sitCourseCompleted", true) && !have($skill`Insectologist`)) {
+    setChoice(1494, 2);
+    use($item`S.I.T. Course Completion Certificate`);
+  }
+
+  if (itemAmount($item`tiny stillsuit`) > 0) {
+    useFamiliar($familiar`Blood-Faced Volleyball`);
+    equip($item`tiny stillsuit`);
   }
 
   // Buy toy accordion

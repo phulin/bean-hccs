@@ -130,7 +130,7 @@ export function main(argString = ""): void {
 
       if (AsdonMartin.installed() && !get("_workshedItemUsed")) {
         // Get 540 turns of Driving Observantly (660 - 120 expected CS turns).
-        new Mood().drive(AsdonMartin.Driving.Observantly).execute(660 - myTurncount());
+        new Mood().drive(AsdonMartin.Driving.Observantly).execute(1230 - myTurncount());
         use($item`cold medicine cabinet`);
       }
 
