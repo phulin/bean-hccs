@@ -152,6 +152,7 @@ export abstract class Test {
       Clan.join("Hobopolis Vacation Home");
       try {
         useFamiliar($familiar`Machine Elf`);
+        equip($slot`weapon`, $item`none`);
         equip($slot`acc3`, $item`Kremlin's Greatest Briefcase`);
         this.context.propertyManager.setChoices({ [326]: 1 });
         ensureEffect($effect`Blood Bubble`);
@@ -489,19 +490,6 @@ export class HpTest extends Test {
           .repeat(),
         () => Witchess.fightPiece($monster`Witchess King`)
       );
-    }
-    if (
-      availableAmount($item`battle broom`) === 0 &&
-      get("_witchessFights") < 5 &&
-      (myPrimestat() === $stat`Mysticality` || myClass() === $class`Seal Clubber`)
-    ) {
-      setAutoAttack(0);
-      equip(
-        myClass() === $class`Seal Clubber`
-          ? $item`June cleaver`
-          : $item`Fourth of May Cosplay Saber`
-      );
-      withMacro(Macro.attack().repeat(), () => Witchess.fightPiece($monster`Witchess Witch`));
     }
 
     // Professor 9x free sausage fight @ NEP
@@ -1172,6 +1160,10 @@ export class WeaponTest extends Test {
 
     ensureEffect($effect`Billiards Belligerence`);
 
+    if (myClass() === $class`Seal Clubber` && !get("_barrelPrayer")) {
+      ensureEffect($effect`Barrel Chested`);
+    }
+
     if (availableAmount($item`vial of hamethyst juice`) > 0) {
       ensureEffect($effect`Ham-Fisted`);
     }
@@ -1186,39 +1178,56 @@ export class WeaponTest extends Test {
     // Pastamancer d1 is weapon damage.
     ensureEffect($effect`Blessing of the Bird`);
 
+    SongBoom.setSong("These Fists Were Made for Punchin'");
+
+    this.context.resources.pull($item`Stick-Knife of Loathing`, 0);
+
     // Get flimsy hardwood scraps.
     visitUrl("shop.php?whichshop=lathe");
     if (availableAmount($item`flimsy hardwood scraps`) > 0) {
       retrieveItem(1, $item`ebony epee`);
     }
 
+    // Fight witch while we have +weapon damage set up
+    if (!have($item`battle broom`) && get("_witchessFights") < 5) {
+      useDefaultFamiliar();
+      setAutoAttack(0);
+      maximize("Weapon Damage Percent, -equip broken champagne bottle", false);
+      equip(
+        myPrimestat() === $stat`Mysticality`
+          ? $item`Fourth of May Cosplay Saber`
+          : $item`June cleaver`
+      );
+      restoreHp(myMaxhp());
+      withMacro(
+        Macro.skill($skill`Curse of Weaksauce`, $skill`Micrometeorite`)
+          .attack()
+          .repeat(),
+        () => Witchess.fightPiece($monster`Witchess Witch`)
+      );
+    }
+
     this.ensureInnerElf();
 
     // Paint ungulith (Saber YR)
     if (!get("_chateauMonsterFought")) {
-      useFamiliar($familiar`Ghost of Crimbo Carols`);
+      useFamiliar($familiar`Melodramedary`);
       equip($item`Fourth of May Cosplay Saber`);
       this.context.propertyManager.setChoices({ [1387]: 3 });
       Macro.skill($skill`Meteor Shower`)
-        .skill($skill`Use the Force`)
+        .trySkill($skill`%fn, spit on me!`)
         .setAutoAttack();
+      Macro.skill($skill`Use the Force`).save();
       visitUrl("place.php?whichplace=chateau&action=chateau_painting", false);
       runCombat();
       saberYr();
+      setAutoAttack(0);
     }
 
     // Corrupted marrow
     ensureEffect($effect`Cowrruption`);
 
-    SongBoom.setSong("These Fists Were Made for Punchin'");
-
-    if (myClass() === $class`Seal Clubber` && !get("_barrelPrayer")) {
-      ensureEffect($effect`Barrel Chested`);
-    }
-
     ensureEffect($effect`Bow-Legged Swagger`);
-
-    this.context.resources.pull($item`Stick-Knife of Loathing`, 0);
 
     useFamiliar($familiar`Disembodied Hand`);
 

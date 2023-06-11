@@ -72,11 +72,11 @@ function burnTurns(ascending: boolean): void {
 
 export function main(argString = ""): void {
   const args = argString.split(" ");
-  let fullLoop = true;
+  let casual = false;
   let loopClass = $class`Seal Clubber`;
   for (const arg of args) {
-    if (arg === "half") {
-      fullLoop = false;
+    if (arg === "casual") {
+      casual = true;
     } else if (
       Class.all()
         .map((loopClass) => loopClass.toString().toLowerCase())
@@ -87,7 +87,7 @@ export function main(argString = ""): void {
     }
   }
 
-  print(`Starting ${fullLoop ? "full" : "half"} loop.`, "blue");
+  print(`Starting ${casual ? "casual" : "CS"} loop.`, "blue");
 
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
@@ -104,7 +104,19 @@ export function main(argString = ""): void {
       if (!AsdonMartin.installed() && !get("_workshedItemUsed")) {
         use($item`Asdon Martin keyfob`);
       }
-
+    }
+  }
+  if (myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
+    if (casual) {
+      ascend(
+        Path.none,
+        loopClass,
+        Lifestyle.casual,
+        loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
+        $item`astral six-pack`,
+        $item`astral pet sweater`
+      );
+    } else {
       ascend(
         Path.get("Community Service"),
         loopClass,
@@ -117,7 +129,7 @@ export function main(argString = ""): void {
   }
 
   // CS portion
-  if (myDaycount() === 1 && inCsLeg()) {
+  if (myDaycount() === 1 && !casual && inCsLeg()) {
     if (!canInteract()) {
       hccs();
     }
@@ -134,32 +146,12 @@ export function main(argString = ""): void {
         use($item`cold medicine cabinet`);
       }
 
-      burnTurns(fullLoop);
-
-      if (
-        fullLoop &&
-        myInebriety() > inebrietyLimit() &&
-        myAdventures() === 0 &&
-        pvpAttacksLeft() === 0
-      ) {
-        if (!AsdonMartin.installed() && !get("_workshedItemUsed")) {
-          use($item`Asdon Martin keyfob`);
-        }
-
-        ascend(
-          Path.none,
-          loopClass,
-          Lifestyle.casual,
-          loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
-          $item`astral six-pack`,
-          $item`astral pet sweater`
-        );
-      }
+      burnTurns(false);
     }
   }
 
   // Casual portion
-  if (fullLoop && myDaycount() === 1 && canInteract() && !inCsLeg()) {
+  if (casual && myDaycount() === 1 && canInteract() && !inCsLeg()) {
     if (!get("kingLiberated")) {
       maximize("", false);
       checkNepQuest();

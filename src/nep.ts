@@ -40,7 +40,7 @@ import { adventureMacro, Macro } from "./combat";
 import { setChoice } from "./lib";
 
 const MALL_MAX = 999999999;
-const SHOP_COUNT = 510;
+const SHOP_COUNT = 505;
 
 const checkItems = [
   $item`tin cup of mulligan stew`,
