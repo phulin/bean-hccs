@@ -73,10 +73,13 @@ function burnTurns(ascending: boolean): void {
 export function main(argString = ""): void {
   const args = argString.split(" ");
   let casual = false;
+  let prep = false;
   let loopClass = $class`Seal Clubber`;
   for (const arg of args) {
     if (arg === "casual") {
       casual = true;
+    } else if (arg === "prep") {
+      prep = true;
     } else if (
       Class.all()
         .map((loopClass) => loopClass.toString().toLowerCase())
@@ -87,7 +90,7 @@ export function main(argString = ""): void {
     }
   }
 
-  print(`Starting ${casual ? "casual" : "CS"} loop.`, "blue");
+  print(`Starting ${casual ? "casual" : "CS"} loop${prep ? " prep only" : ""}.`, "blue");
 
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
@@ -99,14 +102,9 @@ export function main(argString = ""): void {
     withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
     burnTurns(true);
-
-    if (myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
-      if (!AsdonMartin.installed() && !get("_workshedItemUsed")) {
-        use($item`Asdon Martin keyfob`);
-      }
-    }
   }
-  if (myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
+
+  if (!prep && myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
     if (casual) {
       ascend(
         Path.none,

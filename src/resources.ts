@@ -20,7 +20,7 @@ import {
   use,
   useSkill,
 } from "kolmafia";
-import { $effect, $item, $skill, get, have } from "libram";
+import { $effect, $item, $skill, get, have, Mood } from "libram";
 import { pullIfPossible } from "./lib";
 
 export class ResourceTracker {
@@ -95,10 +95,9 @@ export class ResourceTracker {
     if (typ === "booze") {
       const count = Math.floor((threshold - myInebriety()) / item.inebriety);
       if (count > 0) {
-        useSkill(
-          Math.ceil((count * item.inebriety - haveEffect($effect`Ode to Booze`)) / 5),
-          $skill`The Ode to Booze`
-        );
+        new Mood()
+          .skill($skill`The Ode to Booze`)
+          .execute(Math.ceil((count * item.inebriety - haveEffect($effect`Ode to Booze`)) / 5));
         cliExecute(`drink ${count} ${item}`);
         this.consumedBooze.set(item, (this.consumedBooze.get(item) ?? 0) + count);
       }

@@ -210,10 +210,10 @@ export class CoilWireTest extends Test {
 
   prepare(): void {
     // Burn our 20-turn Crimbo Carol
-    if (!have($effect`Holiday Yoked`) && get("_feelHatredUsed") < 3) {
-      useFamiliar($familiar`Ghost of Crimbo Carols`);
-      adventureMacro($location`Noob Cave`, Macro.skill($skill`Feel Hatred`));
-    }
+    // if (!have($effect`Holiday Yoked`) && get("_feelHatredUsed") < 3) {
+    //   useFamiliar($familiar`Ghost of Crimbo Carols`);
+    //   adventureMacro($location`Noob Cave`, Macro.skill($skill`Feel Hatred`));
+    // }
 
     cliExecute("fold makeshift garbage shirt");
     donOutfit("CS Leveling", {
@@ -366,7 +366,7 @@ export class HpTest extends Test {
     donOutfit("CS Leveling");
 
     // Depends on Ez's Bastille script.
-    cliExecute(`bastille ${myPrimestat() === $stat`Muscle` ? "muscle" : "myst"} brutalist`);
+    cliExecute(`bastille ${myPrimestat() === $stat`Muscle` ? "muscle" : "myst"} brutalist gesture`);
 
     // Use ten-percent bonus
     tryUse(1, $item`a ten-percent bonus`);
@@ -383,15 +383,16 @@ export class HpTest extends Test {
     //   visitUrl("place.php?whichplace=chateau&action=chateau_restlabelfree");
     // }
 
-    if (!have($effect`Holiday Yoked`) || !have($item`Sacramento wine`)) {
-      useFamiliar($familiar`Ghost of Crimbo Carols`);
-      withMacro(
-        Macro.skill($skill`Micrometeorite`)
-          .attack()
-          .repeat(),
-        () => Witchess.fightPiece($monster`Witchess Bishop`)
-      );
-    }
+    // Get Holiday Yoked
+    // if (!have($effect`Holiday Yoked`) || !have($item`Sacramento wine`)) {
+    //   useFamiliar($familiar`Ghost of Crimbo Carols`);
+    //   withMacro(
+    //     Macro.skill($skill`Micrometeorite`)
+    //       .attack()
+    //       .repeat(),
+    //     () => Witchess.fightPiece($monster`Witchess Bishop`)
+    //   );
+    // }
 
     ensureEffect($effect`Song of Bravado`);
 
@@ -424,7 +425,7 @@ export class HpTest extends Test {
 
     // LOV Tunnel
     if (!TunnelOfLove.isUsed()) {
-      useDefaultFamiliar();
+      useFamiliar($familiar`Hovering Sombrero`);
       for (const effect of $effects`Frostbeard, Intimidating Mien, Pyromania, Rotten Memories, Takin' It Greasy, Your Fifteen Minutes`) {
         ensureEffect(effect);
       }
@@ -466,6 +467,7 @@ export class HpTest extends Test {
         adventureMacroAuto($location`An Unusually Quiet Barroom Brawl`, Macro.attack().repeat());
       }
       equip($item`makeshift garbage shirt`);
+      setAutoAttack(0);
     }
 
     if (get("_godLobsterFights") < 2) {
@@ -695,6 +697,8 @@ export class MysticalityTest extends Test {
     ensureEffect($effect`Quiet Judgement`);
     ensureNpcEffect($effect`Glittering Eyelashes`, 5, $item`glittery mascara`);
 
+    if (have($item`bag of grain`)) ensureEffect($effect`Nearly All-Natural`);
+
     this.equalizeStat($stat`Mysticality`);
 
     useFamiliar($familiar`Left-Hand Man`);
@@ -859,7 +863,7 @@ export class ItemTest extends Test {
       pants: $item`none`,
       acc1: $item`combat lover's locket`,
       acc2: $item`Guzzlr tablet`,
-      acc3: $item`gold detective badge`,
+      acc3: $item`Cincho de Mayo`,
     });
     cliExecute("umbrella item");
     equip($item`li'l ninja costume`);
@@ -867,8 +871,9 @@ export class ItemTest extends Test {
     ensureEffect($effect`Feeling Lost`);
 
     if (this.predictedTurns() > 1) {
+      throw "Uh oh!";
       // Fortune of the Wheel
-      this.context.resources.deck("wheel");
+      // this.context.resources.deck("wheel");
     }
 
     if (this.predictedTurns() > 3) {
@@ -1003,7 +1008,6 @@ export class NoncombatTest extends Test {
 
     // Pastamancer d1 is -combat.
     ensureEffect($effect`Blessing of the Bird`);
-    ensureEffect($effect`Blessing of your favorite Bird`);
 
     maximize("-combat, 0.01familiar weight, equip Kremlin's Greatest Briefcase", false);
 
@@ -1277,11 +1281,11 @@ export class SpellTest extends Test {
     ensureEffect($effect`We're All Made of Starfish`);
 
     // Tea party
-    if (!get("_madTeaParty")) {
-      visitUrl("clan_viplounge.php?action=lookingglass&whichfloor=2");
-      retrieveItem($item`mariachi hat`);
-      ensureEffect($effect`Full Bottle in front of Me`);
-    }
+    // if (!get("_madTeaParty")) {
+    //   visitUrl("clan_viplounge.php?action=lookingglass&whichfloor=2");
+    //   retrieveItem($item`mariachi hat`);
+    //   ensureEffect($effect`Full Bottle in front of Me`);
+    // }
 
     useSkill(1, $skill`Spirit of Cayenne`);
 
@@ -1310,7 +1314,19 @@ export class SpellTest extends Test {
       );
     }
 
-    if (availableAmount($item`LOV Elixir #6`) > 0) ensureEffect($effect`The Magic of LOV`);
+    if (have($item`LOV Elixir #6`)) ensureEffect($effect`The Magic of LOV`);
+
+    // Cargo Shorts
+    if (!have($effect`Sigils of Yeg`)) {
+      if (
+        !have($item`Yeg's Motel hand soap`) &&
+        !get("_cargoPocketEmptied") &&
+        !get("cargoPocketsEmptied").includes("177")
+      ) {
+        cliExecute("cargo pick 177");
+      }
+      tryUse(1, $item`Yeg's Motel hand soap`);
+    }
 
     // Get flimsy hardwood scraps.
     visitUrl("shop.php?whichshop=lathe");

@@ -201,7 +201,9 @@ export function main(argString = ""): void {
 
     new WeaponTest(context).run();
 
-    ensureEffect($effect`Simmering`);
+    if (!new SpellTest(context).isDone()) {
+      ensureEffect($effect`Simmering`);
+    }
     new SpellTest(context).run();
 
     new ItemTest(context).run();
