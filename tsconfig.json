@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": "src",
-    "noEmit": true,                            /* Do not emit outputs. */
+    "noEmit": true /* Do not emit outputs. */,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "declaration": false,
@@ -14,10 +14,8 @@
     "pretty": true,
     "strict": true,
     "target": "es2018",
+    "skipLibCheck": true
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ], 
-  "isolatedModules": true                 /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "isolatedModules": true /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
 }

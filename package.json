@@ -6,32 +6,30 @@
   "main": "KoLmafia/scripts/bean-hccs/hccs.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run build:types && npm run build:js",
+    "build": "yarn build:types && yarn build:js",
     "build:types": "tsc",
-    "build:js": "webpack",
-    "watch": "webpack --watch --progress"
+    "build:js": "node build.mjs",
+    "watch": "node build.mjs --watch"
   },
   "author": "Patrick Hulin",
   "license": "MIT",
   "dependencies": {
-    "kolmafia": "^5.27380.0"
+    "core-js": "^3.31.1",
+    "esbuild-plugin-babel": "^0.2.3",
+    "kolmafia": "^5.27453.0",
+    "libram": "^0.8.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.8",
-    "@babel/core": "^7.12.9",
-    "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.12.1",
-    "@babel/preset-env": "^7.12.7",
-    "@babel/preset-typescript": "^7.12.7",
-    "@typescript-eslint/eslint-plugin": "^4.30.0",
-    "@typescript-eslint/parser": "^4.30.0",
-    "babel-loader": "^8.2.2",
-    "core-js": "^3.8.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-libram": "^0.2.31",
-    "libram": "^0.8.1",
-    "typescript": "^4.0.3",
-    "webpack": "^5.8.0",
-    "webpack-cli": "^4.2.0"
+    "@babel/cli": "^7.22.6",
+    "@babel/core": "^7.22.8",
+    "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
+    "@babel/preset-env": "^7.22.7",
+    "@babel/preset-typescript": "^7.22.5",
+    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/parser": "^5.61.0",
+    "esbuild": "^0.18.11",
+    "eslint": "^8.44.0",
+    "eslint-plugin-libram": "^0.2.32",
+    "typescript": "^5.1.6"
   }
 }
