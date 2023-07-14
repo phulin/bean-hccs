@@ -831,7 +831,7 @@ export class ItemTest extends Test {
     if (myClass() !== $class`Pastamancer`) {
       ensureEffect($effect`Spice Haze`);
     }
-    // ensureEffect($effect`items.enh`);
+    ensureEffect($effect`items.enh`);
 
     if (have($item`lavender candy heart`)) {
       ensureEffect($effect`Heart of Lavender`);
@@ -1054,7 +1054,7 @@ export class FamiliarTest extends Test {
     ensureEffect($effect`Empathy`);
 
     // These should have fallen through all the way from leveling.
-    ensureEffect($effect`Fidoxene`);
+    // ensureEffect($effect`Fidoxene`);
     ensureEffect($effect`Do I Know You From Somewhere?`);
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);

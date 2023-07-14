@@ -47,7 +47,7 @@ const checkItems = [
   $item`jar of fermented pickle juice`,
   $item`extra-greasy slider`,
   $item`frozen banquet`,
-  // $item`Hodgman's blanket`,
+  $item`Hodgman's blanket`,
   // $item`Gets-You-Drunk`,
   $item`ghost pepper`,
   $item`bottle of Bloodweiser`,
@@ -73,6 +73,7 @@ const checkItems = [
   $item`Feliz Navidad`,
   // $item`Newark`,
   $item`drive-by shooting`,
+  // $item`piscatini`,
   $item`Affirmation Cookie`,
   $item`splendid martini`,
 ];

@@ -4,6 +4,7 @@ import {
   cliExecute,
   getWorkshed,
   inebrietyLimit,
+  Item,
   maximize,
   myAdventures,
   myDaycount,
@@ -30,16 +31,17 @@ import {
   have,
   Lifestyle,
   Mood,
+  withProperties,
   withProperty,
 } from "libram";
 import { main as hccs } from ".";
 import { checkNepQuest, printNepQuestItem } from "./nep";
 import { main as pre } from "./pre";
 
-function carpe(): void {
-  if (!get("_floundryItemCreated")) {
+function floundry(item: Item): void {
+  if (!get("_floundryItemCreated") && !have(item)) {
     Clan.join("Bonus Adventures from Hell");
-    retrieveItem($item`carpe`);
+    retrieveItem(item);
   }
 }
 
@@ -47,15 +49,36 @@ function inCsLeg(): boolean {
   return myPath().name === "Community Service" || get("csServicesPerformed") !== "";
 }
 
-function burnTurns(ascending: boolean): void {
+const runProperties = {
+  _snokebombUsed: 3,
+  _reflexHammerUsed: 3,
+  _feelHatredUsed: 3,
+  _kgbTranquilizerDartUses: 3,
+  _middleFingerRingUsed: true,
+  _navelRunaways: 10,
+};
+
+function burnTurns(ascending: boolean, mode: "garbo" | "cognac"): void {
   if (have($item`can of Rain-Doh`)) use($item`can of Rain-Doh`);
 
   if (
     (myInebriety() === inebrietyLimit() && myAdventures() > 0) ||
     myInebriety() < inebrietyLimit()
   ) {
-    carpe();
-    cliExecute(ascending ? "garbo ascend" : "garbo");
+    if (mode === "garbo") {
+      floundry($item`carpe`);
+      cliExecute(ascending ? "garbo ascend" : "garbo");
+    } else {
+      floundry($item`codpiece`);
+      if (get("_garboCompleted") === "") {
+        withProperties(runProperties, () => cliExecute("garbo nobarf ascend"));
+      }
+      if (!ascending && AsdonMartin.installed() && !get("_workshedItemUsed")) {
+        new Mood().drive(AsdonMartin.Driving.Stealthily).execute(1150 - myTurncount());
+        use($item`cold medicine cabinet`);
+      }
+      cliExecute("cognac");
+    }
   }
 
   if (myInebriety() === inebrietyLimit() && myAdventures() === 0) {
@@ -63,7 +86,12 @@ function burnTurns(ascending: boolean): void {
   }
 
   if (ascending && myInebriety() > inebrietyLimit()) {
-    cliExecute("garbo ascend");
+    if (mode === "garbo") {
+      cliExecute("garbo ascend");
+    } else {
+      withProperties(runProperties, () => cliExecute("garbo nobarf ascend"));
+      cliExecute("cognac");
+    }
     if (myAdventures() === 0) {
       pre();
     }
@@ -75,11 +103,14 @@ export function main(argString = ""): void {
   let casual = false;
   let prep = false;
   let loopClass = $class`Seal Clubber`;
+  let mode: "cognac" | "garbo" = "garbo";
   for (const arg of args) {
     if (arg === "casual") {
       casual = true;
     } else if (arg === "prep") {
       prep = true;
+    } else if (arg === "cognac") {
+      mode = "cognac";
     } else if (
       Class.all()
         .map((loopClass) => loopClass.toString().toLowerCase())
@@ -90,7 +121,10 @@ export function main(argString = ""): void {
     }
   }
 
-  print(`Starting ${casual ? "casual" : "CS"} loop${prep ? " prep only" : ""}.`, "blue");
+  print(
+    `Starting ${casual ? "casual" : "CS"} loop${prep ? " prep only" : ""}, ${mode} mode.`,
+    "blue"
+  );
 
   if (myFamiliar() === $familiar`Stooper`) useFamiliar($familiar`none`);
 
@@ -101,7 +135,7 @@ export function main(argString = ""): void {
 
     withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
-    burnTurns(true);
+    burnTurns(true, mode);
   }
 
   if (!prep && myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
@@ -140,11 +174,13 @@ export function main(argString = ""): void {
 
       if (AsdonMartin.installed() && !get("_workshedItemUsed")) {
         // Get 540 turns of Driving Observantly (660 - 120 expected CS turns).
-        new Mood().drive(AsdonMartin.Driving.Observantly).execute(1230 - myTurncount());
-        use($item`cold medicine cabinet`);
+        new Mood()
+          .drive(AsdonMartin.Driving.Observantly)
+          .execute(mode === "garbo" ? 1150 - myTurncount() : 120);
+        if (mode === "garbo") use($item`cold medicine cabinet`);
       }
 
-      burnTurns(false);
+      burnTurns(false, mode);
     }
   }
 
@@ -170,7 +206,7 @@ export function main(argString = ""): void {
 
       withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
-      burnTurns(false);
+      burnTurns(false, mode);
     }
   }
 
