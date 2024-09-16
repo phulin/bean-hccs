@@ -14,6 +14,7 @@ export function main(): void {
   print("Stone smashed.");
   use(3, $item`Meteorite-Ade`);
   use(1, $item`School of Hard Knocks Diploma`);
+  use(1, $item`punching mirror`);
   if (pvpAttacksLeft() > 0) {
     cliExecute("uberpvpoptimizer");
     cliExecute("swagger");

@@ -58,8 +58,12 @@ const runProperties = {
   _navelRunaways: 10,
 };
 
-function burnTurns(ascending: boolean, mode: "garbo" | "cognac"): void {
+function burnTurns(ascending: boolean, mode: "garbo" | "cognac", extraArgs: string[]): void {
   if (have($item`can of Rain-Doh`)) use($item`can of Rain-Doh`);
+
+  if (ascending) {
+    extraArgs = [...extraArgs, "ascend"];
+  }
 
   if (
     (myInebriety() === inebrietyLimit() && myAdventures() > 0) ||
@@ -67,11 +71,11 @@ function burnTurns(ascending: boolean, mode: "garbo" | "cognac"): void {
   ) {
     if (mode === "garbo") {
       floundry($item`carpe`);
-      cliExecute(ascending ? "garbo ascend" : "garbo");
+      cliExecute(`garbo ${extraArgs.join(" ")}`);
     } else {
       floundry($item`codpiece`);
       if (get("_garboCompleted") === "") {
-        withProperties(runProperties, () => cliExecute("garbo nobarf ascend"));
+        withProperties(runProperties, () => cliExecute("garboween ascend quick"));
       }
       if (!ascending && AsdonMartin.installed() && !get("_workshedItemUsed")) {
         new Mood().drive(AsdonMartin.Driving.Stealthily).execute(1150 - myTurncount());
@@ -87,9 +91,9 @@ function burnTurns(ascending: boolean, mode: "garbo" | "cognac"): void {
 
   if (ascending && myInebriety() > inebrietyLimit()) {
     if (mode === "garbo") {
-      cliExecute("garbo ascend");
+      cliExecute(`garbo ${extraArgs.join(" ")}`);
     } else {
-      withProperties(runProperties, () => cliExecute("garbo nobarf ascend"));
+      withProperties(runProperties, () => cliExecute("garboween ascend quick"));
       cliExecute("cognac");
     }
     if (myAdventures() === 0) {
@@ -104,6 +108,7 @@ export function main(argString = ""): void {
   let prep = false;
   let loopClass = $class`Seal Clubber`;
   let mode: "cognac" | "garbo" = "garbo";
+  const extraArgs = [];
   for (const arg of args) {
     if (arg === "casual") {
       casual = true;
@@ -118,6 +123,8 @@ export function main(argString = ""): void {
     ) {
       loopClass = Class.get(arg as unknown as number);
       print(`Ascending as class ${loopClass}.`, "blue");
+    } else {
+      extraArgs.push(arg);
     }
   }
 
@@ -135,7 +142,7 @@ export function main(argString = ""): void {
 
     withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
-    burnTurns(true, mode);
+    burnTurns(true, mode, extraArgs);
   }
 
   if (!prep && myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
@@ -180,7 +187,7 @@ export function main(argString = ""): void {
         if (mode === "garbo") use($item`cold medicine cabinet`);
       }
 
-      burnTurns(false, mode);
+      burnTurns(false, mode, extraArgs);
     }
   }
 
@@ -192,7 +199,7 @@ export function main(argString = ""): void {
       printNepQuestItem();
 
       if (getWorkshed() === $item`none`) {
-        use($item`Asdon Martin keyfob`);
+        use($item`Asdon Martin keyfob (on ring)`);
       }
 
       cliExecute("loopcasual");
@@ -206,7 +213,7 @@ export function main(argString = ""): void {
 
       withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
 
-      burnTurns(false, mode);
+      burnTurns(false, mode, extraArgs);
     }
   }
 

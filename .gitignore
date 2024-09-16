@@ -2,3 +2,5 @@
 /KoLmafia/scripts
 /.vscode
 .DS_Store
+
+/.yarn/install-state.gz

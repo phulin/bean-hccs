@@ -2,6 +2,7 @@ import {
   availableAmount,
   buy,
   changeMcd,
+  chatPrivate,
   cliExecute,
   containsText,
   create,
@@ -41,6 +42,7 @@ import {
   useFamiliar,
   useSkill,
   visitUrl,
+  wait,
 } from "kolmafia";
 import {
   $class,
@@ -69,7 +71,7 @@ import {
   TunnelOfLove,
   Witchess,
 } from "libram";
-import { adventureMacro, Macro, saberYr, withMacro } from "./combat";
+import { adventureMacro, Macro, withMacro } from "./combat";
 import {
   ensureEffect,
   ensureMpSausage,
@@ -928,18 +930,7 @@ export class HotTest extends Test {
     ensureEffect($effect`Puzzle Champ`);
     ensureEffect($effect`Billiards Belligerence`);
 
-    cliExecute(`smash ${availableAmount($item`ratty knitted cap`)} ratty knitted cap`);
-
-    if (
-      availableAmount($item`sleaze powder`) > 0 ||
-      availableAmount($item`lotion of sleaziness`) > 0
-    ) {
-      ensurePotionEffect($effect`Sleazy Hands`, $item`lotion of sleaziness`);
-    }
-
     ensureEffect($effect`Feeling Peaceful`);
-    // Reward
-    if (have($item`pocket maze`)) ensureEffect($effect`Amazing`);
 
     // Beach comb buff.
     ensureEffect($effect`Hot-Headed`);
@@ -1214,7 +1205,7 @@ export class WeaponTest extends Test {
     this.ensureInnerElf();
 
     // Paint ungulith (Saber YR)
-    if (!get("_chateauMonsterFought")) {
+    if (!get("_photocopyUsed")) {
       useFamiliar($familiar`Melodramedary`);
       equip($item`Fourth of May Cosplay Saber`);
       this.context.propertyManager.setChoices({ [1387]: 3 });
@@ -1222,9 +1213,18 @@ export class WeaponTest extends Test {
         .trySkill($skill`%fn, spit on me!`)
         .setAutoAttack();
       Macro.skill($skill`Use the Force`).save();
-      visitUrl("place.php?whichplace=chateau&action=chateau_painting", false);
+      if (!have($item`photocopied monster`)) {
+        chatPrivate("OnlyFax", "ungulith");
+        wait(5000);
+        cliExecute("fax receive");
+        if (get("photocopyMonster") !== $monster`ungulith`) {
+          cliExecute("fax send");
+          wait(5000);
+          cliExecute("fax receive");
+        }
+      }
+      use($item`photocopied monster`);
       runCombat();
-      saberYr();
       setAutoAttack(0);
     }
 

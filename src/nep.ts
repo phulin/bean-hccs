@@ -39,7 +39,7 @@ import { withStash } from "./clan";
 import { adventureMacro, Macro } from "./combat";
 import { setChoice } from "./lib";
 
-const MALL_MAX = 999999999;
+const MALL_MAX = 999999999999;
 const SHOP_COUNT = 505;
 
 const checkItems = [
@@ -76,6 +76,7 @@ const checkItems = [
   // $item`piscatini`,
   $item`Affirmation Cookie`,
   $item`splendid martini`,
+  // $item`Ralph IX cognac`,
 ];
 
 function escape() {
@@ -173,7 +174,7 @@ function neededItems(items: Item[]) {
     if (shopAmount(item) + itemAmount(item) < SHOP_COUNT) {
       const itemNeeded = SHOP_COUNT - shopAmount(item) - itemAmount(item);
       print(`Need ${itemNeeded} ${item.plural} from stash.`, "blue");
-      needed.push([item, itemNeeded]);
+      needed.push([item, itemNeeded + itemAmount(item)]);
     }
   }
   return needed;

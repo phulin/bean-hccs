@@ -54,7 +54,7 @@ import {
 
 function breakfast() {
   if (getWorkshed() === $item`none`) {
-    use($item`Asdon Martin keyfob`);
+    use($item`Asdon Martin keyfob (on ring)`);
   }
 
   if (!get("_sitCourseCompleted", true) && !have($skill`Insectologist`)) {
@@ -168,7 +168,7 @@ export function main(argString = ""): void {
 
   try {
     if (myLevel() === 1 && mySpleenUse() === 0) {
-      while (get("_universeCalculated") < Math.min(3, get("skillLevel144"))) {
+      while (get("_universeCalculated") < 1) {
         cliExecute("numberology 69");
       }
     }
@@ -216,9 +216,9 @@ export function main(argString = ""): void {
       visitUrl(`choice.php?whichchoice=1089&option=30`);
     }
 
+    cliExecute("pull all");
     shrug($effect`Cowrruption`);
     retrieveItem($item`bitchin' meatcar`);
-    cliExecute("pull all");
 
     useFamiliar($familiar`Shorter-Order Cook`);
     equip($item`blue plate`);
