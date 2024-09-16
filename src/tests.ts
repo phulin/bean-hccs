@@ -1215,11 +1215,11 @@ export class WeaponTest extends Test {
       Macro.skill($skill`Use the Force`).save();
       if (!have($item`photocopied monster`)) {
         chatPrivate("OnlyFax", "ungulith");
-        wait(5000);
+        wait(5);
         cliExecute("fax receive");
         if (get("photocopyMonster") !== $monster`ungulith`) {
           cliExecute("fax send");
-          wait(5000);
+          wait(5);
           cliExecute("fax receive");
         }
       }
