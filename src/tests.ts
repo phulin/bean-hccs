@@ -961,8 +961,7 @@ export class NoncombatTest extends Test {
   }
 
   predictedTurns(): number {
-    const uncappedCombatRate = 5 * (numericModifier("Combat Rate") + 25) - 25;
-    return Math.max(1, 60 + 3 * Math.floor(uncappedCombatRate / 5));
+    return Math.max(1, 60 + 3 * Math.floor(numericModifier("Raw Combat Rate") / 5));
   }
 
   prepare(): void {
@@ -1019,9 +1018,9 @@ export class NoncombatTest extends Test {
       maximize("-combat, 0.01familiar weight, equip Kremlin's Greatest Briefcase", false);
     }
 
-    if (this.predictedTurns() > 1) {
-      throw "Not enough -combat to cap.";
-    }
+    // if (this.predictedTurns() > 1) {
+    //   throw "Not enough -combat to cap.";
+    // }
   }
 }
 

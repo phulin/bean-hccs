@@ -3,7 +3,6 @@ import {
   cliExecute,
   eat,
   inebrietyLimit,
-  maximize,
   myAdventures,
   myDaycount,
   myFamiliar,
@@ -92,17 +91,17 @@ export function main(argString = ""): void {
 
     if (myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
       if (!AsdonMartin.installed() && !get("_workshedItemUsed")) {
-        use($item`Asdon Martin keyfob`);
+        use($item`Asdon Martin keyfob (on ring)`);
       }
 
-      ascend(
-        Path.get("Community Service"),
-        $class`Seal Clubber`,
-        Lifestyle.softcore,
-        "platypus",
-        $item`astral six-pack`,
-        $item`astral statuette`
-      );
+      ascend({
+        path: Path.get("Community Service"),
+        playerClass: $class`Seal Clubber`,
+        lifestyle: Lifestyle.softcore,
+        moon: "platypus",
+        consumable: $item`astral six-pack`,
+        pet: $item`astral statuette`,
+      });
     }
   }
 
@@ -125,49 +124,6 @@ export function main(argString = ""): void {
       }
 
       burnTurns(fullLoop);
-
-      if (
-        fullLoop &&
-        myInebriety() > inebrietyLimit() &&
-        myAdventures() === 0 &&
-        pvpAttacksLeft() === 0
-      ) {
-        if (!AsdonMartin.installed() && !get("_workshedItemUsed")) {
-          use($item`Asdon Martin keyfob`);
-        }
-
-        ascend(
-          Path.none,
-          $class`Seal Clubber`,
-          Lifestyle.casual,
-          "platypus",
-          $item`astral six-pack`,
-          $item`astral pet sweater`
-        );
-      }
-    }
-  }
-
-  // Casual portion
-  if (fullLoop && myDaycount() === 1 && canInteract() && !inCsLeg()) {
-    if (!get("kingLiberated")) {
-      maximize("", false);
-      checkNepQuest();
-      printNepQuestItem();
-
-      cliExecute("loopcasual");
-    }
-
-    if (get("kingLiberated")) {
-      withProperty("libramSkillsSoftcore", "none", () => cliExecute("breakfast"));
-
-      if (AsdonMartin.installed() && !get("_workshedItemUsed")) {
-        // Get 1110 turns of Driving Observantly (1230 - 450 expected casual turns).
-        new Mood().drive(AsdonMartin.Driving.Observantly).execute(1230 - myTurncount());
-        use($item`cold medicine cabinet`);
-      }
-
-      burnTurns(false);
     }
   }
 

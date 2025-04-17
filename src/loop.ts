@@ -147,23 +147,23 @@ export function main(argString = ""): void {
 
   if (!prep && myInebriety() > inebrietyLimit() && myAdventures() === 0 && pvpAttacksLeft() === 0) {
     if (casual) {
-      ascend(
-        Path.none,
-        loopClass,
-        Lifestyle.casual,
-        loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
-        $item`astral six-pack`,
-        $item`astral pet sweater`
-      );
+      ascend({
+        path: Path.none,
+        playerClass: loopClass,
+        lifestyle: Lifestyle.casual,
+        moon: loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
+        consumable: $item`astral six-pack`,
+        pet: $item`astral pet sweater`,
+      });
     } else {
-      ascend(
-        Path.get("Community Service"),
-        loopClass,
-        Lifestyle.softcore,
-        loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
-        $item`astral six-pack`,
-        $item`astral statuette`
-      );
+      ascend({
+        path: Path.get("Community Service"),
+        playerClass: loopClass,
+        lifestyle: Lifestyle.softcore,
+        moon: loopClass.primestat === $stat`Mysticality` ? "blender" : "platypus",
+        consumable: $item`astral six-pack`,
+        pet: $item`astral statuette`,
+      });
     }
   }
 
